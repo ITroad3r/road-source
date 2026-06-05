@@ -69,11 +69,23 @@ function TalentHub() {
     });
   }, [cvs, q, engagement, availability, seniority]);
 
+  async function openCv(cvUrl: string) {
+    if (/^https?:\/\//i.test(cvUrl)) { window.open(cvUrl, "_blank"); return; }
+    const { data, error } = await supabase.storage.from("cvs").createSignedUrl(cvUrl, 60);
+    if (error || !data) return toast.error(error?.message ?? "Could not open CV");
+    window.open(data.signedUrl, "_blank");
+  }
+
   return (
     <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Talent Hub</h1>
-        <p className="text-muted-foreground mt-1">Search the candidate database by skill, role, location or availability.</p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Talent Hub</h1>
+          <p className="text-muted-foreground mt-1">Search the candidate database by skill, role, location or availability.</p>
+        </div>
+        <Button asChild>
+          <Link to="/talent-hub/new"><Plus className="h-4 w-4 mr-1" /> Add candidate</Link>
+        </Button>
       </header>
 
       <Card>
@@ -173,9 +185,9 @@ function TalentHub() {
                   </a>
                 )}
                 {c.cv_url && (
-                  <a href={c.cv_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                    <ExternalLink className="h-3.5 w-3.5" /> CV
-                  </a>
+                  <button type="button" onClick={() => openCv(c.cv_url!)} className="flex items-center gap-1 text-primary hover:underline">
+                    <FileText className="h-3.5 w-3.5" /> CV
+                  </button>
                 )}
               </div>
             </CardContent>

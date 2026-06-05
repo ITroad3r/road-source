@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,7 @@ import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign in — IT Sourcing Hub" }] }),
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) throw redirect({ to: "/dashboard" });
-  },
+  head: () => ({ meta: [{ title: "Sign in — RoadSource" }] }),
   component: AuthPage,
 });
 
@@ -27,6 +23,9 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/dashboard", replace: true });
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       if (session) navigate({ to: "/dashboard" });
     });
@@ -112,6 +111,11 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+          <div className="mt-5 text-center">
+            <Link to="/" className="text-sm font-medium text-primary hover:underline">
+              Back to RoadSource homepage
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

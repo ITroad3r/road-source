@@ -31,6 +31,7 @@ function AuthLayout() {
 
   const navItems = [
     { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
+    { to: "/demands", label: "All Demands", icon: Briefcase },
     { to: "/demands/new", label: "New Demand", icon: FilePlus },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
     { to: "/financials", label: "Financials", icon: Euro },

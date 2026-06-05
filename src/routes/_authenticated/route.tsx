@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, LogOut, FilePlus, Euro } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield } from "lucide-react";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useMyRoles } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -25,11 +26,15 @@ function AuthLayout() {
     navigate({ to: "/auth", replace: true });
   }
 
+  const { data: roles } = useMyRoles(user.id);
+  const isAdmin = roles?.includes("admin") ?? false;
+
   const navItems = [
     { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
     { to: "/demands/new", label: "New Demand", icon: FilePlus },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
     { to: "/financials", label: "Financials", icon: Euro },
+    ...(isAdmin ? [{ to: "/admin/users" as const, label: "Users & roles", icon: Shield }] : []),
   ] as const;
 
   return (

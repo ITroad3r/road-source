@@ -20,6 +20,7 @@ import { Route as AuthenticatedTalentHubIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authenticated/talent-hub.new'
 import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
 import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 
 const RootRoute = RootRouteImport.update({
   id: '/root',
@@ -78,6 +79,11 @@ const AuthenticatedDemandsDemandIdRoute =
     path: '/demands/$demandId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
   '/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/root': typeof RootRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/financials': typeof AuthenticatedFinancialsRoute
   '/_authenticated/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
   '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
   '/_authenticated/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/financials'
     | '/talent-hub'
+    | '/admin/users'
     | '/demands/$demandId'
     | '/demands/new'
     | '/talent-hub/new'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/root'
     | '/dashboard'
     | '/financials'
+    | '/admin/users'
     | '/demands/$demandId'
     | '/demands/new'
     | '/talent-hub/new'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/financials'
     | '/_authenticated/talent-hub'
+    | '/_authenticated/admin/users'
     | '/_authenticated/demands/$demandId'
     | '/_authenticated/demands/new'
     | '/_authenticated/talent-hub/new'
@@ -241,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandsDemandIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -264,6 +283,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinancialsRoute: typeof AuthenticatedFinancialsRoute
   AuthenticatedTalentHubRoute: typeof AuthenticatedTalentHubRouteWithChildren
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedDemandsDemandIdRoute: typeof AuthenticatedDemandsDemandIdRoute
   AuthenticatedDemandsNewRoute: typeof AuthenticatedDemandsNewRoute
 }
@@ -272,6 +292,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinancialsRoute: AuthenticatedFinancialsRoute,
   AuthenticatedTalentHubRoute: AuthenticatedTalentHubRouteWithChildren,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedDemandsDemandIdRoute: AuthenticatedDemandsDemandIdRoute,
   AuthenticatedDemandsNewRoute: AuthenticatedDemandsNewRoute,
 }

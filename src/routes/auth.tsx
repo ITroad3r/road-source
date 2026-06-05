@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Briefcase } from "lucide-react";
+import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -59,14 +59,14 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Briefcase className="h-6 w-6 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-md rounded-xl border-border/70">
+        <CardHeader className="text-center space-y-3">
+          <div className="flex justify-center">
+            <RoadSourceLogo showWordmark={false} />
           </div>
-          <CardTitle className="text-2xl">IT Sourcing Hub</CardTitle>
-          <CardDescription>Internal CRM & Talent Hub</CardDescription>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">Welcome to RoadSource</CardTitle>
+          <CardDescription>Internal CRM &amp; Talent Hub — powered by IT Road</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">

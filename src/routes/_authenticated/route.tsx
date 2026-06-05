@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, LayoutDashboard, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, LogOut } from "lucide-react";
+import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,18 +31,20 @@ function AuthLayout() {
   ] as const;
 
   return (
-    <div className="min-h-screen flex w-full bg-muted/30">
-      <aside className="w-64 border-r bg-card flex flex-col">
-        <div className="p-6 border-b">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Briefcase className="h-5 w-5 text-primary" />
+    <div className="min-h-screen flex w-full bg-background">
+      <aside className="w-64 border-r bg-sidebar text-sidebar-foreground flex flex-col">
+        <div className="p-5 border-b border-sidebar-border">
+          <Link to="/" className="block">
+            <div className="flex items-center gap-2">
+              <RoadSourceLogo showWordmark={false} />
+              <div className="leading-tight">
+                <div className="font-extrabold text-sm tracking-tight text-sidebar-foreground">RoadSource</div>
+                <div className="text-[0.6rem] font-semibold tracking-[0.18em] text-sidebar-foreground/60">
+                  POWERED BY IT ROAD
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="font-semibold text-sm leading-tight">Sourcing Hub</div>
-              <div className="text-xs text-muted-foreground">IT Talent CRM</div>
-            </div>
-          </div>
+          </Link>
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => {

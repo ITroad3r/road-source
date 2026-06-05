@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield, Briefcase } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield, Briefcase, Building2 } from "lucide-react";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,7 @@ function AuthLayout() {
     { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
     { to: "/demands", label: "All Demands", icon: Briefcase },
     { to: "/demands/new", label: "New Demand", icon: FilePlus },
+    { to: "/clients", label: "Clients", icon: Building2 },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
     { to: "/financials", label: "Financials", icon: Euro },
     ...(isAdmin ? [{ to: "/admin/users" as const, label: "Users & roles", icon: Shield }] : []),

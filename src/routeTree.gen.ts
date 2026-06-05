@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTalentHubRouteImport } from './routes/_authenticated/talent-hub'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedTalentHubIndexRouteImport } from './routes/_authenticated/talent-hub.index'
 import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authenticated/talent-hub.new'
 import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
 import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
@@ -48,6 +49,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTalentHubIndexRoute =
+  AuthenticatedTalentHubIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedTalentHubRoute,
+  } as any)
 const AuthenticatedTalentHubNewRoute =
   AuthenticatedTalentHubNewRouteImport.update({
     id: '/new',
@@ -75,16 +82,17 @@ export interface FileRoutesByFullPath {
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
+  '/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
+  '/talent-hub': typeof AuthenticatedTalentHubIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
   '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
   '/_authenticated/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
+  '/_authenticated/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,16 +118,17 @@ export interface FileRouteTypes {
     | '/demands/$demandId'
     | '/demands/new'
     | '/talent-hub/new'
+    | '/talent-hub/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/root'
     | '/dashboard'
-    | '/talent-hub'
     | '/demands/$demandId'
     | '/demands/new'
     | '/talent-hub/new'
+    | '/talent-hub'
   id:
     | '__root__'
     | '/'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/demands/$demandId'
     | '/_authenticated/demands/new'
     | '/_authenticated/talent-hub/new'
+    | '/_authenticated/talent-hub/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/talent-hub/': {
+      id: '/_authenticated/talent-hub/'
+      path: '/'
+      fullPath: '/talent-hub/'
+      preLoaderRoute: typeof AuthenticatedTalentHubIndexRouteImport
+      parentRoute: typeof AuthenticatedTalentHubRoute
+    }
     '/_authenticated/talent-hub/new': {
       id: '/_authenticated/talent-hub/new'
       path: '/new'
@@ -209,11 +227,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedTalentHubRouteChildren {
   AuthenticatedTalentHubNewRoute: typeof AuthenticatedTalentHubNewRoute
+  AuthenticatedTalentHubIndexRoute: typeof AuthenticatedTalentHubIndexRoute
 }
 
 const AuthenticatedTalentHubRouteChildren: AuthenticatedTalentHubRouteChildren =
   {
     AuthenticatedTalentHubNewRoute: AuthenticatedTalentHubNewRoute,
+    AuthenticatedTalentHubIndexRoute: AuthenticatedTalentHubIndexRoute,
   }
 
 const AuthenticatedTalentHubRouteWithChildren =

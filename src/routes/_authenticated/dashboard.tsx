@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +86,13 @@ function Dashboard() {
           </Card>
         )}
         {demands?.map((d) => (
-          <Card key={d.id} className="hover:shadow-md transition-shadow">
+          <Link
+            key={d.id}
+            to="/demands/$demandId"
+            params={{ demandId: d.id }}
+            className="block"
+          >
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
@@ -121,6 +127,7 @@ function Dashboard() {
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
     </div>

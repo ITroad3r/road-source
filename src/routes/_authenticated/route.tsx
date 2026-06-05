@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, FilePlus } from "lucide-react";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ function AuthLayout() {
 
   const navItems = [
     { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
+    { to: "/demands/new", label: "New Demand", icon: FilePlus },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
   ] as const;
 

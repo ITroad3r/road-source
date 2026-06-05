@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTalentHubRouteImport } from './routes/_authenticated/talent-hub'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
 import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
 
 const RootRoute = RootRouteImport.update({
@@ -46,6 +47,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDemandsNewRoute = AuthenticatedDemandsNewRouteImport.update({
+  id: '/demands/new',
+  path: '/demands/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDemandsDemandIdRoute =
   AuthenticatedDemandsDemandIdRouteImport.update({
     id: '/demands/$demandId',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/talent-hub': typeof AuthenticatedTalentHubRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
+  '/demands/new': typeof AuthenticatedDemandsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/talent-hub': typeof AuthenticatedTalentHubRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
+  '/demands/new': typeof AuthenticatedDemandsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/talent-hub': typeof AuthenticatedTalentHubRoute
   '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
+  '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/talent-hub'
     | '/demands/$demandId'
+    | '/demands/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/talent-hub'
     | '/demands/$demandId'
+    | '/demands/new'
   id:
     | '__root__'
     | '/'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/talent-hub'
     | '/_authenticated/demands/$demandId'
+    | '/_authenticated/demands/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -158,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/demands/new': {
+      id: '/_authenticated/demands/new'
+      path: '/demands/new'
+      fullPath: '/demands/new'
+      preLoaderRoute: typeof AuthenticatedDemandsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/demands/$demandId': {
       id: '/_authenticated/demands/$demandId'
       path: '/demands/$demandId'
@@ -172,12 +191,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedTalentHubRoute: typeof AuthenticatedTalentHubRoute
   AuthenticatedDemandsDemandIdRoute: typeof AuthenticatedDemandsDemandIdRoute
+  AuthenticatedDemandsNewRoute: typeof AuthenticatedDemandsNewRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedTalentHubRoute: AuthenticatedTalentHubRoute,
   AuthenticatedDemandsDemandIdRoute: AuthenticatedDemandsDemandIdRoute,
+  AuthenticatedDemandsNewRoute: AuthenticatedDemandsNewRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

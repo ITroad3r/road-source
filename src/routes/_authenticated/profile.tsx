@@ -77,7 +77,7 @@ function ProfilePage() {
   }, [profile, isEditing]);
 
   const updateMutation = useMutation({
-    mutationFn: async (values: { full_name: string | null; avatar_url: string | null; seniority: string | null }) => {
+    mutationFn: async (values: { full_name: string | null; avatar_url: string | null; seniority: Database["public"]["Enums"]["seniority_level"] | null }) => {
       const { error } = await supabase.from("profiles").update(values).eq("id", user.id);
       if (error) throw error;
     },

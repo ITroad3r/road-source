@@ -1,16 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Mail, ExternalLink, User } from "lucide-react";
+import { Search, MapPin, Mail, ExternalLink, User, Plus, FileText } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Talent Hub — Sourcing Hub" }] }),
+  head: () => ({ meta: [{ title: "Talent Hub — RoadSource" }] }),
   component: TalentHub,
 });
 

@@ -55,7 +55,9 @@ function AuthLayout() {
                 to={item.to}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  active ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}
               >
                 <item.icon className="h-4 w-4" />
@@ -64,11 +66,11 @@ function AuthLayout() {
             );
           })}
         </nav>
-        <div className="p-3 border-t space-y-2">
-          <div className="px-2 text-xs text-muted-foreground truncate" title={user.email ?? ""}>
+        <div className="p-3 border-t border-sidebar-border space-y-2">
+          <div className="px-2 text-xs text-sidebar-foreground/60 truncate" title={user.email ?? ""}>
             {user.email}
           </div>
-          <Button variant="outline" size="sm" className="w-full justify-start" onClick={signOut}>
+          <Button variant="outline" size="sm" className="w-full justify-start bg-transparent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground" onClick={signOut}>
             <LogOut className="h-4 w-4 mr-2" /> Sign out
           </Button>
         </div>

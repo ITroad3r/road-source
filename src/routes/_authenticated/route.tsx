@@ -1,0 +1,78 @@
+import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { Briefcase, LayoutDashboard, Users, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/_authenticated")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) throw redirect({ to: "/auth" });
+    return { user: data.user };
+  },
+  component: AuthLayout,
+});
+
+function AuthLayout() {
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = Route.useRouteContext();
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  const navItems = [
+    { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
+    { to: "/talent-hub", label: "Talent Hub", icon: Users },
+  ] as const;
+
+  return (
+    <div className="min-h-screen flex w-full bg-muted/30">
+      <aside className="w-64 border-r bg-card flex flex-col">
+        <div className="p-6 border-b">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Briefcase className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="font-semibold text-sm leading-tight">Sourcing Hub</div>
+              <div className="text-xs text-muted-foreground">IT Talent CRM</div>
+            </div>
+          </div>
+        </div>
+        <nav className="flex-1 p-3 space-y-1">
+          {navItems.map((item) => {
+            const active = pathname.startsWith(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  active ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="p-3 border-t space-y-2">
+          <div className="px-2 text-xs text-muted-foreground truncate" title={user.email ?? ""}>
+            {user.email}
+          </div>
+          <Button variant="outline" size="sm" className="w-full justify-start" onClick={signOut}>
+            <LogOut className="h-4 w-4 mr-2" /> Sign out
+          </Button>
+        </div>
+      </aside>
+      <main className="flex-1 overflow-auto">
+        <Outlet />
+      </main>
+    </div>
+  );
+}

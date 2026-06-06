@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Upload, X, FileText } from "lucide-react";
+import { Upload, X, FileText, Sparkles } from "lucide-react";
+import { parseCvFile } from "@/lib/api/cv-parser.functions";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/new")({
   ssr: false,
@@ -56,6 +58,50 @@ function NewCandidate() {
   const [tagInput, setTagInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const parseCv = useServerFn(parseCvFile);
+
+  async function autofillFromCv() {
+    if (!file) return toast.error("Choose a CV file first");
+    setParsing(true);
+    let tempPath: string | null = null;
+    try {
+      const ext = file.name.split(".").pop() || "pdf";
+      tempPath = `${user.id}/parse-tmp/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("cvs")
+        .upload(tempPath, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { candidate, warning } = await parseCv({ data: { storage_path: tempPath } });
+      if (warning) toast.warning(warning);
+      if (candidate.full_name && !fullName) setFullName(candidate.full_name);
+      if (candidate.email && !email) setEmail(candidate.email);
+      if (candidate.phone && !phone) setPhone(candidate.phone);
+      if (candidate.headline && !headline) setHeadline(candidate.headline);
+      if (candidate.summary && !summary) setSummary(candidate.summary);
+      if (candidate.location && !location) setLocation(candidate.location);
+      if (candidate.linkedin_url && !linkedin) setLinkedin(candidate.linkedin_url);
+      if (candidate.seniority) setSeniority(candidate.seniority);
+      if (candidate.years_experience != null && !yearsExp)
+        setYearsExp(String(candidate.years_experience));
+      if (candidate.skills?.length) {
+        const merged = Array.from(new Set([...skills, ...candidate.skills]));
+        setSkills(merged.slice(0, 40));
+      }
+      if (candidate.tags?.length) {
+        const merged = Array.from(new Set([...tags, ...candidate.tags]));
+        setTags(merged.slice(0, 20));
+      }
+      toast.success("CV parsed — review the pre-filled fields");
+    } catch (err) {
+      toast.error((err as Error).message ?? "Failed to parse CV");
+    } finally {
+      if (tempPath) {
+        await supabase.storage.from("cvs").remove([tempPath]).catch(() => {});
+      }
+      setParsing(false);
+    }
+  }
 
   function addSkill() {
     const s = skillInput.trim();
@@ -212,6 +258,12 @@ function NewCandidate() {
                 <span className="flex items-center gap-2 min-w-0"><FileText className="h-4 w-4 shrink-0" /><span className="truncate">{file.name}</span><span className="text-muted-foreground shrink-0">({(file.size/1024/1024).toFixed(2)} MB)</span></span>
                 <Button type="button" variant="ghost" size="icon" onClick={() => setFile(null)}><X className="h-4 w-4" /></Button>
               </div>
+            )}
+            {file && (
+              <Button type="button" variant="secondary" onClick={autofillFromCv} disabled={parsing} className="w-full">
+                <Sparkles className="h-4 w-4 mr-2" />
+                {parsing ? "Parsing CV with AI…" : "Auto-fill form from CV (AI)"}
+              </Button>
             )}
           </CardContent>
         </Card>

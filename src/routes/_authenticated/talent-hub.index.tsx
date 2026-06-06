@@ -54,21 +54,35 @@ function TalentHub() {
   });
 
   const filtered = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    return (cvs ?? []).filter((c) => {
-      if (engagement !== "all" && c.engagement_preference !== engagement) return false;
-      if (availability !== "all" && c.availability !== availability) return false;
-      if (seniority !== "all" && c.seniority !== seniority) return false;
-      if (!term) return true;
-      const hay = [
-        c.full_name,
-        c.headline ?? "",
-        c.summary ?? "",
-        c.location ?? "",
-        (c.skills ?? []).join(" "),
-      ].join(" ").toLowerCase();
-      return hay.includes(term);
-    });
+    const tokens = q.trim().toLowerCase().split(/[\s,;]+/).filter(Boolean);
+    const scored = (cvs ?? [])
+      .filter((c) => {
+        if (engagement !== "all" && c.engagement_preference !== engagement) return false;
+        if (availability !== "all" && c.availability !== availability) return false;
+        if (seniority !== "all" && c.seniority !== seniority) return false;
+        return true;
+      })
+      .map((c) => {
+        if (!tokens.length) return { c, score: 0 };
+        const skillsLc = (c.skills ?? []).map((s) => s.toLowerCase());
+        const text = [c.full_name, c.headline ?? "", c.summary ?? "", c.location ?? ""]
+          .join(" ")
+          .toLowerCase();
+        let score = 0;
+        let matched = 0;
+        for (const t of tokens) {
+          let hit = false;
+          if (skillsLc.some((s) => s === t)) { score += 5; hit = true; }
+          else if (skillsLc.some((s) => s.includes(t))) { score += 3; hit = true; }
+          if (text.includes(t)) { score += 1; hit = true; }
+          if (hit) matched++;
+        }
+        return { c, score, matched };
+      })
+      .filter((r) => !tokens.length || (r.matched ?? 0) > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((r) => r.c);
+    return scored;
   }, [cvs, q, engagement, availability, seniority]);
 
   async function openCv(cvUrl: string) {

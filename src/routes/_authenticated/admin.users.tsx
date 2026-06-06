@@ -191,7 +191,7 @@ function AddRoleControl({ available, onAdd }: { available: AppRole[]; onAdd: (ro
       <Select value={val} onValueChange={setVal}>
         <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select role" /></SelectTrigger>
         <SelectContent>
-          {available.map((r) => <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>)}
+          {available.map((r) => <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>)}
         </SelectContent>
       </Select>
       <Button size="sm" variant="outline" disabled={!val} onClick={() => { onAdd(val as AppRole); setVal(""); }}>

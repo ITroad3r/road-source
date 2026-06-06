@@ -58,6 +58,50 @@ function NewCandidate() {
   const [tagInput, setTagInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const parseCv = useServerFn(parseCvFile);
+
+  async function autofillFromCv() {
+    if (!file) return toast.error("Choose a CV file first");
+    setParsing(true);
+    let tempPath: string | null = null;
+    try {
+      const ext = file.name.split(".").pop() || "pdf";
+      tempPath = `${user.id}/parse-tmp/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("cvs")
+        .upload(tempPath, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { candidate, warning } = await parseCv({ data: { storage_path: tempPath } });
+      if (warning) toast.warning(warning);
+      if (candidate.full_name && !fullName) setFullName(candidate.full_name);
+      if (candidate.email && !email) setEmail(candidate.email);
+      if (candidate.phone && !phone) setPhone(candidate.phone);
+      if (candidate.headline && !headline) setHeadline(candidate.headline);
+      if (candidate.summary && !summary) setSummary(candidate.summary);
+      if (candidate.location && !location) setLocation(candidate.location);
+      if (candidate.linkedin_url && !linkedin) setLinkedin(candidate.linkedin_url);
+      if (candidate.seniority) setSeniority(candidate.seniority);
+      if (candidate.years_experience != null && !yearsExp)
+        setYearsExp(String(candidate.years_experience));
+      if (candidate.skills?.length) {
+        const merged = Array.from(new Set([...skills, ...candidate.skills]));
+        setSkills(merged.slice(0, 40));
+      }
+      if (candidate.tags?.length) {
+        const merged = Array.from(new Set([...tags, ...candidate.tags]));
+        setTags(merged.slice(0, 20));
+      }
+      toast.success("CV parsed — review the pre-filled fields");
+    } catch (err) {
+      toast.error((err as Error).message ?? "Failed to parse CV");
+    } finally {
+      if (tempPath) {
+        await supabase.storage.from("cvs").remove([tempPath]).catch(() => {});
+      }
+      setParsing(false);
+    }
+  }
 
   function addSkill() {
     const s = skillInput.trim();

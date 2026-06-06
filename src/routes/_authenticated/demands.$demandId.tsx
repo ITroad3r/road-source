@@ -10,10 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil, LayoutGrid, List, Send } from "lucide-react";
 import { format } from "date-fns";
 import { ActivityLog } from "@/components/ActivityLog";
 import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OUTCOME_LABEL, OUTCOME_COLORS, type Lifecycle, type Outcome } from "@/lib/demand-status";
+import { PipelineKanban, type KanbanStage } from "@/components/PipelineKanban";
+import { SendPackageDialog } from "@/components/SendPackageDialog";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,
@@ -53,6 +55,8 @@ function DemandDetail() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
+  const [view, setView] = useState<"list" | "kanban">("kanban");
+  const [packageOpen, setPackageOpen] = useState(false);
 
   const { data: demand, isLoading } = useQuery({
     queryKey: ["demand", demandId],
@@ -221,81 +225,159 @@ function DemandDetail() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="text-xl font-semibold">Pipeline ({candidates?.length ?? 0})</h2>
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-1" /> Add candidate</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>Add candidate from Talent Hub</DialogTitle></DialogHeader>
-            <AddCandidatePicker
-              demandId={demandId}
-              existingCvIds={new Set((candidates ?? []).map((c) => c.cv_id))}
-              onAdded={() => {
-                qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
-                setAddOpen(false);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex rounded-md border bg-background">
+            <Button
+              variant={view === "kanban" ? "default" : "ghost"}
+              size="sm"
+              className="rounded-r-none"
+              onClick={() => setView("kanban")}
+            >
+              <LayoutGrid className="h-3.5 w-3.5 mr-1" /> Kanban
+            </Button>
+            <Button
+              variant={view === "list" ? "default" : "ghost"}
+              size="sm"
+              className="rounded-l-none"
+              onClick={() => setView("list")}
+            >
+              <List className="h-3.5 w-3.5 mr-1" /> List
+            </Button>
+          </div>
+          <Button variant="outline" onClick={() => setPackageOpen(true)} disabled={!candidates?.length}>
+            <Send className="h-4 w-4 mr-1" /> Send Package
+          </Button>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-1" /> Add candidate</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader><DialogTitle>Add candidate from Talent Hub</DialogTitle></DialogHeader>
+              <AddCandidatePicker
+                demandId={demandId}
+                existingCvIds={new Set((candidates ?? []).map((c) => c.cv_id))}
+                onAdded={() => {
+                  qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
+                  setAddOpen(false);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {candidates?.length === 0 && (
-          <Card><CardContent className="p-8 text-center text-muted-foreground">No candidates yet. Add one from the Talent Hub.</CardContent></Card>
-        )}
-        {candidates?.map((dc) => {
-          const cv = dc.talent_hub_cvs;
-          if (!cv) return null;
-          return (
-            <Card key={dc.id}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
-                        <Link to="/talent-hub/$cvId" params={{ cvId: cv.id }} className="font-semibold hover:text-primary transition-colors">{cv.full_name}</Link>
-                        <div className="text-sm text-muted-foreground">{cv.headline ?? "—"}</div>
+      {view === "kanban" ? (
+        <PipelineKanban
+          candidates={(candidates ?? []).map((dc) => ({
+            id: dc.id,
+            stage: dc.stage as KanbanStage,
+            cv: dc.talent_hub_cvs
+              ? {
+                  id: dc.talent_hub_cvs.id,
+                  full_name: dc.talent_hub_cvs.full_name,
+                  headline: dc.talent_hub_cvs.headline,
+                  seniority: dc.talent_hub_cvs.seniority,
+                  daily_rate: dc.talent_hub_cvs.daily_rate,
+                  skills: dc.talent_hub_cvs.skills,
+                }
+              : null,
+          }))}
+          onStageChange={(id, stage) => updateStage.mutate({ id, stage: stage as Stage })}
+          onRemove={(id) => removeCandidate.mutate(id)}
+        />
+      ) : (
+        <div className="space-y-3">
+          {candidates?.length === 0 && (
+            <Card><CardContent className="p-8 text-center text-muted-foreground">No candidates yet. Add one from the Talent Hub.</CardContent></Card>
+          )}
+          {candidates?.map((dc) => {
+            const cv = dc.talent_hub_cvs;
+            if (!cv) return null;
+            return (
+              <Card key={dc.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <Link to="/talent-hub/$cvId" params={{ cvId: cv.id }} className="font-semibold hover:text-primary transition-colors">{cv.full_name}</Link>
+                          <div className="text-sm text-muted-foreground">{cv.headline ?? "—"}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Select value={dc.stage} onValueChange={(v) => updateStage.mutate({ id: dc.id, stage: v as Stage })}>
+                            <SelectTrigger className="w-44">
+                              <Badge variant="outline" className={stageColors[dc.stage]}>{dc.stage.replace("_", " ")}</Badge>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {STAGES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s.replace("_", " ")}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <Button variant="ghost" size="icon" onClick={() => removeCandidate.mutate(dc.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Select value={dc.stage} onValueChange={(v) => updateStage.mutate({ id: dc.id, stage: v as Stage })}>
-                          <SelectTrigger className="w-44">
-                            <Badge variant="outline" className={stageColors[dc.stage]}>{dc.stage.replace("_", " ")}</Badge>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {STAGES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s.replace("_", " ")}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <Button variant="ghost" size="icon" onClick={() => removeCandidate.mutate(dc.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      {cv.skills && cv.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {cv.skills.slice(0, 10).map((s: string) => (
+                            <Badge key={s} variant="secondary" className="text-xs font-normal">{s}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        {cv.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{cv.location}</span>}
+                        {cv.years_experience != null && <span>{cv.years_experience} yrs</span>}
+                        {cv.seniority && <span className="capitalize">{cv.seniority}</span>}
+                        {cv.daily_rate != null && <span>TJM: €{cv.daily_rate}</span>}
+                        {cv.salary_expectation != null && <span>Salary: €{cv.salary_expectation}</span>}
                       </div>
                     </div>
-                    {cv.skills && cv.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {cv.skills.slice(0, 10).map((s: string) => (
-                          <Badge key={s} variant="secondary" className="text-xs font-normal">{s}</Badge>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      {cv.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{cv.location}</span>}
-                      {cv.years_experience != null && <span>{cv.years_experience} yrs</span>}
-                      {cv.seniority && <span className="capitalize">{cv.seniority}</span>}
-                      {cv.daily_rate != null && <span>TJM: €{cv.daily_rate}</span>}
-                      {cv.salary_expectation != null && <span>Salary: €{cv.salary_expectation}</span>}
-                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <SendPackageDialog
+        open={packageOpen}
+        onOpenChange={setPackageOpen}
+        demand={{
+          id: demand.id,
+          title: demand.title,
+          clients: demand.clients
+            ? {
+                name: demand.clients.name,
+                contact_email: demand.clients.contact_email,
+                contact_name: demand.clients.contact_name,
+              }
+            : null,
+        }}
+        candidates={(candidates ?? []).map((dc) => ({
+          id: dc.id,
+          stage: dc.stage,
+          cv: dc.talent_hub_cvs
+            ? {
+                id: dc.talent_hub_cvs.id,
+                full_name: dc.talent_hub_cvs.full_name,
+                headline: dc.talent_hub_cvs.headline,
+                seniority: dc.talent_hub_cvs.seniority,
+                years_experience: dc.talent_hub_cvs.years_experience,
+                daily_rate: dc.talent_hub_cvs.daily_rate,
+                location: dc.talent_hub_cvs.location,
+                skills: dc.talent_hub_cvs.skills,
+                cv_url: dc.talent_hub_cvs.cv_url,
+                linkedin_url: dc.talent_hub_cvs.linkedin_url,
+              }
+            : null,
+        }))}
+      />
 
       <ActivityLog scope={{ demandId }} currentUserId={user.id} />
     </div>

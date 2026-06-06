@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          cv_id: string | null
+          demand_candidate_id: string | null
+          demand_id: string | null
+          id: string
+          kind: string
+          metadata: Json | null
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          cv_id?: string | null
+          demand_candidate_id?: string | null
+          demand_id?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          cv_id?: string | null
+          demand_candidate_id?: string | null
+          demand_id?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidate_financials: {
         Row: {
           candidate_rate: number | null

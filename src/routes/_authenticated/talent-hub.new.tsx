@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Upload, X, FileText } from "lucide-react";
+import { Upload, X, FileText, Sparkles } from "lucide-react";
+import { parseCvFile } from "@/lib/api/cv-parser.functions";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/new")({
   ssr: false,

@@ -87,8 +87,13 @@ function AuthLayout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">
-        <Outlet />
+      <main className="flex-1 overflow-auto flex flex-col">
+        <header className="h-14 border-b bg-background/80 backdrop-blur sticky top-0 z-10 flex items-center justify-end px-4 gap-2">
+          <NotificationsBell userId={user.id} />
+        </header>
+        <div className="flex-1">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

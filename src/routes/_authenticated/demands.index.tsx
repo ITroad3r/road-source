@@ -8,29 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, MapPin, Calendar, Plus, Search, User, Filter } from "lucide-react";
+import { Building2, MapPin, Calendar, Plus, Search, User, Filter, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { useMyRoles } from "@/hooks/useMyRoles";
-
-export const Route = createFileRoute("/_authenticated/demands/")({
-  ssr: false,
-  head: () => ({ meta: [{ title: "Demands — RoadSource" }] }),
-  component: DemandsList,
-});
-
-const DEMAND_STATUSES = ["open", "sourcing", "submitted", "interview", "offer", "placed", "closed", "lost"] as const;
-type Status = (typeof DEMAND_STATUSES)[number];
-
-const statusColors: Record<string, string> = {
-  open: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-  sourcing: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20",
-  submitted: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
-  interview: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
-  offer: "bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/20",
-  placed: "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/20",
-  closed: "bg-muted text-muted-foreground border-border",
-  lost: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
-};
+import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OUTCOME_LABEL, OUTCOME_COLORS, type Lifecycle, type Outcome } from "@/lib/demand-status";
 
 function DemandsList() {
   const { user } = Route.useRouteContext();

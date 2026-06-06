@@ -76,6 +76,21 @@ function Financials() {
     { placedCount: 0, dailyMargin: 0, totalContractMargin: 0 }
   );
 
+  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!canView) {
+    return (
+      <div className="p-8">
+        <Card>
+          <CardContent className="p-10 text-center space-y-3">
+            <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Restricted</h2>
+            <p className="text-sm text-muted-foreground">Financials are available to managers, directors, CEO, and admins.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 space-y-6">
       <header className="flex items-start justify-between gap-3">

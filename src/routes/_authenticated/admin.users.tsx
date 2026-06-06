@@ -149,8 +149,8 @@ function AdminUsers() {
                       <div className="flex flex-wrap gap-1.5">
                         {userRoles.length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
                         {userRoles.map((r) => (
-                          <Badge key={r.id} variant="outline" className={`gap-1 capitalize ${roleColors[r.role]}`}>
-                            {r.role}
+                          <Badge key={r.id} variant="outline" className={`gap-1 ${roleColors[r.role]}`}>
+                            {ROLE_LABEL[r.role]}
                             <button
                               type="button"
                               onClick={() => {

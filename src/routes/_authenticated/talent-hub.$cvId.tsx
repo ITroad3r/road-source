@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { ArrowLeft, Pencil, Save, X, Trash2, Upload, FileText, MapPin, Mail, Phone, ExternalLink, User, Briefcase } from "lucide-react";
 import { format } from "date-fns";
+import { ActivityLog } from "@/components/ActivityLog";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/$cvId")({
   ssr: false,

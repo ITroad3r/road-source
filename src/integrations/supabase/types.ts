@@ -216,6 +216,45 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          demand_candidate_id: string | null
+          demand_id: string | null
+          id: string
+          link: string | null
+          message: string | null
+          read: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          demand_candidate_id?: string | null
+          demand_id?: string | null
+          id?: string
+          link?: string | null
+          message?: string | null
+          read?: boolean
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          demand_candidate_id?: string | null
+          demand_id?: string | null
+          id?: string
+          link?: string | null
+          message?: string | null
+          read?: boolean
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -394,6 +433,10 @@ export type Database = {
         | "closed"
         | "lost"
       engagement_type: "freelance" | "permanent"
+      notification_type:
+        | "demand_assigned"
+        | "pipeline_changed"
+        | "candidate_added"
       seniority_level: "junior" | "mid" | "senior" | "lead" | "principal"
     }
     CompositeTypes: {
@@ -546,6 +589,11 @@ export const Constants = {
         "lost",
       ],
       engagement_type: ["freelance", "permanent"],
+      notification_type: [
+        "demand_assigned",
+        "pipeline_changed",
+        "candidate_added",
+      ],
       seniority_level: ["junior", "mid", "senior", "lead", "principal"],
     },
   },

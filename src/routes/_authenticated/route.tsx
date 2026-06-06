@@ -1,10 +1,11 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield, Briefcase, Building2, User } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield, Briefcase, Building2, User, Bell } from "lucide-react";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMyRoles } from "@/hooks/useMyRoles";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -36,6 +37,7 @@ function AuthLayout() {
     { to: "/clients", label: "Clients", icon: Building2 },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
     { to: "/financials", label: "Financials", icon: Euro },
+    { to: "/notifications", label: "Notifications", icon: Bell },
     { to: "/profile", label: "Profile", icon: User },
     ...(isAdmin ? [{ to: "/admin/users" as const, label: "Users & roles", icon: Shield }] : []),
   ] as const;
@@ -85,8 +87,13 @@ function AuthLayout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">
-        <Outlet />
+      <main className="flex-1 overflow-auto flex flex-col">
+        <header className="h-14 border-b bg-background/80 backdrop-blur sticky top-0 z-10 flex items-center justify-end px-4 gap-2">
+          <NotificationsBell userId={user.id} />
+        </header>
+        <div className="flex-1">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

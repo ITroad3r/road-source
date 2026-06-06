@@ -50,6 +50,7 @@ const stageColors: Record<string, string> = {
 
 function CandidateDetail() {
   const { cvId } = Route.useParams();
+  const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);

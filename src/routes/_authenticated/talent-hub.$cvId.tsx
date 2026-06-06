@@ -445,6 +445,8 @@ function CandidateDetail() {
           </div>
         </CardContent>
       </Card>
+
+      <ActivityLog scope={{ cvId }} currentUserId={user.id} />
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({

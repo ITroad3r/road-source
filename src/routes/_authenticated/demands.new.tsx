@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/demands/new")({
   ssr: false,
@@ -31,6 +32,9 @@ const demandSchema = z.object({
   start_date: z.string().optional().or(z.literal("")),
   priority: z.string(),
   assigned_to: z.string().optional().or(z.literal("")),
+  is_rfo: z.boolean(),
+  rfo_deadline: z.string().optional().or(z.literal("")),
+  positions_count: z.string(),
 });
 
 function NewDemand() {
@@ -51,6 +55,9 @@ function NewDemand() {
   const [skillInput, setSkillInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [newClientOpen, setNewClientOpen] = useState(false);
+  const [isRfo, setIsRfo] = useState(false);
+  const [rfoDeadline, setRfoDeadline] = useState("");
+  const [positionsCount, setPositionsCount] = useState("1");
 
   const { data: clients, refetch: refetchClients } = useQuery({
     queryKey: ["clients"],
@@ -82,11 +89,13 @@ function NewDemand() {
     const parsed = demandSchema.safeParse({
       client_id: clientId, title, description, engagement, location,
       budget_min: budgetMin, budget_max: budgetMax, start_date: startDate, priority, assigned_to: assignedTo,
+      is_rfo: isRfo, rfo_deadline: rfoDeadline, positions_count: positionsCount,
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    const positions = Math.max(1, Number(positionsCount) || 1);
     setSubmitting(true);
     const { data, error } = await supabase.from("demands").insert({
       client_id: clientId,
@@ -102,6 +111,9 @@ function NewDemand() {
       assigned_to: assignedTo || null,
       created_by: user.id,
       status: "open",
+      is_rfo: isRfo,
+      rfo_deadline: isRfo && rfoDeadline ? new Date(rfoDeadline).toISOString() : null,
+      positions_count: positions,
     }).select("id").single();
     setSubmitting(false);
     if (error) return toast.error(error.message);
@@ -227,10 +239,14 @@ function NewDemand() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Start date</Label>
                 <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Positions to fill</Label>
+                <Input type="number" min={1} max={50} value={positionsCount} onChange={(e) => setPositionsCount(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Assign to</Label>
@@ -243,6 +259,22 @@ function NewDemand() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="rounded-md border p-4 space-y-3 bg-muted/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Request For Offer (RFO)</Label>
+                  <p className="text-xs text-muted-foreground">Competitive bid — multiple CVs sent, client picks one.</p>
+                </div>
+                <Switch checked={isRfo} onCheckedChange={setIsRfo} />
+              </div>
+              {isRfo && (
+                <div className="space-y-2">
+                  <Label>RFO deadline</Label>
+                  <Input type="datetime-local" value={rfoDeadline} onChange={(e) => setRfoDeadline(e.target.value)} />
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

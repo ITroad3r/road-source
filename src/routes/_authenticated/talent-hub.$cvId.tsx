@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { ArrowLeft, Pencil, Save, X, Trash2, Upload, FileText, MapPin, Mail, Phone, ExternalLink, User, Briefcase } from "lucide-react";
 import { format } from "date-fns";
+import { ActivityLog } from "@/components/ActivityLog";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/$cvId")({
   ssr: false,
@@ -49,6 +50,7 @@ const stageColors: Record<string, string> = {
 
 function CandidateDetail() {
   const { cvId } = Route.useParams();
+  const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
@@ -443,6 +445,8 @@ function CandidateDetail() {
           </div>
         </CardContent>
       </Card>
+
+      <ActivityLog scope={{ cvId }} currentUserId={user.id} />
     </div>
   );
 }

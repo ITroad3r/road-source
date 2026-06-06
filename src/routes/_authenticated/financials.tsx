@@ -64,18 +64,44 @@ function Financials() {
 
   const filtered = (rows ?? []).filter((r) => stageFilter === "all" || r.stage === stageFilter);
 
-  const totals = filtered.reduce(
+  // Executive aggregates: revenue = client_rate * days, cost = candidate_rate * days, profit = margin * days
+  // Days estimate: contract_duration_months * 20 working days
+  const exec = filtered.reduce(
     (acc, r) => {
       const f = r.candidate_financials?.[0];
-      const margin = Number(f?.margin ?? 0);
-      const months = Number(f?.contract_duration_months ?? 0);
+      if (!f) return acc;
+      const months = Number(f.contract_duration_months ?? 0);
+      const days = months ? months * 20 : 0;
+      const revenue = Number(f.client_rate ?? 0) * days;
+      const cost = Number(f.candidate_rate ?? 0) * days;
+      const profit = Number(f.margin ?? 0) * days;
       if (r.stage === "placed") acc.placedCount++;
-      acc.dailyMargin += margin;
-      acc.totalContractMargin += margin * (months ? months * 20 : 0); // 20 working days/mo estimate
+      acc.dailyMargin += Number(f.margin ?? 0);
+      acc.totalRevenue += revenue;
+      acc.totalCost += cost;
+      acc.totalProfit += profit;
+      // monthly bucket by placement_date
+      if (f.placement_date && revenue > 0) {
+        const key = format(new Date(f.placement_date), "yyyy-MM");
+        acc.monthly[key] = (acc.monthly[key] ?? 0) + revenue;
+      }
+      // per-client share
+      const cname = r.demands?.clients?.name ?? "—";
+      if (revenue > 0) acc.byClient[cname] = (acc.byClient[cname] ?? 0) + revenue;
       return acc;
     },
-    { placedCount: 0, dailyMargin: 0, totalContractMargin: 0 }
+    { placedCount: 0, dailyMargin: 0, totalRevenue: 0, totalCost: 0, totalProfit: 0, monthly: {} as Record<string, number>, byClient: {} as Record<string, number> }
   );
+
+  const netMargin = exec.totalRevenue > 0 ? (exec.totalProfit / exec.totalRevenue) * 100 : 0;
+  const monthlyData = Object.entries(exec.monthly)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, revenue]) => ({ month: format(new Date(month + "-01"), "MMM yy"), revenue: Math.round(revenue) }));
+  const clientData = Object.entries(exec.byClient)
+    .map(([name, value]) => ({ name, value: Math.round(value) }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 8);
+  const pieColors = ["hsl(var(--primary))", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16"];
 
   if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
   if (!canView) {
@@ -97,7 +123,7 @@ function Financials() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Financials</h1>
-          <p className="text-muted-foreground mt-1">Track rates, margins and placements across the pipeline.</p>
+          <p className="text-muted-foreground mt-1">Revenue, operational cost and net margin across the pipeline.</p>
         </div>
         <Select value={stageFilter} onValueChange={setStageFilter}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
@@ -109,11 +135,61 @@ function Financials() {
         </Select>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Stat icon={Users} label="Placed candidates" value={String(totals.placedCount)} />
-        <Stat icon={Euro} label="Daily margin (sum)" value={`€${totals.dailyMargin.toFixed(0)}`} />
-        <Stat icon={TrendingUp} label="Est. contract margin" value={`€${totals.totalContractMargin.toFixed(0)}`} />
+      {/* Executive KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Stat icon={Euro} label="Total Revenue" value={`€${exec.totalRevenue.toLocaleString()}`} />
+        <Stat icon={Wallet} label="Operational Cost" value={`€${exec.totalCost.toLocaleString()}`} />
+        <Stat icon={TrendingUp} label="Net Profit" value={`€${exec.totalProfit.toLocaleString()}`} />
+        <Stat icon={Percent} label="Net Margin" value={`${netMargin.toFixed(1)}%`} />
       </div>
+
+      {/* Charts */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader><CardTitle className="text-base">Monthly Revenue</CardTitle></CardHeader>
+          <CardContent>
+            {monthlyData.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-12 text-center">No revenue data yet. Add placement dates and rates.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip formatter={(v: number) => `€${v.toLocaleString()}`} contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-base">Revenue by Client</CardTitle></CardHeader>
+          <CardContent>
+            {clientData.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-12 text-center">No client revenue yet.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie data={clientData} dataKey="value" nameKey="name" outerRadius={90} label={(e: { name: string }) => e.name}>
+                    {clientData.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => `€${v.toLocaleString()}`} contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                  <Legend wrapperStyle={{ fontSize: "12px" }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Stat icon={Users} label="Placed candidates" value={String(exec.placedCount)} />
+        <Stat icon={Euro} label="Daily margin (sum)" value={`€${exec.dailyMargin.toFixed(0)}`} />
+        <Stat icon={TrendingUp} label="Avg margin / placement" value={exec.placedCount > 0 ? `€${(exec.totalProfit / exec.placedCount).toFixed(0)}` : "—"} />
+      </div>
+
 
       <Card>
         <CardHeader><CardTitle>Pipeline financials</CardTitle></CardHeader>

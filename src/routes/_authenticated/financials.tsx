@@ -42,6 +42,9 @@ type Row = {
 };
 
 function Financials() {
+  const { user } = Route.useRouteContext();
+  const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
+  const canView = !!roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r));
   const [stageFilter, setStageFilter] = useState<string>("all");
 
   const { data: rows, isLoading } = useQuery({

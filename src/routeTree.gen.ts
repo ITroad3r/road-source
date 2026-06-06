@@ -25,6 +25,7 @@ import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
 import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedDemandsDemandIdEditRouteImport } from './routes/_authenticated/demands.$demandId.edit'
 
 const RootRoute = RootRouteImport.update({
   id: '/root',
@@ -110,6 +111,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDemandsDemandIdEditRoute =
+  AuthenticatedDemandsDemandIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedDemandsDemandIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,11 +129,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
+  '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
   '/demands/': typeof AuthenticatedDemandsIndexRoute
   '/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
+  '/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,11 +146,12 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
+  '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
   '/demands': typeof AuthenticatedDemandsIndexRoute
   '/talent-hub': typeof AuthenticatedTalentHubIndexRoute
+  '/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,11 +166,12 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRoute
+  '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
   '/_authenticated/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
   '/_authenticated/demands/': typeof AuthenticatedDemandsIndexRoute
   '/_authenticated/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
+  '/_authenticated/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/talent-hub/new'
     | '/demands/'
     | '/talent-hub/'
+    | '/demands/$demandId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/talent-hub/new'
     | '/demands'
     | '/talent-hub'
+    | '/demands/$demandId/edit'
   id:
     | '__root__'
     | '/'
@@ -215,6 +227,7 @@ export interface FileRouteTypes {
     | '/_authenticated/talent-hub/new'
     | '/_authenticated/demands/'
     | '/_authenticated/talent-hub/'
+    | '/_authenticated/demands/$demandId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/demands/$demandId/edit': {
+      id: '/_authenticated/demands/$demandId/edit'
+      path: '/edit'
+      fullPath: '/demands/$demandId/edit'
+      preLoaderRoute: typeof AuthenticatedDemandsDemandIdEditRouteImport
+      parentRoute: typeof AuthenticatedDemandsDemandIdRoute
+    }
   }
 }
 
@@ -357,6 +377,21 @@ const AuthenticatedTalentHubRouteWithChildren =
     AuthenticatedTalentHubRouteChildren,
   )
 
+interface AuthenticatedDemandsDemandIdRouteChildren {
+  AuthenticatedDemandsDemandIdEditRoute: typeof AuthenticatedDemandsDemandIdEditRoute
+}
+
+const AuthenticatedDemandsDemandIdRouteChildren: AuthenticatedDemandsDemandIdRouteChildren =
+  {
+    AuthenticatedDemandsDemandIdEditRoute:
+      AuthenticatedDemandsDemandIdEditRoute,
+  }
+
+const AuthenticatedDemandsDemandIdRouteWithChildren =
+  AuthenticatedDemandsDemandIdRoute._addFileChildren(
+    AuthenticatedDemandsDemandIdRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -365,7 +400,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedTalentHubRoute: typeof AuthenticatedTalentHubRouteWithChildren
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
-  AuthenticatedDemandsDemandIdRoute: typeof AuthenticatedDemandsDemandIdRoute
+  AuthenticatedDemandsDemandIdRoute: typeof AuthenticatedDemandsDemandIdRouteWithChildren
   AuthenticatedDemandsNewRoute: typeof AuthenticatedDemandsNewRoute
   AuthenticatedDemandsIndexRoute: typeof AuthenticatedDemandsIndexRoute
 }
@@ -378,7 +413,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedTalentHubRoute: AuthenticatedTalentHubRouteWithChildren,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
-  AuthenticatedDemandsDemandIdRoute: AuthenticatedDemandsDemandIdRoute,
+  AuthenticatedDemandsDemandIdRoute:
+    AuthenticatedDemandsDemandIdRouteWithChildren,
   AuthenticatedDemandsNewRoute: AuthenticatedDemandsNewRoute,
   AuthenticatedDemandsIndexRoute: AuthenticatedDemandsIndexRoute,
 }
@@ -395,3 +431,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

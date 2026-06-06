@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
@@ -136,6 +136,11 @@ function DemandDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/demands/$demandId/edit" params={{ demandId }}>
+                  <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                </Link>
+              </Button>
               <Select value={demand.status} onValueChange={(v) => updateStatus.mutate(v)}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>

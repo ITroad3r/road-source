@@ -29,15 +29,18 @@ function AuthLayout() {
 
   const { data: roles } = useMyRoles(user.id);
   const isAdmin = roles?.includes("admin") ?? false;
+  const canCreateDemand = !!roles?.some((r) => ["admin", "division_manager"].includes(r));
+  const canSeeFinancials = !!roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r));
+  const canSeeReports = canSeeFinancials;
 
   const navItems = [
     { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
     { to: "/demands", label: "All Demands", icon: Briefcase },
-    { to: "/demands/new", label: "New Demand", icon: FilePlus },
+    ...(canCreateDemand ? [{ to: "/demands/new" as const, label: "New Demand", icon: FilePlus }] : []),
     { to: "/clients", label: "Clients", icon: Building2 },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
-    { to: "/financials", label: "Financials", icon: Euro },
-    { to: "/reports", label: "Reports", icon: BarChart3 },
+    ...(canSeeFinancials ? [{ to: "/financials" as const, label: "Financials", icon: Euro }] : []),
+    ...(canSeeReports ? [{ to: "/reports" as const, label: "Reports", icon: BarChart3 }] : []),
     { to: "/notifications", label: "Notifications", icon: Bell },
     { to: "/profile", label: "Profile", icon: User },
     ...(isAdmin ? [{ to: "/admin/users" as const, label: "Users & roles", icon: Shield }] : []),

@@ -12,8 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Euro, TrendingUp, Users, Pencil } from "lucide-react";
+import { Euro, TrendingUp, Users, Pencil, Lock } from "lucide-react";
 import { format } from "date-fns";
+import { useMyRoles } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated/financials")({
   ssr: false,
@@ -41,10 +42,14 @@ type Row = {
 };
 
 function Financials() {
+  const { user } = Route.useRouteContext();
+  const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
+  const canView = !!roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r));
   const [stageFilter, setStageFilter] = useState<string>("all");
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["financials-rows"],
+    enabled: canView,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
@@ -70,6 +75,21 @@ function Financials() {
     },
     { placedCount: 0, dailyMargin: 0, totalContractMargin: 0 }
   );
+
+  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!canView) {
+    return (
+      <div className="p-8">
+        <Card>
+          <CardContent className="p-10 text-center space-y-3">
+            <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Restricted</h2>
+            <p className="text-sm text-muted-foreground">Financials are available to managers, directors, CEO, and admins.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 space-y-6">

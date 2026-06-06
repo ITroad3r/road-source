@@ -42,7 +42,7 @@ function ReportsPage() {
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
   const [rangeDays, setRangeDays] = useState<number>(90);
 
-  const canView = roles?.some((r) => ["admin", "manager", "sales"].includes(r)) ?? false;
+  const canView = roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r)) ?? false;
 
   const since = useMemo(() => subDays(new Date(), rangeDays).toISOString(), [rangeDays]);
 
@@ -87,7 +87,7 @@ function ReportsPage() {
     return (
       <div className="p-8">
         <Card><CardContent className="p-8 text-center text-muted-foreground">
-          Reports are available to admins, managers, and sales.
+          Reports are available to managers, directors, CEO, and admins.
         </CardContent></Card>
       </div>
     );

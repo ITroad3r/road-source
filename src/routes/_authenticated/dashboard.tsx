@@ -41,9 +41,9 @@ const statusColors: Record<string, string> = {
   lost: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
 };
 
-function pickView(roles: AppRole[]): "admin" | "sales" | "sourcing" {
-  if (roles.includes("admin") || roles.includes("manager")) return "admin";
-  if (roles.includes("sales")) return "sales";
+function pickView(roles: AppRole[]): "executive" | "manager" | "sourcing" {
+  if (roles.includes("ceo") || roles.includes("division_director")) return "executive";
+  if (roles.includes("division_manager") || roles.includes("admin")) return "manager";
   return "sourcing";
 }
 
@@ -56,8 +56,7 @@ function Dashboard() {
   }
 
   const view = pickView(roles ?? []);
-  if (view === "admin") return <AdminManagerView />;
-  if (view === "sales") return <SalesView userId={user.id} />;
+  if (view === "manager" || view === "executive") return <AdminManagerView />;
   return <SourcingView userId={user.id} />;
 }
 

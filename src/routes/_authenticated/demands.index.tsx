@@ -36,7 +36,7 @@ function DemandsList() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const { data: roles } = useMyRoles(user.id);
-  const canAssign = (roles ?? []).some((r) => ["admin", "manager", "sales"].includes(r));
+  const canAssign = (roles ?? []).some((r) => ["admin", "division_manager"].includes(r));
   const canCreate = canAssign;
 
   const [search, setSearch] = useState("");

@@ -44,7 +44,7 @@ function ClientsPage() {
   const qc = useQueryClient();
   const { user } = Route.useRouteContext();
   const { data: roles } = useMyRoles(user.id);
-  const canManage = !!roles?.some((r) => ["admin", "manager", "sales"].includes(r));
+  const canManage = !!roles?.some((r) => ["admin", "division_manager", "division_director"].includes(r));
 
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<ClientRow | null>(null);

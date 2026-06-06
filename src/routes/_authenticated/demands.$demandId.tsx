@@ -136,6 +136,11 @@ function DemandDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/demands/$demandId/edit" params={{ demandId }}>
+                  <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                </Link>
+              </Button>
               <Select value={demand.status} onValueChange={(v) => updateStatus.mutate(v)}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>

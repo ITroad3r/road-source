@@ -196,14 +196,20 @@ export type Database = {
           budget_max: number | null
           budget_min: number | null
           client_id: string
+          commercial_outcome: Database["public"]["Enums"]["commercial_outcome"]
           created_at: string
           created_by: string | null
           description: string | null
           engagement: Database["public"]["Enums"]["engagement_type"]
           id: string
+          is_rfo: boolean
+          lifecycle: Database["public"]["Enums"]["demand_lifecycle"]
           location: string | null
+          lost_reason: string | null
+          positions_count: number
           priority: number | null
           required_skills: string[] | null
+          rfo_deadline: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["demand_status"]
           title: string
@@ -214,14 +220,20 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           client_id: string
+          commercial_outcome?: Database["public"]["Enums"]["commercial_outcome"]
           created_at?: string
           created_by?: string | null
           description?: string | null
           engagement?: Database["public"]["Enums"]["engagement_type"]
           id?: string
+          is_rfo?: boolean
+          lifecycle?: Database["public"]["Enums"]["demand_lifecycle"]
           location?: string | null
+          lost_reason?: string | null
+          positions_count?: number
           priority?: number | null
           required_skills?: string[] | null
+          rfo_deadline?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["demand_status"]
           title: string
@@ -232,14 +244,20 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           client_id?: string
+          commercial_outcome?: Database["public"]["Enums"]["commercial_outcome"]
           created_at?: string
           created_by?: string | null
           description?: string | null
           engagement?: Database["public"]["Enums"]["engagement_type"]
           id?: string
+          is_rfo?: boolean
+          lifecycle?: Database["public"]["Enums"]["demand_lifecycle"]
           location?: string | null
+          lost_reason?: string | null
+          positions_count?: number
           priority?: number | null
           required_skills?: string[] | null
+          rfo_deadline?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["demand_status"]
           title?: string
@@ -467,6 +485,13 @@ export type Database = {
         | "placed"
         | "rejected"
         | "withdrawn"
+      commercial_outcome: "pending" | "won" | "lost"
+      demand_lifecycle:
+        | "open"
+        | "in_progress"
+        | "on_hold"
+        | "filled"
+        | "cancelled"
       demand_status:
         | "open"
         | "sourcing"
@@ -627,6 +652,14 @@ export const Constants = {
         "placed",
         "rejected",
         "withdrawn",
+      ],
+      commercial_outcome: ["pending", "won", "lost"],
+      demand_lifecycle: [
+        "open",
+        "in_progress",
+        "on_hold",
+        "filled",
+        "cancelled",
       ],
       demand_status: [
         "open",

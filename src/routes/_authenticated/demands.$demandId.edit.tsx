@@ -9,9 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ArrowLeft, X } from "lucide-react";
+import {
+  LIFECYCLE_VALUES,
+  LIFECYCLE_LABEL,
+  OUTCOME_VALUES,
+  OUTCOME_LABEL,
+  type Lifecycle,
+  type Outcome,
+} from "@/lib/demand-status";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId/edit")({
   ssr: false,
@@ -30,10 +39,16 @@ const demandSchema = z.object({
   start_date: z.string().optional().or(z.literal("")),
   priority: z.string(),
   assigned_to: z.string().optional().or(z.literal("")),
-  status: z.enum(["open", "sourcing", "submitted", "interview", "offer", "placed", "closed", "lost"]),
-});
-
-const DEMAND_STATUSES = ["open", "sourcing", "submitted", "interview", "offer", "placed", "closed", "lost"] as const;
+  lifecycle: z.enum(LIFECYCLE_VALUES),
+  commercial_outcome: z.enum(OUTCOME_VALUES),
+  lost_reason: z.string().trim().max(1000).optional().or(z.literal("")),
+  is_rfo: z.boolean(),
+  rfo_deadline: z.string().optional().or(z.literal("")),
+  positions_count: z.string(),
+}).refine(
+  (d) => d.commercial_outcome !== "lost" || (d.lost_reason && d.lost_reason.trim().length > 0),
+  { path: ["lost_reason"], message: "Lost reason is required when outcome is Lost" },
+);
 
 function EditDemand() {
   const { demandId } = Route.useParams();
@@ -81,7 +96,12 @@ function EditDemand() {
   const [startDate, setStartDate] = useState("");
   const [priority, setPriority] = useState("3");
   const [assignedTo, setAssignedTo] = useState("");
-  const [status, setStatus] = useState<(typeof DEMAND_STATUSES)[number]>("open");
+  const [lifecycle, setLifecycle] = useState<Lifecycle>("open");
+  const [outcome, setOutcome] = useState<Outcome>("pending");
+  const [lostReason, setLostReason] = useState("");
+  const [isRfo, setIsRfo] = useState(false);
+  const [rfoDeadline, setRfoDeadline] = useState("");
+  const [positionsCount, setPositionsCount] = useState("1");
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -98,7 +118,12 @@ function EditDemand() {
     setStartDate(demand.start_date ? demand.start_date.slice(0, 10) : "");
     setPriority(String(demand.priority ?? 3));
     setAssignedTo(demand.assigned_to ?? "");
-    setStatus(demand.status as (typeof DEMAND_STATUSES)[number]);
+    setLifecycle(demand.lifecycle as Lifecycle);
+    setOutcome(demand.commercial_outcome as Outcome);
+    setLostReason(demand.lost_reason ?? "");
+    setIsRfo(!!demand.is_rfo);
+    setRfoDeadline(demand.rfo_deadline ? demand.rfo_deadline.slice(0, 16) : "");
+    setPositionsCount(String(demand.positions_count ?? 1));
     setSkills(demand.required_skills ?? []);
   }, [demand]);
 
@@ -125,7 +150,12 @@ function EditDemand() {
           start_date: values.start_date || null,
           priority: Number(values.priority),
           assigned_to: values.assigned_to || null,
-          status: values.status,
+          lifecycle: values.lifecycle,
+          commercial_outcome: values.commercial_outcome,
+          lost_reason: values.commercial_outcome === "lost" ? (values.lost_reason || null) : null,
+          is_rfo: values.is_rfo,
+          rfo_deadline: values.is_rfo && values.rfo_deadline ? new Date(values.rfo_deadline).toISOString() : null,
+          positions_count: Math.max(1, Number(values.positions_count) || 1),
         })
         .eq("id", demandId);
       if (error) throw error;
@@ -142,17 +172,10 @@ function EditDemand() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = demandSchema.safeParse({
-      client_id: clientId,
-      title,
-      description,
-      engagement,
-      location,
-      budget_min: budgetMin,
-      budget_max: budgetMax,
-      start_date: startDate,
-      priority,
-      assigned_to: assignedTo,
-      status,
+      client_id: clientId, title, description, engagement, location,
+      budget_min: budgetMin, budget_max: budgetMax, start_date: startDate, priority,
+      assigned_to: assignedTo, lifecycle, commercial_outcome: outcome, lost_reason: lostReason,
+      is_rfo: isRfo, rfo_deadline: rfoDeadline, positions_count: positionsCount,
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -196,12 +219,12 @@ function EditDemand() {
 
             <div className="space-y-2">
               <Label>Title *</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="e.g. Senior React Engineer — 6 months" />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} />
             </div>
 
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={5000} rows={5} placeholder="Mission context, team, must-haves…" />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={5000} rows={5} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -229,17 +252,44 @@ function EditDemand() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Status</Label>
-                <Select value={status} onValueChange={(v) => setStatus(v as (typeof DEMAND_STATUSES)[number])}>
-                  <SelectTrigger className="capitalize"><SelectValue /></SelectTrigger>
+                <Label>Positions</Label>
+                <Input type="number" min={1} max={50} value={positionsCount} onChange={(e) => setPositionsCount(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Lifecycle</Label>
+                <Select value={lifecycle} onValueChange={(v) => setLifecycle(v as Lifecycle)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {DEMAND_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-                    ))}
+                    {LIFECYCLE_VALUES.map((s) => <SelectItem key={s} value={s}>{LIFECYCLE_LABEL[s]}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Commercial outcome</Label>
+                <Select value={outcome} onValueChange={(v) => setOutcome(v as Outcome)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {OUTCOME_VALUES.map((s) => <SelectItem key={s} value={s}>{OUTCOME_LABEL[s]}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
+
+            {outcome === "lost" && (
+              <div className="space-y-2">
+                <Label>Lost reason *</Label>
+                <Textarea
+                  value={lostReason}
+                  onChange={(e) => setLostReason(e.target.value)}
+                  rows={2}
+                  maxLength={1000}
+                  placeholder="Why was this demand lost? (e.g. client picked another vendor, budget cut…)"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Required skills</Label>
@@ -270,7 +320,7 @@ function EditDemand() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Location</Label>
-                <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} placeholder="Paris / Remote / Hybrid" />
+                <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} />
               </div>
               <div className="space-y-2">
                 <Label>Budget min (€)</Label>
@@ -298,6 +348,22 @@ function EditDemand() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="rounded-md border p-4 space-y-3 bg-muted/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Request For Offer (RFO)</Label>
+                  <p className="text-xs text-muted-foreground">Competitive bid — multiple CVs sent, client picks one.</p>
+                </div>
+                <Switch checked={isRfo} onCheckedChange={setIsRfo} />
+              </div>
+              {isRfo && (
+                <div className="space-y-2">
+                  <Label>RFO deadline</Label>
+                  <Input type="datetime-local" value={rfoDeadline} onChange={(e) => setRfoDeadline(e.target.value)} />
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

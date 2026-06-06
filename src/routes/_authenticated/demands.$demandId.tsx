@@ -10,10 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil, LayoutGrid, List, Send } from "lucide-react";
 import { format } from "date-fns";
 import { ActivityLog } from "@/components/ActivityLog";
 import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OUTCOME_LABEL, OUTCOME_COLORS, type Lifecycle, type Outcome } from "@/lib/demand-status";
+import { PipelineKanban, type KanbanStage } from "@/components/PipelineKanban";
+import { SendPackageDialog } from "@/components/SendPackageDialog";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,

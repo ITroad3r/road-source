@@ -87,7 +87,7 @@ function ReportsPage() {
     return (
       <div className="p-8">
         <Card><CardContent className="p-8 text-center text-muted-foreground">
-          Reports are available to admins, managers, and sales.
+          Reports are available to managers, directors, CEO, and admins.
         </CardContent></Card>
       </div>
     );

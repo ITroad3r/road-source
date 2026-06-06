@@ -245,6 +245,8 @@ function DemandDetail() {
           );
         })}
       </div>
+
+      <ActivityLog scope={{ demandId }} currentUserId={user.id} />
     </div>
   );
 }

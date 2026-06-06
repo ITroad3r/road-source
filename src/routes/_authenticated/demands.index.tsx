@@ -11,7 +11,22 @@ import { toast } from "sonner";
 import { Building2, MapPin, Calendar, Plus, Search, User, Filter, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { useMyRoles } from "@/hooks/useMyRoles";
-import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OUTCOME_LABEL, OUTCOME_COLORS, type Lifecycle, type Outcome } from "@/lib/demand-status";
+import {
+  LIFECYCLE_VALUES,
+  LIFECYCLE_LABEL,
+  LIFECYCLE_COLORS,
+  OUTCOME_VALUES,
+  OUTCOME_LABEL,
+  OUTCOME_COLORS,
+  type Lifecycle,
+  type Outcome,
+} from "@/lib/demand-status";
+
+export const Route = createFileRoute("/_authenticated/demands/")({
+  ssr: false,
+  head: () => ({ meta: [{ title: "Demands — RoadSource" }] }),
+  component: DemandsList,
+});
 
 function DemandsList() {
   const { user } = Route.useRouteContext();
@@ -21,8 +36,10 @@ function DemandsList() {
   const canCreate = canAssign;
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
+  const [lifecycleFilter, setLifecycleFilter] = useState<Lifecycle | "all">("all");
+  const [outcomeFilter, setOutcomeFilter] = useState<Outcome | "all">("all");
   const [assigneeFilter, setAssigneeFilter] = useState<"all" | "me" | "unassigned">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "rfo" | "standard">("all");
 
   const { data: demands, isLoading } = useQuery({
     queryKey: ["demands", "list"],
@@ -59,25 +76,28 @@ function DemandsList() {
       qc.invalidateQueries({ queryKey: ["demands", "list"] });
       toast.success("Assignment updated");
     },
-    onError: (e: any) => toast.error(e.message ?? "Failed to update"),
+    onError: (e: Error) => toast.error(e.message ?? "Failed to update"),
   });
 
-  const statusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: Status }) => {
-      const { error } = await supabase.from("demands").update({ status }).eq("id", id);
+  const lifecycleMutation = useMutation({
+    mutationFn: async ({ id, lifecycle }: { id: string; lifecycle: Lifecycle }) => {
+      const { error } = await supabase.from("demands").update({ lifecycle }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demands", "list"] });
-      toast.success("Status updated");
+      toast.success("Lifecycle updated");
     },
-    onError: (e: any) => toast.error(e.message ?? "Failed to update"),
+    onError: (e: Error) => toast.error(e.message ?? "Failed to update"),
   });
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return (demands ?? []).filter((d: any) => {
-      if (statusFilter !== "all" && d.status !== statusFilter) return false;
+      if (lifecycleFilter !== "all" && d.lifecycle !== lifecycleFilter) return false;
+      if (outcomeFilter !== "all" && d.commercial_outcome !== outcomeFilter) return false;
+      if (typeFilter === "rfo" && !d.is_rfo) return false;
+      if (typeFilter === "standard" && d.is_rfo) return false;
       if (assigneeFilter === "me" && d.assigned_to !== user.id) return false;
       if (assigneeFilter === "unassigned" && d.assigned_to) return false;
       if (!q) return true;
@@ -93,7 +113,7 @@ function DemandsList() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [demands, search, statusFilter, assigneeFilter, user.id]);
+  }, [demands, search, lifecycleFilter, outcomeFilter, typeFilter, assigneeFilter, user.id]);
 
   const sourcerName = (id: string | null) => {
     if (!id) return null;
@@ -120,8 +140,8 @@ function DemandsList() {
       </div>
 
       <Card>
-        <CardContent className="pt-6 flex flex-col md:flex-row gap-3">
-          <div className="relative flex-1">
+        <CardContent className="pt-6 flex flex-col md:flex-row flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search title, client, skills, location…"
@@ -130,25 +150,30 @@ function DemandsList() {
               className="pl-9"
             />
           </div>
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as Status | "all")}>
-            <SelectTrigger className="w-full md:w-44">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
+          <Select value={lifecycleFilter} onValueChange={(v) => setLifecycleFilter(v as Lifecycle | "all")}>
+            <SelectTrigger className="w-full md:w-44"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {DEMAND_STATUSES.map((s) => (
-                <SelectItem key={s} value={s} className="capitalize">
-                  {s}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">All lifecycles</SelectItem>
+              {LIFECYCLE_VALUES.map((s) => <SelectItem key={s} value={s}>{LIFECYCLE_LABEL[s]}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Select value={assigneeFilter} onValueChange={(v) => setAssigneeFilter(v as any)}>
-            <SelectTrigger className="w-full md:w-44">
-              <User className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
+          <Select value={outcomeFilter} onValueChange={(v) => setOutcomeFilter(v as Outcome | "all")}>
+            <SelectTrigger className="w-full md:w-40"><Trophy className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All outcomes</SelectItem>
+              {OUTCOME_VALUES.map((s) => <SelectItem key={s} value={s}>{OUTCOME_LABEL[s]}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
+            <SelectTrigger className="w-full md:w-36"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="rfo">RFO only</SelectItem>
+              <SelectItem value="standard">Standard</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={assigneeFilter} onValueChange={(v) => setAssigneeFilter(v as typeof assigneeFilter)}>
+            <SelectTrigger className="w-full md:w-44"><User className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All assignees</SelectItem>
               <SelectItem value="me">Assigned to me</SelectItem>
@@ -181,15 +206,20 @@ function DemandsList() {
                       >
                         {d.title}
                       </Link>
-                      <Badge variant="outline" className={statusColors[d.status]}>
-                        {d.status}
+                      <Badge variant="outline" className={LIFECYCLE_COLORS[d.lifecycle as Lifecycle]}>
+                        {LIFECYCLE_LABEL[d.lifecycle as Lifecycle]}
                       </Badge>
-                      <Badge variant="secondary" className="capitalize">
-                        {d.engagement}
+                      <Badge variant="outline" className={OUTCOME_COLORS[d.commercial_outcome as Outcome]}>
+                        {OUTCOME_LABEL[d.commercial_outcome as Outcome]}
                       </Badge>
-                      {d.priority <= 2 && (
-                        <Badge variant="destructive">P{d.priority}</Badge>
+                      {d.is_rfo && (
+                        <Badge variant="outline" className="bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20">
+                          RFO{d.rfo_deadline ? ` · ${format(new Date(d.rfo_deadline), "MMM d")}` : ""}
+                        </Badge>
                       )}
+                      <Badge variant="secondary" className="capitalize">{d.engagement}</Badge>
+                      {d.priority <= 2 && <Badge variant="destructive">P{d.priority}</Badge>}
+                      {d.positions_count > 1 && <Badge variant="outline">{d.positions_count} positions</Badge>}
                     </div>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-2">
                       {d.clients?.name && (
@@ -209,22 +239,16 @@ function DemandsList() {
                         </span>
                       )}
                       {(d.budget_min || d.budget_max) && (
-                        <span>
-                          €{d.budget_min ?? "?"}–{d.budget_max ?? "?"}/day
-                        </span>
+                        <span>€{d.budget_min ?? "?"}–{d.budget_max ?? "?"}/day</span>
                       )}
                     </div>
                     {d.required_skills?.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {d.required_skills.slice(0, 8).map((s: string) => (
-                          <Badge key={s} variant="outline" className="text-xs">
-                            {s}
-                          </Badge>
+                          <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
                         ))}
                         {d.required_skills.length > 8 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{d.required_skills.length - 8}
-                          </Badge>
+                          <Badge variant="outline" className="text-xs">+{d.required_skills.length - 8}</Badge>
                         )}
                       </div>
                     )}
@@ -248,26 +272,22 @@ function DemandsList() {
                           <SelectContent>
                             <SelectItem value="unassigned">Unassigned</SelectItem>
                             {sourcers?.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>
-                                {p.full_name ?? p.email}
-                              </SelectItem>
+                              <SelectItem key={p.id} value={p.id}>{p.full_name ?? p.email}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <Select
-                          value={d.status}
+                          value={d.lifecycle}
                           onValueChange={(v) =>
-                            statusMutation.mutate({ id: d.id, status: v as Status })
+                            lifecycleMutation.mutate({ id: d.id, lifecycle: v as Lifecycle })
                           }
                         >
-                          <SelectTrigger className="h-8 text-xs capitalize">
+                          <SelectTrigger className="h-8 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {DEMAND_STATUSES.map((s) => (
-                              <SelectItem key={s} value={s} className="capitalize">
-                                {s}
-                              </SelectItem>
+                            {LIFECYCLE_VALUES.map((s) => (
+                              <SelectItem key={s} value={s}>{LIFECYCLE_LABEL[s]}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>

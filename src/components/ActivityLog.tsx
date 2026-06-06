@@ -48,13 +48,13 @@ export function ActivityLog({ scope, currentUserId }: { scope: Scope; currentUse
 
   const addNote = useMutation({
     mutationFn: async () => {
-      const payload: Record<string, unknown> = {
+      const payload = {
         author_id: currentUserId,
         kind: "note",
         body: body.trim(),
+        demand_id: scope.demandId ?? null,
+        cv_id: scope.cvId ?? null,
       };
-      if (scope.demandId) payload.demand_id = scope.demandId;
-      if (scope.cvId) payload.cv_id = scope.cvId;
       const { error } = await supabase.from("activity_log").insert(payload);
       if (error) throw error;
     },

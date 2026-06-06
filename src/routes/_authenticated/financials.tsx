@@ -49,6 +49,7 @@ function Financials() {
 
   const { data: rows, isLoading } = useQuery({
     queryKey: ["financials-rows"],
+    enabled: canView,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")

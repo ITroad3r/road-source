@@ -48,6 +48,7 @@ const stageColors: Record<string, string> = {
 
 function DemandDetail() {
   const { demandId } = Route.useParams();
+  const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
 

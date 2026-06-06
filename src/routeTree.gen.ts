@@ -26,6 +26,7 @@ import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedTalentHubCvIdRouteImport } from './routes/_authenticated/talent-hub.$cvId'
 import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
 import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
+import { Route as AuthenticatedClientsClientIdRouteImport } from './routes/_authenticated/clients.$clientId'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedDemandsDemandIdEditRouteImport } from './routes/_authenticated/demands.$demandId.edit'
 
@@ -120,6 +121,12 @@ const AuthenticatedDemandsDemandIdRoute =
     path: '/demands/$demandId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientsClientIdRoute =
+  AuthenticatedClientsClientIdRouteImport.update({
+    id: '/$clientId',
+    path: '/$clientId',
+    getParentRoute: () => AuthenticatedClientsRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -143,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
@@ -161,6 +169,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
@@ -183,6 +192,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
   '/_authenticated/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/talent-hub'
     | '/admin/users'
+    | '/clients/$clientId'
     | '/demands/$demandId'
     | '/demands/new'
     | '/talent-hub/$cvId'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/admin/users'
+    | '/clients/$clientId'
     | '/demands/$demandId'
     | '/demands/new'
     | '/talent-hub/$cvId'
@@ -244,6 +256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/talent-hub'
     | '/_authenticated/admin/users'
+    | '/_authenticated/clients/$clientId'
     | '/_authenticated/demands/$demandId'
     | '/_authenticated/demands/new'
     | '/_authenticated/talent-hub/$cvId'
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandsDemandIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clients/$clientId': {
+      id: '/_authenticated/clients/$clientId'
+      path: '/$clientId'
+      fullPath: '/clients/$clientId'
+      preLoaderRoute: typeof AuthenticatedClientsClientIdRouteImport
+      parentRoute: typeof AuthenticatedClientsRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/admin/users'
@@ -400,10 +420,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedClientsRouteChildren {
+  AuthenticatedClientsClientIdRoute: typeof AuthenticatedClientsClientIdRoute
   AuthenticatedClientsIndexRoute: typeof AuthenticatedClientsIndexRoute
 }
 
 const AuthenticatedClientsRouteChildren: AuthenticatedClientsRouteChildren = {
+  AuthenticatedClientsClientIdRoute: AuthenticatedClientsClientIdRoute,
   AuthenticatedClientsIndexRoute: AuthenticatedClientsIndexRoute,
 }
 

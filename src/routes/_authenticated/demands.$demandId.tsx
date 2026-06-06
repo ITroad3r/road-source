@@ -118,10 +118,13 @@ function DemandDetail() {
 
   const updateOutcome = useMutation({
     mutationFn: async ({ outcome, lost_reason }: { outcome: Outcome; lost_reason?: string | null }) => {
-      const payload: Record<string, unknown> = { commercial_outcome: outcome };
-      if (outcome === "lost") payload.lost_reason = lost_reason ?? null;
-      else payload.lost_reason = null;
-      const { error } = await supabase.from("demands").update(payload).eq("id", demandId);
+      const { error } = await supabase
+        .from("demands")
+        .update({
+          commercial_outcome: outcome,
+          lost_reason: outcome === "lost" ? (lost_reason ?? null) : null,
+        })
+        .eq("id", demandId);
       if (error) throw error;
     },
     onSuccess: () => {

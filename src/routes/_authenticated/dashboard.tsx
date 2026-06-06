@@ -56,8 +56,7 @@ function Dashboard() {
   }
 
   const view = pickView(roles ?? []);
-  if (view === "admin") return <AdminManagerView />;
-  if (view === "sales") return <SalesView userId={user.id} />;
+  if (view === "manager" || view === "executive") return <AdminManagerView />;
   return <SourcingView userId={user.id} />;
 }
 

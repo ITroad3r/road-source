@@ -116,10 +116,10 @@ function EditDemand() {
         .update({
           client_id: values.client_id,
           title: values.title.trim(),
-          description: values.description.trim() || null,
+          description: values.description?.trim() || null,
           engagement: values.engagement,
           required_skills: skills,
-          location: values.location.trim() || null,
+          location: values.location?.trim() || null,
           budget_min: values.budget_min ? Number(values.budget_min) : null,
           budget_max: values.budget_max ? Number(values.budget_max) : null,
           start_date: values.start_date || null,

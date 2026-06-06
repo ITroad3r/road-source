@@ -141,15 +141,15 @@ function TalentHub() {
           <Card key={c.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 min-w-0">
+                <Link to="/talent-hub/$cvId" params={{ cvId: c.id }} className="flex items-start gap-3 min-w-0 flex-1 group">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <User className="h-5 w-5 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <div className="font-semibold truncate">{c.full_name}</div>
+                    <div className="font-semibold truncate group-hover:text-primary transition-colors">{c.full_name}</div>
                     <div className="text-sm text-muted-foreground truncate">{c.headline ?? "—"}</div>
                   </div>
-                </div>
+                </Link>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   {c.availability && (
                     <Badge variant={c.availability === "available" ? "default" : "secondary"} className="text-xs capitalize">
@@ -159,6 +159,7 @@ function TalentHub() {
                   {c.seniority && <Badge variant="outline" className="text-xs capitalize">{c.seniority}</Badge>}
                 </div>
               </div>
+
 
               {c.skills && c.skills.length > 0 && (
                 <div className="flex flex-wrap gap-1">

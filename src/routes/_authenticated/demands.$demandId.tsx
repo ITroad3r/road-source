@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { ActivityLog } from "@/components/ActivityLog";
+import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OUTCOME_LABEL, OUTCOME_COLORS, type Lifecycle, type Outcome } from "@/lib/demand-status";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,
@@ -33,7 +34,7 @@ const STAGES = [
 ] as const;
 type Stage = (typeof STAGES)[number];
 
-const DEMAND_STATUSES = ["open", "sourcing", "submitted", "interview", "offer", "placed", "closed", "lost"] as const;
+
 
 const stageColors: Record<string, string> = {
   identified: "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20",
@@ -103,14 +104,29 @@ function DemandDetail() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const updateStatus = useMutation({
-    mutationFn: async (status: string) => {
-      const { error } = await supabase.from("demands").update({ status: status as typeof DEMAND_STATUSES[number] }).eq("id", demandId);
+  const updateLifecycle = useMutation({
+    mutationFn: async (lifecycle: Lifecycle) => {
+      const { error } = await supabase.from("demands").update({ lifecycle }).eq("id", demandId);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demand", demandId] });
-      toast.success("Demand status updated");
+      toast.success("Lifecycle updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateOutcome = useMutation({
+    mutationFn: async ({ outcome, lost_reason }: { outcome: Outcome; lost_reason?: string | null }) => {
+      const payload: Record<string, unknown> = { commercial_outcome: outcome };
+      if (outcome === "lost") payload.lost_reason = lost_reason ?? null;
+      else payload.lost_reason = null;
+      const { error } = await supabase.from("demands").update(payload).eq("id", demandId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["demand", demandId] });
+      toast.success("Outcome updated");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -137,23 +153,55 @@ function DemandDetail() {
                 {demand.clients?.industry && <span className="opacity-60">· {demand.clients.industry}</span>}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
               <Button asChild variant="outline" size="sm">
                 <Link to="/demands/$demandId/edit" params={{ demandId }}>
                   <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
                 </Link>
               </Button>
-              <Select value={demand.status} onValueChange={(v) => updateStatus.mutate(v)}>
+              <Select value={demand.lifecycle} onValueChange={(v) => updateLifecycle.mutate(v as Lifecycle)}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {DEMAND_STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                  {LIFECYCLE_VALUES.map((s) => <SelectItem key={s} value={s}>{LIFECYCLE_LABEL[s]}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Select
+                value={demand.commercial_outcome}
+                onValueChange={(v) => {
+                  const outcome = v as Outcome;
+                  if (outcome === "lost") {
+                    const reason = window.prompt("Reason demand was lost:", demand.lost_reason ?? "");
+                    if (!reason || !reason.trim()) return;
+                    updateOutcome.mutate({ outcome, lost_reason: reason.trim() });
+                  } else {
+                    updateOutcome.mutate({ outcome });
+                  }
+                }}
+              >
+                <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {OUTCOME_VALUES.map((s) => <SelectItem key={s} value={s}>{OUTCOME_LABEL[s]}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Badge variant="outline" className={LIFECYCLE_COLORS[demand.lifecycle as Lifecycle]}>{LIFECYCLE_LABEL[demand.lifecycle as Lifecycle]}</Badge>
+              <Badge variant="outline" className={OUTCOME_COLORS[demand.commercial_outcome as Outcome]}>{OUTCOME_LABEL[demand.commercial_outcome as Outcome]}</Badge>
+              {demand.is_rfo && (
+                <Badge variant="outline" className="bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20">
+                  RFO{demand.rfo_deadline ? ` · due ${format(new Date(demand.rfo_deadline), "MMM d, HH:mm")}` : ""}
+                </Badge>
+              )}
               <Badge variant="secondary" className="capitalize">{demand.engagement}</Badge>
+              {demand.positions_count > 1 && <Badge variant="outline">{demand.positions_count} positions</Badge>}
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {demand.commercial_outcome === "lost" && demand.lost_reason && (
+            <div className="rounded-md bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm">
+              <span className="font-medium text-red-700 dark:text-red-300">Lost reason: </span>
+              <span className="text-red-700 dark:text-red-300">{demand.lost_reason}</span>
+            </div>
+          )}
           {demand.description && <p className="text-sm whitespace-pre-wrap">{demand.description}</p>}
           <div className="flex flex-wrap gap-1.5">
             {demand.required_skills?.map((s: string) => (

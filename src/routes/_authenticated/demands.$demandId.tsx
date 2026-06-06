@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { ArrowLeft, Building2, MapPin, Calendar, Plus, Search, Trash2, User, Pencil } from "lucide-react";
 import { format } from "date-fns";
+import { ActivityLog } from "@/components/ActivityLog";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,

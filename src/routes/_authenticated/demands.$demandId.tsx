@@ -55,6 +55,8 @@ function DemandDetail() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
+  const [view, setView] = useState<"list" | "kanban">("kanban");
+  const [packageOpen, setPackageOpen] = useState(false);
 
   const { data: demand, isLoading } = useQuery({
     queryKey: ["demand", demandId],

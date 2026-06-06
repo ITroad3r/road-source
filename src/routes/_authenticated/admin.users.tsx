@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Shield, Search, Plus, X, User as UserIcon } from "lucide-react";
-import { useMyRoles, AppRole } from "@/hooks/useMyRoles";
+import { useMyRoles, AppRole, ROLE_LABEL } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   ssr: false,
@@ -18,13 +18,14 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsers,
 });
 
-const ROLES: AppRole[] = ["admin", "manager", "sales", "sourcing"];
+const ROLES: AppRole[] = ["sourcing_team", "division_manager", "division_director", "ceo", "admin"];
 
 const roleColors: Record<AppRole, string> = {
   admin: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
-  manager: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
-  sales: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-  sourcing: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+  ceo: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+  division_director: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
+  division_manager: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+  sourcing_team: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
 };
 
 function AdminUsers() {

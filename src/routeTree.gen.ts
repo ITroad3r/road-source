@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTalentHubRouteImport } from './routes/_authenticated/talent-hub'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedFinancialsRouteImport } from './routes/_authenticated/financials'
@@ -52,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedTalentHubRoute = AuthenticatedTalentHubRouteImport.update({
   id: '/talent-hub',
   path: '/talent-hub',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/financials': typeof AuthenticatedFinancialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/financials': typeof AuthenticatedFinancialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/_authenticated/financials': typeof AuthenticatedFinancialsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/talent-hub': typeof AuthenticatedTalentHubRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/financials'
     | '/notifications'
     | '/profile'
+    | '/reports'
     | '/talent-hub'
     | '/admin/users'
     | '/clients/$clientId'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/financials'
     | '/notifications'
     | '/profile'
+    | '/reports'
     | '/admin/users'
     | '/clients/$clientId'
     | '/demands/$demandId'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financials'
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
+    | '/_authenticated/reports'
     | '/_authenticated/talent-hub'
     | '/_authenticated/admin/users'
     | '/_authenticated/clients/$clientId'
@@ -309,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/talent-hub'
       fullPath: '/talent-hub'
       preLoaderRoute: typeof AuthenticatedTalentHubRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
@@ -471,6 +490,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinancialsRoute: typeof AuthenticatedFinancialsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedTalentHubRoute: typeof AuthenticatedTalentHubRouteWithChildren
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedDemandsDemandIdRoute: typeof AuthenticatedDemandsDemandIdRouteWithChildren
@@ -484,6 +504,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinancialsRoute: AuthenticatedFinancialsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedTalentHubRoute: AuthenticatedTalentHubRouteWithChildren,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedDemandsDemandIdRoute:

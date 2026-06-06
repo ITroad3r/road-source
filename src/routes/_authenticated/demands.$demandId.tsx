@@ -205,7 +205,7 @@ function DemandDetail() {
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <div className="font-semibold">{cv.full_name}</div>
+                        <Link to="/talent-hub/$cvId" params={{ cvId: cv.id }} className="font-semibold hover:text-primary transition-colors">{cv.full_name}</Link>
                         <div className="text-sm text-muted-foreground">{cv.headline ?? "—"}</div>
                       </div>
                       <div className="flex items-center gap-2">

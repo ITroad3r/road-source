@@ -12,8 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Euro, TrendingUp, Users, Pencil, Lock } from "lucide-react";
+import { Euro, TrendingUp, Users, Pencil, Lock, Percent, Wallet } from "lucide-react";
 import { format } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 import { useMyRoles } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated/financials")({

@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedTalentHubIndexRouteImport } from './routes/_authenticated/talent-hub.index'
 import { Route as AuthenticatedDemandsIndexRouteImport } from './routes/_authenticated/demands.index'
+import { Route as AuthenticatedClientsIndexRouteImport } from './routes/_authenticated/clients.index'
 import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authenticated/talent-hub.new'
 import { Route as AuthenticatedTalentHubCvIdRouteImport } from './routes/_authenticated/talent-hub.$cvId'
 import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
@@ -90,6 +91,12 @@ const AuthenticatedDemandsIndexRoute =
     path: '/demands/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientsIndexRoute =
+  AuthenticatedClientsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedClientsRoute,
+  } as any)
 const AuthenticatedTalentHubNewRoute =
   AuthenticatedTalentHubNewRouteImport.update({
     id: '/new',
@@ -129,7 +136,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
-  '/clients': typeof AuthenticatedClientsRoute
+  '/clients': typeof AuthenticatedClientsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
+  '/clients/': typeof AuthenticatedClientsIndexRoute
   '/demands/': typeof AuthenticatedDemandsIndexRoute
   '/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
   '/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
@@ -148,7 +156,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
-  '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/demands/new': typeof AuthenticatedDemandsNewRoute
   '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
+  '/clients': typeof AuthenticatedClientsIndexRoute
   '/demands': typeof AuthenticatedDemandsIndexRoute
   '/talent-hub': typeof AuthenticatedTalentHubIndexRoute
   '/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
@@ -168,7 +176,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
-  '/_authenticated/clients': typeof AuthenticatedClientsRoute
+  '/_authenticated/clients': typeof AuthenticatedClientsRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/financials': typeof AuthenticatedFinancialsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
   '/_authenticated/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
   '/_authenticated/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
+  '/_authenticated/clients/': typeof AuthenticatedClientsIndexRoute
   '/_authenticated/demands/': typeof AuthenticatedDemandsIndexRoute
   '/_authenticated/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
   '/_authenticated/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/demands/new'
     | '/talent-hub/$cvId'
     | '/talent-hub/new'
+    | '/clients/'
     | '/demands/'
     | '/talent-hub/'
     | '/demands/$demandId/edit'
@@ -208,7 +218,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/root'
-    | '/clients'
     | '/dashboard'
     | '/financials'
     | '/notifications'
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/demands/new'
     | '/talent-hub/$cvId'
     | '/talent-hub/new'
+    | '/clients'
     | '/demands'
     | '/talent-hub'
     | '/demands/$demandId/edit'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/_authenticated/demands/new'
     | '/_authenticated/talent-hub/$cvId'
     | '/_authenticated/talent-hub/new'
+    | '/_authenticated/clients/'
     | '/_authenticated/demands/'
     | '/_authenticated/talent-hub/'
     | '/_authenticated/demands/$demandId/edit'
@@ -336,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clients/': {
+      id: '/_authenticated/clients/'
+      path: '/'
+      fullPath: '/clients/'
+      preLoaderRoute: typeof AuthenticatedClientsIndexRouteImport
+      parentRoute: typeof AuthenticatedClientsRoute
+    }
     '/_authenticated/talent-hub/new': {
       id: '/_authenticated/talent-hub/new'
       path: '/new'
@@ -381,6 +399,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedClientsRouteChildren {
+  AuthenticatedClientsIndexRoute: typeof AuthenticatedClientsIndexRoute
+}
+
+const AuthenticatedClientsRouteChildren: AuthenticatedClientsRouteChildren = {
+  AuthenticatedClientsIndexRoute: AuthenticatedClientsIndexRoute,
+}
+
+const AuthenticatedClientsRouteWithChildren =
+  AuthenticatedClientsRoute._addFileChildren(AuthenticatedClientsRouteChildren)
+
 interface AuthenticatedTalentHubRouteChildren {
   AuthenticatedTalentHubCvIdRoute: typeof AuthenticatedTalentHubCvIdRoute
   AuthenticatedTalentHubNewRoute: typeof AuthenticatedTalentHubNewRoute
@@ -415,7 +444,7 @@ const AuthenticatedDemandsDemandIdRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
+  AuthenticatedClientsRoute: typeof AuthenticatedClientsRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinancialsRoute: typeof AuthenticatedFinancialsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
@@ -428,7 +457,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedClientsRoute: AuthenticatedClientsRoute,
+  AuthenticatedClientsRoute: AuthenticatedClientsRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinancialsRoute: AuthenticatedFinancialsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
@@ -453,3 +482,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

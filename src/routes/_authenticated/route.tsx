@@ -37,6 +37,7 @@ function AuthLayout() {
     { to: "/clients", label: "Clients", icon: Building2 },
     { to: "/talent-hub", label: "Talent Hub", icon: Users },
     { to: "/financials", label: "Financials", icon: Euro },
+    { to: "/reports", label: "Reports", icon: BarChart3 },
     { to: "/notifications", label: "Notifications", icon: Bell },
     { to: "/profile", label: "Profile", icon: User },
     ...(isAdmin ? [{ to: "/admin/users" as const, label: "Users & roles", icon: Shield }] : []),

@@ -259,6 +259,12 @@ function NewCandidate() {
                 <Button type="button" variant="ghost" size="icon" onClick={() => setFile(null)}><X className="h-4 w-4" /></Button>
               </div>
             )}
+            {file && (
+              <Button type="button" variant="secondary" onClick={autofillFromCv} disabled={parsing} className="w-full">
+                <Sparkles className="h-4 w-4 mr-2" />
+                {parsing ? "Parsing CV with AI…" : "Auto-fill form from CV (AI)"}
+              </Button>
+            )}
           </CardContent>
         </Card>
 

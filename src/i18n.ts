@@ -19,7 +19,7 @@ void instance.init({
   defaultNS: "common",
   supportedLngs: ["en", "fr"],
   interpolation: { escapeValue: false },
-  initImmediate: false,
+  initAsync: false,
   react: { useSuspense: false },
   detection: {
     order: ["localStorage", "navigator", "htmlTag"],

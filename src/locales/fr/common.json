@@ -187,5 +187,27 @@
     "pending": "En attente",
     "won": "Gagnée",
     "lost": "Perdue"
+  },
+  "ceoPreview": {
+    "title": "Vue d'ensemble exécutive",
+    "subtitle": "T2 2026 · en direct",
+    "synced": "Synchronisé",
+    "openDemands": "Demandes ouvertes",
+    "activeCandidates": "Candidats actifs",
+    "placementRate": "Taux de placement",
+    "pipelineValue": "Valeur du pipeline",
+    "revenueVsTarget": "Revenu vs Objectif",
+    "pipelineFunnel": "Entonnoir du pipeline",
+    "identified": "Identifiés",
+    "submitted": "Soumis",
+    "interview": "Entretien",
+    "offer": "Offre",
+    "placed": "Placés",
+    "jan": "Janv",
+    "feb": "Févr",
+    "mar": "Mars",
+    "apr": "Avr",
+    "may": "Mai",
+    "jun": "Juin"
   }
 }

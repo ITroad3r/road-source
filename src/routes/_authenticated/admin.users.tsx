@@ -1,16 +1,21 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Shield, Search, Plus, X, User as UserIcon } from "lucide-react";
+import { Shield, Search, Plus, X, User as UserIcon, UserPlus, Mail, Trash2 } from "lucide-react";
 import { useMyRoles, AppRole, ROLE_LABEL } from "@/hooks/useMyRoles";
+import { inviteUser, resendInvite, deleteUser } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   ssr: false,
@@ -32,6 +37,10 @@ function AdminUsers() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
+
+  const invite = useServerFn(inviteUser);
+  const resend = useServerFn(resendInvite);
+  const del = useServerFn(deleteUser);
 
   const { data: myRoles, isLoading: rolesLoading } = useMyRoles(user.id);
 
@@ -76,6 +85,33 @@ function AdminUsers() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const inviteMut = useMutation({
+    mutationFn: async (vars: { email: string; fullName: string; role: AppRole }) =>
+      invite({ data: vars }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-profiles"] });
+      qc.invalidateQueries({ queryKey: ["admin-all-roles"] });
+      toast.success("Invitation sent");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resendMut = useMutation({
+    mutationFn: async (email: string) => resend({ data: { email } }),
+    onSuccess: () => toast.success("Invitation re-sent"),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: async (userId: string) => del({ data: { userId } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-profiles"] });
+      qc.invalidateQueries({ queryKey: ["admin-all-roles"] });
+      toast.success("User deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
   if (!myRoles?.includes("admin")) return <Navigate to="/dashboard" />;
 
@@ -95,9 +131,10 @@ function AdminUsers() {
     <div className="p-8 space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-7 w-7" /> Users & roles</h1>
-          <p className="text-muted-foreground mt-1">Assign roles to control who can view, create or manage demands, candidates and financials.</p>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-7 w-7" /> Users &amp; roles</h1>
+          <p className="text-muted-foreground mt-1">Invite teammates, assign their role, and manage access. Invitees receive an email to complete their profile.</p>
         </div>
+        <InviteUserDialog onSubmit={(v) => inviteMut.mutateAsync(v)} loading={inviteMut.isPending} />
       </header>
 
       <Card>
@@ -119,12 +156,13 @@ function AdminUsers() {
                 <TableHead>Email</TableHead>
                 <TableHead>Roles</TableHead>
                 <TableHead className="w-48">Add role</TableHead>
+                <TableHead className="w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No users match.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No users match.</TableCell></TableRow>
               )}
               {filtered.map((p) => {
                 const userRoles = rolesByUser.get(p.id) ?? [];
@@ -154,7 +192,7 @@ function AdminUsers() {
                             <button
                               type="button"
                               onClick={() => {
-                                if (isSelf && r.role === "admin" && (rolesByUser.get(p.id) ?? []).filter((x) => x.role === "admin").length <= 1) {
+                                if (isSelf && r.role === "admin") {
                                   const adminCount = (allRoles ?? []).filter((x) => x.role === "admin").length;
                                   if (adminCount <= 1) return toast.error("Cannot remove the last admin");
                                 }
@@ -171,6 +209,37 @@ function AdminUsers() {
                     </TableCell>
                     <TableCell>
                       <AddRoleControl available={available} onAdd={(role) => addRole.mutate({ userId: p.id, role })} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" title="Resend invitation"
+                          onClick={() => resendMut.mutate(p.email)} disabled={resendMut.isPending}>
+                          <Mail className="h-3.5 w-3.5" />
+                        </Button>
+                        {!isSelf && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" title="Delete user">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete {p.full_name ?? p.email}?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This permanently removes the user account and their access. Data they created stays.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteMut.mutate(p.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Delete user
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -198,5 +267,54 @@ function AddRoleControl({ available, onAdd }: { available: AppRole[]; onAdd: (ro
         <Plus className="h-3.5 w-3.5" />
       </Button>
     </div>
+  );
+}
+
+function InviteUserDialog({ onSubmit, loading }: { onSubmit: (v: { email: string; fullName: string; role: AppRole }) => Promise<unknown>; loading: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState<AppRole>("sourcing_team");
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button><UserPlus className="h-4 w-4 mr-2" /> Invite user</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Invite a new user</DialogTitle>
+          <DialogDescription>They'll receive an email invitation to set their password and complete their profile.</DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            await onSubmit({ email, fullName, role });
+            setEmail(""); setFullName(""); setRole("sourcing_team"); setOpen(false);
+          }}
+          className="space-y-3"
+        >
+          <div className="space-y-1.5">
+            <Label htmlFor="iv-name">Full name</Label>
+            <Input id="iv-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="iv-email">Email</Label>
+            <Input id="iv-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Role</Label>
+            <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {ROLES.map((r) => <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={loading}>{loading ? "Sending…" : "Send invitation"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

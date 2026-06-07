@@ -55,14 +55,11 @@ function DemandsList() {
   });
 
   const { data: sourcers } = useQuery({
-    queryKey: ["sourcers"],
+    queryKey: ["team-members"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .order("full_name");
+      const { data, error } = await supabase.rpc("list_team_members");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as { id: string; full_name: string | null }[];
     },
     enabled: canAssign,
   });

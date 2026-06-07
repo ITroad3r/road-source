@@ -7,12 +7,14 @@ import {
   DollarSign,
   MoreVertical,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Static, material-design styled preview of the CEO analytics dashboard.
  * Used on the landing page hero to showcase the product.
  */
 export function CeoDashboardPreview() {
+  const { t } = useTranslation();
   return (
     <div className="relative">
       {/* Ambient glow */}
@@ -27,14 +29,14 @@ export function CeoDashboardPreview() {
             </div>
             <div>
               <div className="text-[11px] font-semibold tracking-wide text-foreground">
-                Executive Overview
+                {t("ceoPreview.title")}
               </div>
-              <div className="text-[10px] text-muted-foreground">Q2 2026 · live</div>
+              <div className="text-[10px] text-muted-foreground">{t("ceoPreview.subtitle")}</div>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-muted-foreground">Synced</span>
+            <span className="text-[10px] text-muted-foreground">{t("ceoPreview.synced")}</span>
           </div>
         </div>
 
@@ -42,7 +44,7 @@ export function CeoDashboardPreview() {
         <div className="grid grid-cols-2 gap-3 p-4 bg-muted/30">
           <KpiTile
             icon={Briefcase}
-            label="Open demands"
+            label={t("ceoPreview.openDemands")}
             value="24"
             delta="+12%"
             trend="up"
@@ -50,7 +52,7 @@ export function CeoDashboardPreview() {
           />
           <KpiTile
             icon={Users}
-            label="Active candidates"
+            label={t("ceoPreview.activeCandidates")}
             value="137"
             delta="+8%"
             trend="up"
@@ -58,7 +60,7 @@ export function CeoDashboardPreview() {
           />
           <KpiTile
             icon={Target}
-            label="Placement rate"
+            label={t("ceoPreview.placementRate")}
             value="42%"
             delta="+3.1pt"
             trend="up"
@@ -66,7 +68,7 @@ export function CeoDashboardPreview() {
           />
           <KpiTile
             icon={DollarSign}
-            label="Pipeline value"
+            label={t("ceoPreview.pipelineValue")}
             value="€1.8M"
             delta="−2%"
             trend="down"
@@ -80,7 +82,7 @@ export function CeoDashboardPreview() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                  Revenue vs Target
+                  {t("ceoPreview.revenueVsTarget")}
                 </div>
                 <div className="text-lg font-bold tracking-tight">€420K</div>
               </div>
@@ -91,12 +93,12 @@ export function CeoDashboardPreview() {
             </div>
             <BarChart />
             <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
-              <span>Jan</span>
-              <span>Feb</span>
-              <span>Mar</span>
-              <span>Apr</span>
-              <span>May</span>
-              <span>Jun</span>
+              <span>{t("ceoPreview.jan")}</span>
+              <span>{t("ceoPreview.feb")}</span>
+              <span>{t("ceoPreview.mar")}</span>
+              <span>{t("ceoPreview.apr")}</span>
+              <span>{t("ceoPreview.may")}</span>
+              <span>{t("ceoPreview.jun")}</span>
             </div>
           </div>
         </div>
@@ -106,16 +108,16 @@ export function CeoDashboardPreview() {
           <div className="rounded-xl border border-border/70 bg-background p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                Pipeline funnel
+                {t("ceoPreview.pipelineFunnel")}
               </div>
               <MoreVertical className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <div className="space-y-2">
-              <FunnelRow label="Identified" value={284} pct={100} tone="primary" />
-              <FunnelRow label="Submitted" value={168} pct={59} tone="primary" />
-              <FunnelRow label="Interview" value={92} pct={32} tone="accent" />
-              <FunnelRow label="Offer" value={41} pct={14} tone="accent" />
-              <FunnelRow label="Placed" value={27} pct={9} tone="emerald" />
+              <FunnelRow label={t("ceoPreview.identified")} value={284} pct={100} tone="primary" />
+              <FunnelRow label={t("ceoPreview.submitted")} value={168} pct={59} tone="primary" />
+              <FunnelRow label={t("ceoPreview.interview")} value={92} pct={32} tone="accent" />
+              <FunnelRow label={t("ceoPreview.offer")} value={41} pct={14} tone="accent" />
+              <FunnelRow label={t("ceoPreview.placed")} value={27} pct={9} tone="emerald" />
             </div>
           </div>
         </div>

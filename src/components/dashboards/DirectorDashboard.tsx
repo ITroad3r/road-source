@@ -13,9 +13,10 @@ export function DirectorDashboard({ fullName }: { fullName: string | null }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demands")
-        .select("id,title,status,commercial_outcome,lost_reason,assigned_to,created_at,clients(name)");
+        .select("id,title,lifecycle,commercial_outcome,lost_reason,assigned_to,created_at,clients(name)");
       if (error) throw error;
-      return data as { id: string; title: string; status: string; commercial_outcome: string; lost_reason: string | null; assigned_to: string | null; created_at: string; clients: { name: string } | null }[];
+      return (data as unknown as { id: string; title: string; lifecycle: string; commercial_outcome: string; lost_reason: string | null; assigned_to: string | null; created_at: string; clients: { name: string } | null }[])
+        .map((d) => ({ ...d, status: d.lifecycle }));
     },
   });
 

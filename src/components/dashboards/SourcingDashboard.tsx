@@ -14,13 +14,13 @@ export function SourcingDashboard({ userId, fullName }: { userId: string; fullNa
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demands")
-        .select("id,title,description,engagement,required_skills,location,budget_min,budget_max,status,start_date,priority,created_at,assigned_to,positions_count,clients(name,industry)")
+        .select("id,title,description,engagement,required_skills,location,budget_min,budget_max,status,lifecycle,start_date,priority,created_at,assigned_to,positions_count,clients(name,industry)")
         .eq("assigned_to", userId)
-        .in("status", ["open", "in_progress"])
+        .in("lifecycle", ["open", "in_progress"])
         .order("priority", { ascending: true })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as DemandRow[];
+      return (data as unknown as (DemandRow & { lifecycle: string })[]).map((d) => ({ ...d, status: d.lifecycle }));
     },
   });
 

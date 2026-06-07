@@ -14,10 +14,11 @@ export function ManagerDashboard({ fullName }: { fullName: string | null }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demands")
-        .select("id,title,status,lifecycle,commercial_outcome,assigned_to,created_at,positions_count,clients(name,industry)")
+        .select("id,title,lifecycle,commercial_outcome,assigned_to,created_at,positions_count,clients(name,industry)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as (DemandRow & { lifecycle: string; commercial_outcome: string })[];
+      return (data as unknown as { id: string; title: string; lifecycle: string; commercial_outcome: string; assigned_to: string | null; created_at: string; positions_count: number | null; clients: { name: string; industry: string | null } | null }[])
+        .map((d) => ({ ...d, status: d.lifecycle }));
     },
   });
 

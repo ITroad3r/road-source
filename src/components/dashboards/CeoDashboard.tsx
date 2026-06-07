@@ -13,9 +13,10 @@ export function CeoDashboard({ fullName }: { fullName: string | null }) {
   const { data: demands } = useQuery({
     queryKey: ["ceo-dash", "demands"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("demands").select("id,status,commercial_outcome,created_at,clients(name)");
+      const { data, error } = await supabase.from("demands").select("id,lifecycle,commercial_outcome,created_at,clients(name)");
       if (error) throw error;
-      return data as { id: string; status: string; commercial_outcome: string; created_at: string; clients: { name: string } | null }[];
+      return (data as unknown as { id: string; lifecycle: string; commercial_outcome: string; created_at: string; clients: { name: string } | null }[])
+        .map((d) => ({ ...d, status: d.lifecycle }));
     },
   });
 

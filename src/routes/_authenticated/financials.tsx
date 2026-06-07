@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ type Row = {
 
 function Financials() {
   const { user } = Route.useRouteContext();
+  const { t } = useTranslation();
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
   const canView = !!roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r));
   const [stageFilter, setStageFilter] = useState<string>("all");
@@ -103,15 +105,15 @@ function Financials() {
     .slice(0, 8);
   const pieColors = ["hsl(var(--primary))", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16"];
 
-  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">{t("common.loading")}</div>;
   if (!canView) {
     return (
       <div className="p-8">
         <Card>
           <CardContent className="p-10 text-center space-y-3">
             <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
-            <h2 className="text-lg font-semibold">Restricted</h2>
-            <p className="text-sm text-muted-foreground">Financials are available to managers, directors, CEO, and admins.</p>
+            <h2 className="text-lg font-semibold">{t("common.restricted")}</h2>
+            <p className="text-sm text-muted-foreground">{t("financials.restrictedBody")}</p>
           </CardContent>
         </Card>
       </div>
@@ -122,34 +124,34 @@ function Financials() {
     <div className="p-8 space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Financials</h1>
-          <p className="text-muted-foreground mt-1">Revenue, operational cost and net margin across the pipeline.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("financials.title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("financials.subtitle")}</p>
         </div>
         <Select value={stageFilter} onValueChange={setStageFilter}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All offer + placed</SelectItem>
-            <SelectItem value="offer">Offer</SelectItem>
-            <SelectItem value="placed">Placed</SelectItem>
+            <SelectItem value="all">{t("financials.allOfferPlaced")}</SelectItem>
+            <SelectItem value="offer">{t("financials.stageOffer")}</SelectItem>
+            <SelectItem value="placed">{t("financials.stagePlaced")}</SelectItem>
           </SelectContent>
         </Select>
       </header>
 
       {/* Executive KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Stat icon={Euro} label="Total Revenue" value={`€${exec.totalRevenue.toLocaleString()}`} />
-        <Stat icon={Wallet} label="Operational Cost" value={`€${exec.totalCost.toLocaleString()}`} />
-        <Stat icon={TrendingUp} label="Net Profit" value={`€${exec.totalProfit.toLocaleString()}`} />
-        <Stat icon={Percent} label="Net Margin" value={`${netMargin.toFixed(1)}%`} />
+        <Stat icon={Euro} label={t("financials.totalRevenue")} value={`€${exec.totalRevenue.toLocaleString()}`} />
+        <Stat icon={Wallet} label={t("financials.operationalCost")} value={`€${exec.totalCost.toLocaleString()}`} />
+        <Stat icon={TrendingUp} label={t("financials.netProfit")} value={`€${exec.totalProfit.toLocaleString()}`} />
+        <Stat icon={Percent} label={t("financials.netMargin")} value={`${netMargin.toFixed(1)}%`} />
       </div>
 
       {/* Charts */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader><CardTitle className="text-base">Monthly Revenue</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t("financials.monthlyRevenue")}</CardTitle></CardHeader>
           <CardContent>
             {monthlyData.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-12 text-center">No revenue data yet. Add placement dates and rates.</p>
+              <p className="text-sm text-muted-foreground py-12 text-center">{t("financials.noRevenueData")}</p>
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={monthlyData}>
@@ -165,10 +167,10 @@ function Financials() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Revenue by Client</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t("financials.revenueByClient")}</CardTitle></CardHeader>
           <CardContent>
             {clientData.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-12 text-center">No client revenue yet.</p>
+              <p className="text-sm text-muted-foreground py-12 text-center">{t("financials.noClientRevenue")}</p>
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
@@ -185,32 +187,32 @@ function Financials() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Stat icon={Users} label="Placed candidates" value={String(exec.placedCount)} />
-        <Stat icon={Euro} label="Daily margin (sum)" value={`€${exec.dailyMargin.toFixed(0)}`} />
-        <Stat icon={TrendingUp} label="Avg margin / placement" value={exec.placedCount > 0 ? `€${(exec.totalProfit / exec.placedCount).toFixed(0)}` : "—"} />
+        <Stat icon={Users} label={t("financials.placedCandidates")} value={String(exec.placedCount)} />
+        <Stat icon={Euro} label={t("financials.dailyMarginSum")} value={`€${exec.dailyMargin.toFixed(0)}`} />
+        <Stat icon={TrendingUp} label={t("financials.avgMargin")} value={exec.placedCount > 0 ? `€${(exec.totalProfit / exec.placedCount).toFixed(0)}` : "—"} />
       </div>
 
 
       <Card>
-        <CardHeader><CardTitle>Pipeline financials</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("financials.pipelineFinancials")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Candidate</TableHead>
-                <TableHead>Demand</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead className="text-right">Client rate</TableHead>
-                <TableHead className="text-right">Candidate rate</TableHead>
-                <TableHead className="text-right">Margin</TableHead>
-                <TableHead>Placement</TableHead>
+                <TableHead>{t("financials.candidate")}</TableHead>
+                <TableHead>{t("financials.demand")}</TableHead>
+                <TableHead>{t("financials.stage")}</TableHead>
+                <TableHead className="text-right">{t("financials.clientRate")}</TableHead>
+                <TableHead className="text-right">{t("financials.candidateRate")}</TableHead>
+                <TableHead className="text-right">{t("financials.margin")}</TableHead>
+                <TableHead>{t("financials.placement")}</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">{t("common.loading")}</TableCell></TableRow>}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No candidates at offer or placed stage yet.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">{t("financials.noPipeline")}</TableCell></TableRow>
               )}
               {filtered.map((r) => {
                 const f = r.candidate_financials?.[0];

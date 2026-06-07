@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Briefcase, UserCheck, Send, AlertCircle, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { StatCard, type DemandRow } from "./shared";
+import { DispatchDemandDialog } from "@/components/DispatchDemandDialog";
 
 export function ManagerDashboard({ fullName }: { fullName: string | null }) {
   const { data: demands, isLoading } = useQuery({
@@ -75,16 +76,18 @@ export function ManagerDashboard({ fullName }: { fullName: string | null }) {
             )}
             <ul className="divide-y">
               {awaitingDispatch.slice(0, 6).map((d) => (
-                <li key={d.id}>
-                  <Link to="/demands/$demandId" params={{ demandId: d.id }} className="flex items-center justify-between p-3 hover:bg-accent">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">{d.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {d.clients?.name ?? "—"} · {formatDistanceToNow(new Date(d.created_at), { addSuffix: true })}
-                      </div>
+                <li key={d.id} className="flex items-center justify-between p-3 hover:bg-accent gap-3">
+                  <Link to="/demands/$demandId" params={{ demandId: d.id }} className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{d.title}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {d.clients?.name ?? "—"} · {formatDistanceToNow(new Date(d.created_at), { addSuffix: true })}
                     </div>
-                    <Badge variant="outline" className="ml-2 shrink-0">Dispatch <ArrowRight className="h-3 w-3 ml-1" /></Badge>
                   </Link>
+                  <DispatchDemandDialog
+                    demandId={d.id}
+                    demandTitle={d.title}
+                    currentAssignee={d.assigned_to}
+                  />
                 </li>
               ))}
             </ul>

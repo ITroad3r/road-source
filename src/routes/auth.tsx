@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +41,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) toast.error(error.message);
-    else toast.success("Signed in");
+    else toast.success(t("auth.signedIn"));
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -54,66 +57,67 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) toast.error(error.message);
-    else toast.success("Account created — you can sign in now");
+    else toast.success(t("auth.accountCreated"));
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+      <div className="absolute top-4 right-4"><LanguageSwitcher /></div>
       <Card className="w-full max-w-md shadow-md rounded-xl border-border/70">
         <CardHeader className="text-center space-y-3">
           <div className="flex justify-center">
             <RoadSourceLogo showWordmark={false} />
           </div>
-          <CardTitle className="text-2xl font-extrabold tracking-tight">Welcome to RoadSource</CardTitle>
-          <CardDescription>Internal CRM &amp; Talent Hub — powered by IT Road</CardDescription>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">{t("auth.title")}</CardTitle>
+          <CardDescription>{t("auth.subtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Create account</TabsTrigger>
+              <TabsTrigger value="signin">{t("auth.tabSignIn")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.tabSignUp")}</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="si-email">Email</Label>
+                  <Label htmlFor="si-email">{t("auth.email")}</Label>
                   <Input id="si-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="si-pw">Password</Label>
+                  <Label htmlFor="si-pw">{t("auth.password")}</Label>
                   <Input id="si-pw" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in…" : "Sign in"}
+                  {loading ? t("common.signingIn") : t("auth.submitSignIn")}
                 </Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="su-name">Full name</Label>
+                  <Label htmlFor="su-name">{t("auth.fullName")}</Label>
                   <Input id="su-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="su-email">Email</Label>
+                  <Label htmlFor="su-email">{t("auth.email")}</Label>
                   <Input id="su-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="su-pw">Password</Label>
+                  <Label htmlFor="su-pw">{t("auth.password")}</Label>
                   <Input id="su-pw" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating…" : "Create account"}
+                  {loading ? t("common.creating") : t("auth.submitSignUp")}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
-                  New accounts default to the Sourcing role.
+                  {t("auth.defaultRoleNote")}
                 </p>
               </form>
             </TabsContent>
           </Tabs>
           <div className="mt-5 text-center">
             <Link to="/" className="text-sm font-medium text-primary hover:underline">
-              Back to RoadSource homepage
+              {t("auth.backHome")}
             </Link>
           </div>
         </CardContent>

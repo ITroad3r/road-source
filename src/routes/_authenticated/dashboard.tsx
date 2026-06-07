@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,9 +51,10 @@ function pickView(roles: AppRole[]): "executive" | "manager" | "sourcing" {
 function Dashboard() {
   const { user } = Route.useRouteContext();
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
+  const { t } = useTranslation();
 
   if (rolesLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+    return <div className="p-8 text-sm text-muted-foreground">{t("common.loading")}</div>;
   }
 
   const view = pickView(roles ?? []);
@@ -63,6 +65,7 @@ function Dashboard() {
 /* ---------------- Admin / Manager ---------------- */
 
 function AdminManagerView() {
+  const { t } = useTranslation();
   const { data: demands, isLoading } = useQuery({
     queryKey: ["dashboard", "all-demands"],
     queryFn: async () => {
@@ -112,20 +115,20 @@ function AdminManagerView() {
   return (
     <div className="p-8 space-y-6">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Team Overview</h1>
-        <p className="text-muted-foreground mt-1">Company-wide view of demands, pipeline, and talent.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.teamOverviewTitle")}</h1>
+        <p className="text-muted-foreground mt-1">{t("dashboard.teamOverviewSubtitle")}</p>
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total demands" value={demands?.length ?? 0} icon={Briefcase} />
-        <StatCard label="Open" value={statusCounts.open ?? 0} />
-        <StatCard label="Unassigned" value={unassigned} />
-        <StatCard label="Placed" value={statusCounts.placed ?? 0} />
+        <StatCard label={t("dashboard.totalDemands")} value={demands?.length ?? 0} icon={Briefcase} />
+        <StatCard label={t("dashboard.open")} value={statusCounts.open ?? 0} />
+        <StatCard label={t("dashboard.unassigned")} value={unassigned} />
+        <StatCard label={t("dashboard.placed")} value={statusCounts.placed ?? 0} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Candidate pipeline</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4" /> {t("dashboard.candidatePipeline")}</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
               {["identified", "submitted", "interview", "offer", "placed", "rejected"].map((s) => (
@@ -139,18 +142,18 @@ function AdminManagerView() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> Talent Hub</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> {t("dashboard.talentHubTitle")}</CardTitle></CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{cvCount ?? 0}</div>
-            <p className="text-sm text-muted-foreground mt-1">Total candidates in hub</p>
-            <Link to="/talent-hub" className="text-sm text-primary hover:underline mt-3 inline-block">Browse talent hub →</Link>
+            <p className="text-sm text-muted-foreground mt-1">{t("dashboard.totalCandidates")}</p>
+            <Link to="/talent-hub" className="text-sm text-primary hover:underline mt-3 inline-block">{t("dashboard.browseHub")}</Link>
           </CardContent>
         </Card>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Recent demands</h2>
-        {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        <h2 className="text-lg font-semibold">{t("dashboard.recentDemands")}</h2>
+        {isLoading && <p className="text-sm text-muted-foreground">{t("common.loading")}</p>}
         {demands?.slice(0, 10).map((d) => <DemandCard key={d.id} d={d} compact />)}
       </section>
     </div>
@@ -221,6 +224,7 @@ function SalesView({ userId }: { userId: string }) {
 /* ---------------- Sourcing ---------------- */
 
 function SourcingView({ userId }: { userId: string }) {
+  const { t } = useTranslation();
   const { data: demands, isLoading } = useQuery({
     queryKey: ["my-demands", userId],
     queryFn: async () => {
@@ -243,24 +247,24 @@ function SourcingView({ userId }: { userId: string }) {
   return (
     <div className="p-8 space-y-6">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">My Demands</h1>
-        <p className="text-muted-foreground mt-1">Open requests assigned to you. Source candidates from the Talent Hub.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("dashboard.myDemandsTitle")}</h1>
+        <p className="text-muted-foreground mt-1">{t("dashboard.myDemandsSubtitle")}</p>
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total assigned" value={demands?.length ?? 0} />
-        <StatCard label="Open" value={counts.open ?? 0} />
-        <StatCard label="In progress" value={(counts.sourcing ?? 0) + (counts.submitted ?? 0) + (counts.interview ?? 0)} />
-        <StatCard label="Placed" value={counts.placed ?? 0} />
+        <StatCard label={t("dashboard.totalAssigned")} value={demands?.length ?? 0} />
+        <StatCard label={t("dashboard.open")} value={counts.open ?? 0} />
+        <StatCard label={t("dashboard.inProgress")} value={(counts.sourcing ?? 0) + (counts.submitted ?? 0) + (counts.interview ?? 0)} />
+        <StatCard label={t("dashboard.placed")} value={counts.placed ?? 0} />
       </div>
 
       <div className="space-y-3">
-        {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {isLoading && <p className="text-sm text-muted-foreground">{t("common.loading")}</p>}
         {!isLoading && demands?.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
               <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              No demands assigned to you yet.
+              {t("dashboard.noneAssigned")}
             </CardContent>
           </Card>
         )}

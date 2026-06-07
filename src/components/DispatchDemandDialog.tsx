@@ -50,7 +50,7 @@ export function DispatchDemandDialog({
       if (!assignee) throw new Error("Pick a sourcer first");
       const { error } = await supabase
         .from("demands")
-        .update({ assigned_to: assignee, lifecycle: "in_progress", status: "in_progress" })
+        .update({ assigned_to: assignee, lifecycle: "in_progress" })
         .eq("id", demandId);
       if (error) throw error;
     },

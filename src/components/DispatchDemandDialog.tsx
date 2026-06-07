@@ -29,19 +29,9 @@ export function DispatchDemandDialog({
     queryKey: ["dispatch-sourcers"],
     enabled: open,
     queryFn: async () => {
-      const { data: roleRows, error: rolesErr } = await supabase
-        .from("user_roles")
-        .select("user_id, role")
-        .in("role", ["sourcing_team", "division_manager", "admin"]);
-      if (rolesErr) throw rolesErr;
-      const ids = Array.from(new Set((roleRows ?? []).map((r) => r.user_id)));
-      if (ids.length === 0) return [] as SourcerOption[];
-      const { data: profiles, error: profErr } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", ids);
-      if (profErr) throw profErr;
-      return (profiles ?? []).map((p) => ({ id: p.id, full_name: p.full_name, email: p.email }));
+      const { data, error } = await supabase.rpc("list_team_members");
+      if (error) throw error;
+      return (data ?? []) as { id: string; full_name: string | null }[];
     },
   });
 
@@ -87,7 +77,7 @@ export function DispatchDemandDialog({
               <SelectContent>
                 {(sourcers ?? []).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.full_name ?? s.email}
+                    {s.full_name ?? s.id.slice(0,8)}
                   </SelectItem>
                 ))}
                 {!isLoading && (sourcers ?? []).length === 0 && (

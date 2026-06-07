@@ -69,11 +69,11 @@ function NewDemand() {
   });
 
   const { data: users } = useQuery({
-    queryKey: ["profiles-all"],
+    queryKey: ["team-members"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id, full_name, email").order("full_name");
+      const { data, error } = await supabase.rpc("list_team_members");
       if (error) throw error;
-      return data;
+      return (data ?? []) as { id: string; full_name: string | null }[];
     },
   });
 
@@ -254,7 +254,7 @@ function NewDemand() {
                   <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
                   <SelectContent>
                     {users?.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.email}</SelectItem>
+                      <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.id.slice(0,8)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

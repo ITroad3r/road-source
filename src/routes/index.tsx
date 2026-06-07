@@ -127,7 +127,6 @@ function Landing() {
           </div>
 
           <CeoDashboardPreview />
-          </div>
         </div>
       </section>
 

@@ -254,7 +254,7 @@ function NewDemand() {
                   <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
                   <SelectContent>
                     {users?.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.email}</SelectItem>
+                      <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.id.slice(0,8)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

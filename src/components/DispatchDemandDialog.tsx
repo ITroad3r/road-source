@@ -77,7 +77,7 @@ export function DispatchDemandDialog({
               <SelectContent>
                 {(sourcers ?? []).map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.full_name ?? s.email}
+                    {s.full_name ?? s.id.slice(0,8)}
                   </SelectItem>
                 ))}
                 {!isLoading && (sourcers ?? []).length === 0 && (

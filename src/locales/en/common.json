@@ -187,5 +187,27 @@
     "pending": "Pending",
     "won": "Won",
     "lost": "Lost"
+  },
+  "ceoPreview": {
+    "title": "Executive Overview",
+    "subtitle": "Q2 2026 · live",
+    "synced": "Synced",
+    "openDemands": "Open demands",
+    "activeCandidates": "Active candidates",
+    "placementRate": "Placement rate",
+    "pipelineValue": "Pipeline value",
+    "revenueVsTarget": "Revenue vs Target",
+    "pipelineFunnel": "Pipeline funnel",
+    "identified": "Identified",
+    "submitted": "Submitted",
+    "interview": "Interview",
+    "offer": "Offer",
+    "placed": "Placed",
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun"
   }
 }

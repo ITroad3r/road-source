@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { CeoDashboardPreview } from "@/components/CeoDashboardPreview";
 import {
   Briefcase,
   Users,

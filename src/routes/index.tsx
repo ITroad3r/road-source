@@ -126,28 +126,7 @@ function Landing() {
             </ul>
           </div>
 
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 blur-2xl -z-10" />
-            <Card className="rounded-2xl border-border/70 shadow-md overflow-hidden">
-              <div className="px-5 py-3 flex items-center gap-2 border-b bg-muted/40">
-                <div className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-                <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-                <div className="h-2.5 w-2.5 rounded-full bg-accent" />
-                <div className="ml-3 text-xs text-muted-foreground">roadsource · dashboard</div>
-              </div>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-muted-foreground font-medium">{t("landing.previewOpenDemands")}</div>
-                    <div className="text-3xl font-extrabold tracking-tight">24</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-muted-foreground font-medium">{t("landing.previewActiveCandidates")}</div>
-                    <div className="text-3xl font-extrabold tracking-tight" style={{ color: "#0D9488" }}>137</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <CeoDashboardPreview />
           </div>
         </div>
       </section>

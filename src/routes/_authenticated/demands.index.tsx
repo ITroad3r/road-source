@@ -115,7 +115,7 @@ function DemandsList() {
   const sourcerName = (id: string | null) => {
     if (!id) return null;
     const s = sourcers?.find((p) => p.id === id);
-    return s?.full_name ?? s?.email ?? id.slice(0, 8);
+    return s?.full_name ?? id.slice(0, 8);
   };
 
   return (
@@ -269,7 +269,7 @@ function DemandsList() {
                           <SelectContent>
                             <SelectItem value="unassigned">Unassigned</SelectItem>
                             {sourcers?.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>{p.full_name ?? p.email}</SelectItem>
+                              <SelectItem key={p.id} value={p.id}>{p.full_name ?? p.id.slice(0,8)}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>

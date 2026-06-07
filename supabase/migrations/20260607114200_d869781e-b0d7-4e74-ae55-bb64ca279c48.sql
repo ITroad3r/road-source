@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.auto_close_demand_on_hire() FROM PUBLIC, anon, authenticated;

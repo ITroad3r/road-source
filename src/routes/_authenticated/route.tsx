@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -21,6 +23,7 @@ function AuthLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = Route.useRouteContext();
+  const { t } = useTranslation();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -34,16 +37,16 @@ function AuthLayout() {
   const canSeeReports = canSeeFinancials;
 
   const navItems = [
-    { to: "/dashboard", label: "My Demands", icon: LayoutDashboard },
-    { to: "/demands", label: "All Demands", icon: Briefcase },
-    ...(canCreateDemand ? [{ to: "/demands/new" as const, label: "New Demand", icon: FilePlus }] : []),
-    { to: "/clients", label: "Clients", icon: Building2 },
-    { to: "/talent-hub", label: "Talent Hub", icon: Users },
-    ...(canSeeFinancials ? [{ to: "/financials" as const, label: "Financials", icon: Euro }] : []),
-    ...(canSeeReports ? [{ to: "/reports" as const, label: "Reports", icon: BarChart3 }] : []),
-    { to: "/notifications", label: "Notifications", icon: Bell },
-    { to: "/profile", label: "Profile", icon: User },
-    ...(isAdmin ? [{ to: "/admin/users" as const, label: "Users & roles", icon: Shield }] : []),
+    { to: "/dashboard", label: t("nav.myDemands"), icon: LayoutDashboard },
+    { to: "/demands", label: t("nav.allDemands"), icon: Briefcase },
+    ...(canCreateDemand ? [{ to: "/demands/new" as const, label: t("nav.newDemand"), icon: FilePlus }] : []),
+    { to: "/clients", label: t("nav.clients"), icon: Building2 },
+    { to: "/talent-hub", label: t("nav.talentHub"), icon: Users },
+    ...(canSeeFinancials ? [{ to: "/financials" as const, label: t("nav.financials"), icon: Euro }] : []),
+    ...(canSeeReports ? [{ to: "/reports" as const, label: t("nav.reports"), icon: BarChart3 }] : []),
+    { to: "/notifications", label: t("nav.notifications"), icon: Bell },
+    { to: "/profile", label: t("nav.profile"), icon: User },
+    ...(isAdmin ? [{ to: "/admin/users" as const, label: t("nav.usersRoles"), icon: Shield }] : []),
   ] as const;
 
   return (
@@ -56,7 +59,7 @@ function AuthLayout() {
               <div className="leading-tight">
                 <div className="font-extrabold text-sm tracking-tight text-sidebar-foreground">RoadSource</div>
                 <div className="text-[0.6rem] font-semibold tracking-[0.18em] text-sidebar-foreground/60">
-                  POWERED BY IT ROAD
+                  {t("nav.poweredBy")}
                 </div>
               </div>
             </div>
@@ -87,12 +90,13 @@ function AuthLayout() {
             {user.email}
           </div>
           <Button variant="outline" size="sm" className="w-full justify-start bg-transparent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground" onClick={signOut}>
-            <LogOut className="h-4 w-4 mr-2" /> Sign out
+            <LogOut className="h-4 w-4 mr-2" /> {t("common.signOut")}
           </Button>
         </div>
       </aside>
       <main className="flex-1 overflow-auto flex flex-col">
         <header className="h-14 border-b bg-background/80 backdrop-blur sticky top-0 z-10 flex items-center justify-end px-4 gap-2">
+          <LanguageSwitcher />
           <NotificationsBell userId={user.id} />
         </header>
         <div className="flex-1">

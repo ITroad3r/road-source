@@ -30,7 +30,7 @@ import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
 import { Route as AuthenticatedClientsClientIdRouteImport } from './routes/_authenticated/clients.$clientId'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
-import { Route as AuthenticatedTalentHubCvIdGenerateCvRouteImport } from './routes/_authenticated/talent-hub.$cvId.generate-cv'
+import { Route as AuthenticatedTalentHubGenerateCvIdRouteImport } from './routes/_authenticated/talent-hub.generate.$cvId'
 import { Route as AuthenticatedDemandsDemandIdEditRouteImport } from './routes/_authenticated/demands.$demandId.edit'
 
 const SetPasswordRoute = SetPasswordRouteImport.update({
@@ -145,11 +145,11 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedTalentHubCvIdGenerateCvRoute =
-  AuthenticatedTalentHubCvIdGenerateCvRouteImport.update({
-    id: '/generate-cv',
-    path: '/generate-cv',
-    getParentRoute: () => AuthenticatedTalentHubCvIdRoute,
+const AuthenticatedTalentHubGenerateCvIdRoute =
+  AuthenticatedTalentHubGenerateCvIdRouteImport.update({
+    id: '/generate/$cvId',
+    path: '/generate/$cvId',
+    getParentRoute: () => AuthenticatedTalentHubRoute,
   } as any)
 const AuthenticatedDemandsDemandIdEditRoute =
   AuthenticatedDemandsDemandIdEditRouteImport.update({
@@ -174,13 +174,13 @@ export interface FileRoutesByFullPath {
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/demands/new': typeof AuthenticatedDemandsNewRoute
-  '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRouteWithChildren
+  '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
   '/clients/': typeof AuthenticatedClientsIndexRoute
   '/demands/': typeof AuthenticatedDemandsIndexRoute
   '/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
   '/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
-  '/talent-hub/$cvId/generate-cv': typeof AuthenticatedTalentHubCvIdGenerateCvRoute
+  '/talent-hub/generate/$cvId': typeof AuthenticatedTalentHubGenerateCvIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -196,13 +196,13 @@ export interface FileRoutesByTo {
   '/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/demands/new': typeof AuthenticatedDemandsNewRoute
-  '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRouteWithChildren
+  '/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
   '/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
   '/clients': typeof AuthenticatedClientsIndexRoute
   '/demands': typeof AuthenticatedDemandsIndexRoute
   '/talent-hub': typeof AuthenticatedTalentHubIndexRoute
   '/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
-  '/talent-hub/$cvId/generate-cv': typeof AuthenticatedTalentHubCvIdGenerateCvRoute
+  '/talent-hub/generate/$cvId': typeof AuthenticatedTalentHubGenerateCvIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -222,13 +222,13 @@ export interface FileRoutesById {
   '/_authenticated/clients/$clientId': typeof AuthenticatedClientsClientIdRoute
   '/_authenticated/demands/$demandId': typeof AuthenticatedDemandsDemandIdRouteWithChildren
   '/_authenticated/demands/new': typeof AuthenticatedDemandsNewRoute
-  '/_authenticated/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRouteWithChildren
+  '/_authenticated/talent-hub/$cvId': typeof AuthenticatedTalentHubCvIdRoute
   '/_authenticated/talent-hub/new': typeof AuthenticatedTalentHubNewRoute
   '/_authenticated/clients/': typeof AuthenticatedClientsIndexRoute
   '/_authenticated/demands/': typeof AuthenticatedDemandsIndexRoute
   '/_authenticated/talent-hub/': typeof AuthenticatedTalentHubIndexRoute
   '/_authenticated/demands/$demandId/edit': typeof AuthenticatedDemandsDemandIdEditRoute
-  '/_authenticated/talent-hub/$cvId/generate-cv': typeof AuthenticatedTalentHubCvIdGenerateCvRoute
+  '/_authenticated/talent-hub/generate/$cvId': typeof AuthenticatedTalentHubGenerateCvIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -254,7 +254,7 @@ export interface FileRouteTypes {
     | '/demands/'
     | '/talent-hub/'
     | '/demands/$demandId/edit'
-    | '/talent-hub/$cvId/generate-cv'
+    | '/talent-hub/generate/$cvId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -276,7 +276,7 @@ export interface FileRouteTypes {
     | '/demands'
     | '/talent-hub'
     | '/demands/$demandId/edit'
-    | '/talent-hub/$cvId/generate-cv'
+    | '/talent-hub/generate/$cvId'
   id:
     | '__root__'
     | '/'
@@ -301,7 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/demands/'
     | '/_authenticated/talent-hub/'
     | '/_authenticated/demands/$demandId/edit'
-    | '/_authenticated/talent-hub/$cvId/generate-cv'
+    | '/_authenticated/talent-hub/generate/$cvId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -461,12 +461,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/talent-hub/$cvId/generate-cv': {
-      id: '/_authenticated/talent-hub/$cvId/generate-cv'
-      path: '/generate-cv'
-      fullPath: '/talent-hub/$cvId/generate-cv'
-      preLoaderRoute: typeof AuthenticatedTalentHubCvIdGenerateCvRouteImport
-      parentRoute: typeof AuthenticatedTalentHubCvIdRoute
+    '/_authenticated/talent-hub/generate/$cvId': {
+      id: '/_authenticated/talent-hub/generate/$cvId'
+      path: '/generate/$cvId'
+      fullPath: '/talent-hub/generate/$cvId'
+      preLoaderRoute: typeof AuthenticatedTalentHubGenerateCvIdRouteImport
+      parentRoute: typeof AuthenticatedTalentHubRoute
     }
     '/_authenticated/demands/$demandId/edit': {
       id: '/_authenticated/demands/$demandId/edit'
@@ -491,33 +491,20 @@ const AuthenticatedClientsRouteChildren: AuthenticatedClientsRouteChildren = {
 const AuthenticatedClientsRouteWithChildren =
   AuthenticatedClientsRoute._addFileChildren(AuthenticatedClientsRouteChildren)
 
-interface AuthenticatedTalentHubCvIdRouteChildren {
-  AuthenticatedTalentHubCvIdGenerateCvRoute: typeof AuthenticatedTalentHubCvIdGenerateCvRoute
-}
-
-const AuthenticatedTalentHubCvIdRouteChildren: AuthenticatedTalentHubCvIdRouteChildren =
-  {
-    AuthenticatedTalentHubCvIdGenerateCvRoute:
-      AuthenticatedTalentHubCvIdGenerateCvRoute,
-  }
-
-const AuthenticatedTalentHubCvIdRouteWithChildren =
-  AuthenticatedTalentHubCvIdRoute._addFileChildren(
-    AuthenticatedTalentHubCvIdRouteChildren,
-  )
-
 interface AuthenticatedTalentHubRouteChildren {
-  AuthenticatedTalentHubCvIdRoute: typeof AuthenticatedTalentHubCvIdRouteWithChildren
+  AuthenticatedTalentHubCvIdRoute: typeof AuthenticatedTalentHubCvIdRoute
   AuthenticatedTalentHubNewRoute: typeof AuthenticatedTalentHubNewRoute
   AuthenticatedTalentHubIndexRoute: typeof AuthenticatedTalentHubIndexRoute
+  AuthenticatedTalentHubGenerateCvIdRoute: typeof AuthenticatedTalentHubGenerateCvIdRoute
 }
 
 const AuthenticatedTalentHubRouteChildren: AuthenticatedTalentHubRouteChildren =
   {
-    AuthenticatedTalentHubCvIdRoute:
-      AuthenticatedTalentHubCvIdRouteWithChildren,
+    AuthenticatedTalentHubCvIdRoute: AuthenticatedTalentHubCvIdRoute,
     AuthenticatedTalentHubNewRoute: AuthenticatedTalentHubNewRoute,
     AuthenticatedTalentHubIndexRoute: AuthenticatedTalentHubIndexRoute,
+    AuthenticatedTalentHubGenerateCvIdRoute:
+      AuthenticatedTalentHubGenerateCvIdRoute,
   }
 
 const AuthenticatedTalentHubRouteWithChildren =

@@ -21,7 +21,7 @@ import { ItroadCvPdf } from "@/components/cv-template/ItroadCvPdf";
 import { buildItroadDocx } from "@/components/cv-template/buildDocx";
 import type { CvData, CvExperience, CvEducation } from "@/components/cv-template/types";
 
-export const Route = createFileRoute("/_authenticated/talent-hub/$cvId/generate-cv")({
+export const Route = createFileRoute("/_authenticated/talent-hub/generate/$cvId")({
   ssr: false,
   head: () => ({ meta: [{ title: "Generate ITROAD CV — RoadSource" }] }),
   component: GenerateCvPage,

@@ -81,6 +81,33 @@ function CandidateDetail() {
     },
   });
 
+  const { data: generatedCvs, refetch: refetchGenerated } = useQuery({
+    queryKey: ["generated-cvs", cvId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("generated_cvs")
+        .select("id, format, storage_path, display_name, role_title, anonymized, created_at")
+        .eq("cv_id", cvId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  async function openGenerated(path: string) {
+    const { data, error } = await supabase.storage.from("cvs").createSignedUrl(path, 120);
+    if (error || !data) return toast.error(error?.message ?? "Could not open file");
+    window.open(data.signedUrl, "_blank");
+  }
+  async function deleteGenerated(id: string, path: string) {
+    if (!confirm("Delete this generated CV?")) return;
+    await supabase.storage.from("cvs").remove([path]);
+    const { error } = await supabase.from("generated_cvs").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    refetchGenerated();
+  }
+
   // editable state
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "", headline: "", summary: "",

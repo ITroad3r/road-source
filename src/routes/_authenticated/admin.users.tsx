@@ -112,7 +112,7 @@ function AdminUsers() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
   if (!myRoles?.includes("admin")) return <Navigate to="/dashboard" />;
 
   const rolesByUser = new Map<string, { id: string; role: AppRole }[]>();
@@ -128,7 +128,7 @@ function AdminUsers() {
   );
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-7 w-7" /> Users &amp; roles</h1>

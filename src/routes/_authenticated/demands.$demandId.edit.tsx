@@ -186,11 +186,11 @@ function EditDemand() {
     setSubmitting(false);
   }
 
-  if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!demand) return <div className="p-8">Demand not found.</div>;
+  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!demand) return <div className="p-4 md:p-8">Demand not found.</div>;
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <div className="mb-6">
         <Button asChild variant="ghost" size="sm" className="-ml-3">
           <Link to="/demands/$demandId" params={{ demandId }}>

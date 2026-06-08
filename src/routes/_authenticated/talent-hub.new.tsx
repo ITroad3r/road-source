@@ -174,7 +174,7 @@ function NewCandidate() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <header className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Add candidate</h1>
         <p className="text-muted-foreground mt-1">Create a new CV in the Talent Hub. Upload a PDF or DOCX if you have one.</p>

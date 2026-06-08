@@ -72,11 +72,11 @@ function ClientDetail() {
     enabled: (demands ?? []).length > 0,
   });
 
-  if (clientLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!client) return <div className="p-8">Client not found.</div>;
+  if (clientLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!client) return <div className="p-4 md:p-8">Client not found.</div>;
 
   return (
-    <div className="p-8 space-y-6 max-w-6xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-6xl">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-3">
           <Link to="/clients"><ArrowLeft className="h-4 w-4 mr-1" /> Back to Clients</Link>

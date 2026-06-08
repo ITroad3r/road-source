@@ -66,7 +66,7 @@ export function CeoDashboard({ fullName }: { fullName: string | null }) {
   }));
 
   return (
-    <div className="p-8 space-y-6 bg-gradient-to-br from-background via-background to-primary/5 min-h-full">
+    <div className="p-4 md:p-8 space-y-6 bg-gradient-to-br from-background via-background to-primary/5 min-h-full">
       <header className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Executive overview{fullName ? ` · ${fullName.split(" ")[0]}` : ""}</h1>
@@ -89,11 +89,11 @@ export function CeoDashboard({ fullName }: { fullName: string | null }) {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={revenueByMonth}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `€${v/1000}k`} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} formatter={(v: number) => `€${v.toLocaleString()}`} />
-                  <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 4 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `€${v/1000}k`} />
+                  <Tooltip contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} formatter={(v: number) => `€${v.toLocaleString()}`} />
+                  <Line type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={2.5} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -106,11 +106,11 @@ export function CeoDashboard({ fullName }: { fullName: string | null }) {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={funnel} layout="vertical" margin={{ left: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis type="category" dataKey="stage" stroke="hsl(var(--muted-foreground))" fontSize={12} width={90} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis type="category" dataKey="stage" stroke="var(--muted-foreground)" fontSize={12} width={90} />
+                  <Tooltip contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} />
+                  <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

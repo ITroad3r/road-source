@@ -122,7 +122,7 @@ function NewDemand() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <header className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">New Demand</h1>
         <p className="text-muted-foreground mt-1">Create a client request and assign it to a sourcing teammate.</p>

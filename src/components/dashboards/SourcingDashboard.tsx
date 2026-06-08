@@ -51,7 +51,7 @@ export function SourcingDashboard({ userId, fullName }: { userId: string; fullNa
   }).length;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hi {fullName?.split(" ")[0] ?? "there"}, ready to source?</h1>
@@ -78,7 +78,7 @@ export function SourcingDashboard({ userId, fullName }: { userId: string; fullNa
           </div>
           {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {!isLoading && demands?.length === 0 && (
-            <Card><CardContent className="p-8 text-center text-muted-foreground">
+            <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">
               <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-40" />
               No demands assigned to you yet. Your manager will dispatch new requests here.
             </CardContent></Card>

@@ -1,6 +1,6 @@
 import {
-  Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, LevelFormat,
-  HeadingLevel, TabStopType, TabStopPosition, PageOrientation,
+  Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, BorderStyle, LevelFormat,
+  TabStopType, TabStopPosition, PageOrientation,
 } from "docx";
 import type { CvData } from "./types";
 import { anonymizeName } from "./types";

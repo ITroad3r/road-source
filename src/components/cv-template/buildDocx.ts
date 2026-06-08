@@ -1,6 +1,6 @@
 import {
-  Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, LevelFormat,
-  HeadingLevel, TabStopType, TabStopPosition, PageOrientation,
+  Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, BorderStyle, LevelFormat,
+  TabStopType, TabStopPosition, PageOrientation,
 } from "docx";
 import type { CvData } from "./types";
 import { anonymizeName } from "./types";
@@ -48,7 +48,7 @@ function projectLine(project: string) {
   });
 }
 
-export async function buildItroadDocx(cv: CvData, anonymize: boolean): Promise<Blob> {
+export async function buildItroadDocx(cv: CvData, anonymize: boolean, logoBytes?: Uint8Array | null): Promise<Blob> {
   const displayName = (anonymize ? anonymizeName(cv.full_name || "Candidate") : (cv.full_name || "Candidate")).toUpperCase();
   const role = (cv.role_title || "").toUpperCase();
   const contactBits = anonymize
@@ -57,18 +57,25 @@ export async function buildItroadDocx(cv: CvData, anonymize: boolean): Promise<B
 
   const children: Paragraph[] = [];
 
-  // Header
-  children.push(
-    new Paragraph({
-      tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
-      spacing: { after: 60 },
-      children: [
-        new TextRun({ text: "ITROAD", bold: true, color: BLUE, size: 24 }),
-        new TextRun({ text: "  CONSULTING", color: MUTED, size: 16 }),
-        new TextRun({ text: `\t${displayName}`, bold: true, size: 36, color: INK }),
-      ],
-    }),
-  );
+  // Header with logo (left) + name (right via tab)
+  const headerRuns: (TextRun | ImageRun)[] = [];
+  if (logoBytes) {
+    headerRuns.push(new ImageRun({
+      type: "jpg",
+      data: logoBytes,
+      transformation: { width: 70, height: 70 },
+      altText: { title: "ITROAD", description: "ITROAD Group logo", name: "itroad-logo" },
+    }));
+  } else {
+    headerRuns.push(new TextRun({ text: "ITROAD", bold: true, color: BLUE, size: 32 }));
+    headerRuns.push(new TextRun({ text: "  GROUP", color: MUTED, size: 20 }));
+  }
+  headerRuns.push(new TextRun({ text: `\t${displayName}`, bold: true, size: 36, color: INK }));
+  children.push(new Paragraph({
+    tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
+    spacing: { after: 60 },
+    children: headerRuns,
+  }));
   if (role) {
     children.push(new Paragraph({
       alignment: AlignmentType.RIGHT,

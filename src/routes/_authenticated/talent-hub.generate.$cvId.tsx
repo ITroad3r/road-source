@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Upload, Sparkles, Download, Loader2, FileText, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Upload, Sparkles, Download, Loader2, FileText, Plus, Trash2, Save } from "lucide-react";
 import { saveAs } from "file-saver";
 import { pdf } from "@react-pdf/renderer";
+import itroadLogo from "@/assets/itroad-logo.jpg.asset.json";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,21 +116,65 @@ function GenerateCvPage() {
 
   const ready = !!cv;
 
+  async function fetchLogoBytes(): Promise<Uint8Array | null> {
+    try {
+      const res = await fetch(itroadLogo.url);
+      if (!res.ok) return null;
+      return new Uint8Array(await res.arrayBuffer());
+    } catch { return null; }
+  }
+
+  async function buildPdfBlob() {
+    if (!cv) throw new Error("No CV");
+    return await pdf(<ItroadCvPdf cv={cv} anonymize={anonymize} />).toBlob();
+  }
+  async function buildDocxBlob() {
+    if (!cv) throw new Error("No CV");
+    const bytes = await fetchLogoBytes();
+    return await buildItroadDocx(cv, anonymize, bytes);
+  }
+
   async function downloadPdf() {
     if (!cv) return;
-    try {
-      const blob = await pdf(<ItroadCvPdf cv={cv} anonymize={anonymize} />).toBlob();
-      const fn = fileBase(cv) + ".pdf";
-      saveAs(blob, fn);
-    } catch (e) { toast.error((e as Error).message); }
+    try { saveAs(await buildPdfBlob(), fileBase(cv) + ".pdf"); }
+    catch (e) { toast.error((e as Error).message); }
   }
 
   async function downloadDocx() {
     if (!cv) return;
+    try { saveAs(await buildDocxBlob(), fileBase(cv) + ".docx"); }
+    catch (e) { toast.error((e as Error).message); }
+  }
+
+  const [saving, setSaving] = useState(false);
+  async function saveToProfile() {
+    if (!cv) return;
+    setSaving(true);
     try {
-      const blob = await buildItroadDocx(cv, anonymize);
-      saveAs(blob, fileBase(cv) + ".docx");
-    } catch (e) { toast.error((e as Error).message); }
+      const { data: userRes } = await supabase.auth.getUser();
+      const userId = userRes.user?.id ?? null;
+      const ts = Date.now();
+      const base = fileBase(cv);
+      const pdfBlob = await buildPdfBlob();
+      const docxBlob = await buildDocxBlob();
+      const pdfPath = `generated/${cvId}/${ts}-${base}.pdf`;
+      const docxPath = `generated/${cvId}/${ts}-${base}.docx`;
+
+      const up1 = await supabase.storage.from("cvs").upload(pdfPath, pdfBlob, { contentType: "application/pdf", upsert: false });
+      if (up1.error) throw up1.error;
+      const up2 = await supabase.storage.from("cvs").upload(docxPath, docxBlob, { contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", upsert: false });
+      if (up2.error) throw up2.error;
+
+      const rows = [
+        { cv_id: cvId, format: "pdf" as const, storage_path: pdfPath, display_name: cv.full_name, role_title: cv.role_title, anonymized: anonymize, generated_by: userId },
+        { cv_id: cvId, format: "docx" as const, storage_path: docxPath, display_name: cv.full_name, role_title: cv.role_title, anonymized: anonymize, generated_by: userId },
+      ];
+      const ins = await supabase.from("generated_cvs").insert(rows);
+      if (ins.error) throw ins.error;
+      toast.success("Saved to candidate profile");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally { setSaving(false); }
   }
 
   return (
@@ -265,7 +310,11 @@ function GenerateCvPage() {
             <CardContent className="p-4 flex flex-wrap gap-3 justify-end items-center">
               <span className="text-sm text-muted-foreground mr-auto">Ready to export</span>
               <Button variant="outline" onClick={downloadDocx}><Download className="h-4 w-4 mr-2" />Download DOCX</Button>
-              <Button onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+              <Button variant="outline" onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+              <Button onClick={saveToProfile} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Save to profile
+              </Button>
             </CardContent>
           </Card>
         </>

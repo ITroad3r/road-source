@@ -81,6 +81,33 @@ function CandidateDetail() {
     },
   });
 
+  const { data: generatedCvs, refetch: refetchGenerated } = useQuery({
+    queryKey: ["generated-cvs", cvId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("generated_cvs")
+        .select("id, format, storage_path, display_name, role_title, anonymized, created_at")
+        .eq("cv_id", cvId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  async function openGenerated(path: string) {
+    const { data, error } = await supabase.storage.from("cvs").createSignedUrl(path, 120);
+    if (error || !data) return toast.error(error?.message ?? "Could not open file");
+    window.open(data.signedUrl, "_blank");
+  }
+  async function deleteGenerated(id: string, path: string) {
+    if (!confirm("Delete this generated CV?")) return;
+    await supabase.storage.from("cvs").remove([path]);
+    const { error } = await supabase.from("generated_cvs").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    refetchGenerated();
+  }
+
   // editable state
   const [form, setForm] = useState({
     full_name: "", email: "", phone: "", headline: "", summary: "",
@@ -425,6 +452,42 @@ function CandidateDetail() {
                 </Link>
               </Button>
             </Field>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-lg flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Generated ITROAD CVs ({generatedCvs?.length ?? 0})</CardTitle>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/talent-hub/generate/$cvId" params={{ cvId }}><Sparkles className="h-3.5 w-3.5 mr-1.5" /> New</Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {(!generatedCvs || generatedCvs.length === 0) ? (
+            <div className="text-sm text-muted-foreground">No branded CVs generated yet.</div>
+          ) : (
+            <div className="space-y-2">
+              {generatedCvs.map((g) => (
+                <div key={g.id} className="flex items-center justify-between gap-2 rounded-md border p-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate flex items-center gap-2">
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="truncate">{g.display_name}</span>
+                      <Badge variant="outline" className="text-[10px] uppercase">{g.format}</Badge>
+                      {g.anonymized && <Badge variant="secondary" className="text-[10px]">anonymized</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {g.role_title ? `${g.role_title} · ` : ""}{format(new Date(g.created_at), "PP · p")}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button size="sm" variant="ghost" onClick={() => openGenerated(g.storage_path)}>Open</Button>
+                    <Button size="icon" variant="ghost" onClick={() => deleteGenerated(g.id, g.storage_path)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

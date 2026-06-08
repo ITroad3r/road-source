@@ -1,0 +1,296 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { ArrowLeft, Upload, Sparkles, Download, Loader2, FileText, Plus, Trash2 } from "lucide-react";
+import { saveAs } from "file-saver";
+import { pdf } from "@react-pdf/renderer";
+
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+
+import { parseFullCv } from "@/lib/api/cv-deep-parser.functions";
+import { ItroadCvPdf } from "@/components/cv-template/ItroadCvPdf";
+import { buildItroadDocx } from "@/components/cv-template/buildDocx";
+import type { CvData, CvExperience, CvEducation } from "@/components/cv-template/types";
+
+export const Route = createFileRoute("/_authenticated/talent-hub/$cvId/generate-cv")({
+  ssr: false,
+  head: () => ({ meta: [{ title: "Generate ITROAD CV — RoadSource" }] }),
+  component: GenerateCvPage,
+});
+
+const ALLOWED = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+const MAX = 10 * 1024 * 1024;
+
+const emptyExp = (): CvExperience => ({ title: "", company: "", location: "", period: "", project: "", bullets: [""] });
+const emptyEdu = (): CvEducation => ({ title: "", school: "", location: "", period: "", notes: [] });
+
+function GenerateCvPage() {
+  const { cvId } = Route.useParams();
+  const navigate = useNavigate();
+  const parseFn = useServerFn(parseFullCv);
+
+  const { data: candidate } = useQuery({
+    queryKey: ["talent-hub", cvId, "for-generate"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("talent_hub_cvs")
+        .select("id, full_name, email, phone, headline, location, linkedin_url, cv_url, skills")
+        .eq("id", cvId).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [cv, setCv] = useState<CvData | null>(null);
+  const [anonymize, setAnonymize] = useState(true);
+  const [parsing, setParsing] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+
+  async function parseFromStored() {
+    if (!candidate?.cv_url) return toast.error("This candidate has no CV file. Upload one first or upload a file below.");
+    if (/^https?:\/\//i.test(candidate.cv_url)) return toast.error("Stored CV is an external link. Upload a file below.");
+    setParsing(true);
+    try {
+      const { cv } = await parseFn({ data: { storage_path: candidate.cv_url } });
+      seedFromParsed(cv);
+      toast.success("CV parsed — review and edit before generating");
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally { setParsing(false); }
+  }
+
+  async function parseFromUpload() {
+    if (!uploadFile) return;
+    if (!ALLOWED.includes(uploadFile.type)) return toast.error("PDF / DOC / DOCX only");
+    if (uploadFile.size > MAX) return toast.error("Max 10 MB");
+    setParsing(true);
+    try {
+      const path = `tmp/${cvId}/${Date.now()}-${uploadFile.name.replace(/[^\w.\-]/g, "_")}`;
+      const { error: upErr } = await supabase.storage.from("cvs").upload(path, uploadFile, { upsert: true, contentType: uploadFile.type });
+      if (upErr) throw upErr;
+      const { cv } = await parseFn({ data: { storage_path: path } });
+      seedFromParsed(cv);
+      toast.success("CV parsed — review and edit before generating");
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally { setParsing(false); }
+  }
+
+  function seedFromParsed(p: CvData) {
+    setCv({
+      full_name: p.full_name || candidate?.full_name || "",
+      role_title: p.role_title || candidate?.headline || "",
+      email: p.email ?? candidate?.email ?? "",
+      phone: p.phone ?? candidate?.phone ?? "",
+      location: p.location ?? candidate?.location ?? "",
+      linkedin_url: p.linkedin_url ?? candidate?.linkedin_url ?? "",
+      skill_groups: p.skill_groups?.length ? p.skill_groups : (candidate?.skills ?? []).length ? [(candidate!.skills as string[]).join(" | ")] : [""],
+      experiences: p.experiences?.length ? p.experiences : [emptyExp()],
+      educations: p.educations?.length ? p.educations : [emptyEdu()],
+      others: p.others ?? [],
+    });
+  }
+
+  function blank() {
+    setCv({
+      full_name: candidate?.full_name ?? "",
+      role_title: candidate?.headline ?? "",
+      email: candidate?.email ?? "",
+      phone: candidate?.phone ?? "",
+      location: candidate?.location ?? "",
+      linkedin_url: candidate?.linkedin_url ?? "",
+      skill_groups: [(candidate?.skills as string[] | undefined ?? []).join(" | ")].filter(Boolean),
+      experiences: [emptyExp()],
+      educations: [emptyEdu()],
+      others: [],
+    });
+  }
+
+  const ready = !!cv;
+
+  async function downloadPdf() {
+    if (!cv) return;
+    try {
+      const blob = await pdf(<ItroadCvPdf cv={cv} anonymize={anonymize} />).toBlob();
+      const fn = fileBase(cv) + ".pdf";
+      saveAs(blob, fn);
+    } catch (e) { toast.error((e as Error).message); }
+  }
+
+  async function downloadDocx() {
+    if (!cv) return;
+    try {
+      const blob = await buildItroadDocx(cv, anonymize);
+      saveAs(blob, fileBase(cv) + ".docx");
+    } catch (e) { toast.error((e as Error).message); }
+  }
+
+  return (
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/talent-hub/$cvId" params={{ cvId }}><ArrowLeft className="h-4 w-4 mr-1" /> Back to candidate</Link>
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Generate ITROAD-branded CV</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Upload any CV (or use this candidate's stored CV). AI extracts the data, you review &amp; edit, then export as PDF or DOCX in the ITROAD template.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Button onClick={parseFromStored} disabled={parsing || !candidate?.cv_url} variant="outline">
+              {parsing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+              Use stored CV
+            </Button>
+            <label className="flex items-center justify-center gap-2 border-2 border-dashed rounded-md px-3 py-2 cursor-pointer hover:bg-accent/40 transition text-sm">
+              <Upload className="h-4 w-4 text-muted-foreground" />
+              <span className="truncate">{uploadFile ? uploadFile.name : "Upload any CV (PDF/DOC/DOCX)"}</span>
+              <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="hidden" onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)} />
+            </label>
+            <Button onClick={parseFromUpload} disabled={parsing || !uploadFile}>
+              {parsing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              Parse uploaded file
+            </Button>
+          </div>
+          <button onClick={blank} className="text-xs text-muted-foreground hover:underline">or start from a blank form</button>
+        </CardContent>
+      </Card>
+
+      {ready && cv && (
+        <>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Header</CardTitle>
+              <label className="flex items-center gap-2 text-sm">
+                <Switch checked={anonymize} onCheckedChange={setAnonymize} />
+                Anonymize (hide contact, abbreviate surname)
+              </label>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Field label="Full name"><Input value={cv.full_name} onChange={(e) => setCv({ ...cv, full_name: e.target.value })} /></Field>
+              <Field label="Role / headline"><Input value={cv.role_title} onChange={(e) => setCv({ ...cv, role_title: e.target.value })} placeholder="e.g. DEVELOPPEUR JAVA" /></Field>
+              <Field label="Email"><Input value={cv.email ?? ""} onChange={(e) => setCv({ ...cv, email: e.target.value })} /></Field>
+              <Field label="Phone"><Input value={cv.phone ?? ""} onChange={(e) => setCv({ ...cv, phone: e.target.value })} /></Field>
+              <Field label="Location"><Input value={cv.location ?? ""} onChange={(e) => setCv({ ...cv, location: e.target.value })} /></Field>
+              <Field label="LinkedIn"><Input value={cv.linkedin_url ?? ""} onChange={(e) => setCv({ ...cv, linkedin_url: e.target.value })} /></Field>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Skills</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, skill_groups: [...cv.skill_groups, ""] })}><Plus className="h-3 w-3 mr-1" />Add line</Button>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {cv.skill_groups.map((s, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input value={s} onChange={(e) => updateAt(cv.skill_groups, i, e.target.value, (arr) => setCv({ ...cv, skill_groups: arr }))} placeholder="Java | Spring boot | Hibernate" />
+                  <Button size="icon" variant="ghost" onClick={() => setCv({ ...cv, skill_groups: cv.skill_groups.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Experience</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, experiences: [...cv.experiences, emptyExp()] })}><Plus className="h-3 w-3 mr-1" />Add</Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {cv.experiences.map((e, i) => (
+                <div key={i} className="space-y-2 rounded-md border p-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <Input value={e.title} placeholder="Role title" onChange={(ev) => updateExp(cv, i, { ...e, title: ev.target.value }, setCv)} />
+                    <Input value={e.company} placeholder="Company" onChange={(ev) => updateExp(cv, i, { ...e, company: ev.target.value }, setCv)} />
+                    <Input value={e.location} placeholder="Location" onChange={(ev) => updateExp(cv, i, { ...e, location: ev.target.value }, setCv)} />
+                    <Input value={e.period} placeholder="MM/YYYY-MM/YYYY" onChange={(ev) => updateExp(cv, i, { ...e, period: ev.target.value }, setCv)} />
+                  </div>
+                  <Input value={e.project ?? ""} placeholder="Project description (optional)" onChange={(ev) => updateExp(cv, i, { ...e, project: ev.target.value }, setCv)} />
+                  <Textarea rows={4} value={e.bullets.join("\n")} placeholder="One bullet per line"
+                    onChange={(ev) => updateExp(cv, i, { ...e, bullets: ev.target.value.split("\n") }, setCv)} />
+                  <div className="flex justify-end">
+                    <Button size="sm" variant="ghost" onClick={() => setCv({ ...cv, experiences: cv.experiences.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4 mr-1" />Remove</Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Education</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, educations: [...cv.educations, emptyEdu()] })}><Plus className="h-3 w-3 mr-1" />Add</Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {cv.educations.map((e, i) => (
+                <div key={i} className="space-y-2 rounded-md border p-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <Input value={e.title} placeholder="Degree" onChange={(ev) => updateEdu(cv, i, { ...e, title: ev.target.value }, setCv)} />
+                    <Input value={e.school} placeholder="Institution" onChange={(ev) => updateEdu(cv, i, { ...e, school: ev.target.value }, setCv)} />
+                    <Input value={e.location} placeholder="Location" onChange={(ev) => updateEdu(cv, i, { ...e, location: ev.target.value }, setCv)} />
+                    <Input value={e.period} placeholder="Period" onChange={(ev) => updateEdu(cv, i, { ...e, period: ev.target.value }, setCv)} />
+                  </div>
+                  <Textarea rows={2} value={e.notes.join("\n")} placeholder="One note per line"
+                    onChange={(ev) => updateEdu(cv, i, { ...e, notes: ev.target.value.split("\n") }, setCv)} />
+                  <div className="flex justify-end">
+                    <Button size="sm" variant="ghost" onClick={() => setCv({ ...cv, educations: cv.educations.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4 mr-1" />Remove</Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">Others (certifications, side projects)</CardTitle></CardHeader>
+            <CardContent>
+              <Textarea rows={4} value={cv.others.join("\n")} placeholder="One item per line"
+                onChange={(e) => setCv({ ...cv, others: e.target.value.split("\n") })} />
+            </CardContent>
+          </Card>
+
+          <Card className="sticky bottom-4 shadow-lg">
+            <CardContent className="p-4 flex flex-wrap gap-3 justify-end items-center">
+              <span className="text-sm text-muted-foreground mr-auto">Ready to export</span>
+              <Button variant="outline" onClick={downloadDocx}><Download className="h-4 w-4 mr-2" />Download DOCX</Button>
+              <Button onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div className="space-y-1.5"><Label className="text-xs">{label}</Label>{children}</div>;
+}
+
+function updateAt<T>(arr: T[], i: number, v: T, set: (a: T[]) => void) {
+  const next = arr.slice(); next[i] = v; set(next);
+}
+function updateExp(cv: CvData, i: number, v: CvExperience, set: (c: CvData) => void) {
+  const next = cv.experiences.slice(); next[i] = v; set({ ...cv, experiences: next });
+}
+function updateEdu(cv: CvData, i: number, v: CvEducation, set: (c: CvData) => void) {
+  const next = cv.educations.slice(); next[i] = v; set({ ...cv, educations: next });
+}
+
+function fileBase(cv: CvData) {
+  const name = (cv.full_name || "candidate").trim().replace(/\s+/g, "_");
+  return `ITROAD_${name}_CV`;
+}

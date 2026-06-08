@@ -310,7 +310,11 @@ function GenerateCvPage() {
             <CardContent className="p-4 flex flex-wrap gap-3 justify-end items-center">
               <span className="text-sm text-muted-foreground mr-auto">Ready to export</span>
               <Button variant="outline" onClick={downloadDocx}><Download className="h-4 w-4 mr-2" />Download DOCX</Button>
-              <Button onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+              <Button variant="outline" onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+              <Button onClick={saveToProfile} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Save to profile
+              </Button>
             </CardContent>
           </Card>
         </>

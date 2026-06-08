@@ -82,11 +82,11 @@ function ReportsPage() {
     },
   });
 
-  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
   if (!canView) {
     return (
-      <div className="p-8">
-        <Card><CardContent className="p-8 text-center text-muted-foreground">
+      <div className="p-4 md:p-8">
+        <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">
           Reports are available to managers, directors, CEO, and admins.
         </CardContent></Card>
       </div>
@@ -167,7 +167,7 @@ function ReportsPage() {
   const overallConversion = totalSubmitted > 0 ? (totalPlaced / totalSubmitted) * 100 : 0;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">

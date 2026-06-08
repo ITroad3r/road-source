@@ -103,12 +103,12 @@ function Financials() {
     .map(([name, value]) => ({ name, value: Math.round(value) }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 8);
-  const pieColors = ["hsl(var(--primary))", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16"];
+  const pieColors = ["var(--primary)", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16"];
 
-  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">{t("common.loading")}</div>;
+  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{t("common.loading")}</div>;
   if (!canView) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <Card>
           <CardContent className="p-10 text-center space-y-3">
             <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
@@ -121,7 +121,7 @@ function Financials() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t("financials.title")}</h1>
@@ -158,8 +158,8 @@ function Financials() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="month" className="text-xs" />
                   <YAxis className="text-xs" />
-                  <Tooltip formatter={(v: number) => `€${v.toLocaleString()}`} contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Tooltip formatter={(v: number) => `€${v.toLocaleString()}`} contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} />
+                  <Bar dataKey="revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -177,7 +177,7 @@ function Financials() {
                   <Pie data={clientData} dataKey="value" nameKey="name" outerRadius={90} label={(e: { name: string }) => e.name}>
                     {clientData.map((_, i) => <Cell key={i} fill={pieColors[i % pieColors.length]} />)}
                   </Pie>
-                  <Tooltip formatter={(v: number) => `€${v.toLocaleString()}`} contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                  <Tooltip formatter={(v: number) => `€${v.toLocaleString()}`} contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} />
                   <Legend wrapperStyle={{ fontSize: "12px" }} />
                 </PieChart>
               </ResponsiveContainer>

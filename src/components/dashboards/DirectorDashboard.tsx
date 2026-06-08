@@ -53,7 +53,7 @@ export function DirectorDashboard({ fullName }: { fullName: string | null }) {
   const topLost = Object.entries(lostReasons).sort((a,b) => b[1]-a[1]).slice(0,5);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Division performance{fullName ? ` · ${fullName.split(" ")[0]}` : ""}</h1>

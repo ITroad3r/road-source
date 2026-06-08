@@ -138,11 +138,11 @@ function DemandDetail() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!demand) return <div className="p-8">Demand not found.</div>;
+  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!demand) return <div className="p-4 md:p-8">Demand not found.</div>;
 
   return (
-    <div className="p-8 space-y-6 max-w-6xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-6xl">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-3">
           <Link to="/dashboard"><ArrowLeft className="h-4 w-4 mr-1" /> Back to My Demands</Link>
@@ -290,7 +290,7 @@ function DemandDetail() {
       ) : (
         <div className="space-y-3">
           {candidates?.length === 0 && (
-            <Card><CardContent className="p-8 text-center text-muted-foreground">No candidates yet. Add one from the Talent Hub.</CardContent></Card>
+            <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">No candidates yet. Add one from the Talent Hub.</CardContent></Card>
           )}
           {candidates?.map((dc) => {
             const cv = dc.talent_hub_cvs;

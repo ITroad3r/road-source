@@ -29,13 +29,13 @@ function Dashboard() {
     },
   });
 
-  if (rolesLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
 
   if (!roles || roles.length === 0) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <Card>
-          <CardContent className="p-8 text-center space-y-3">
+          <CardContent className="p-4 md:p-8 text-center space-y-3">
             <Shield className="h-10 w-10 mx-auto text-muted-foreground" />
             <h2 className="text-lg font-semibold">No role assigned yet</h2>
             <p className="text-sm text-muted-foreground">Ask an admin to assign you a role so you can start using RoadSource.</p>
@@ -60,7 +60,7 @@ function Dashboard() {
 
 function AdminDashboard({ fullName }: { fullName: string | null }) {
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
           <Shield className="h-7 w-7" /> Admin console{fullName ? ` · ${fullName.split(" ")[0]}` : ""}

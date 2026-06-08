@@ -206,11 +206,11 @@ function CandidateDetail() {
     setTags([...tags, t]); setTagInput("");
   }
 
-  if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!cv) return <div className="p-8">Candidate not found.</div>;
+  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!cv) return <div className="p-4 md:p-8">Candidate not found.</div>;
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm" className="-ml-3">
           <Link to="/talent-hub"><ArrowLeft className="h-4 w-4 mr-1" /> Back to Talent Hub</Link>

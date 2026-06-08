@@ -1,6 +1,7 @@
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import type { CvData } from "./types";
 import { BRAND, anonymizeName } from "./types";
+import itroadLogo from "@/assets/itroad-logo.jpg.asset.json";
 
 const styles = StyleSheet.create({
   page: { paddingTop: 36, paddingBottom: 36, paddingHorizontal: 40, fontSize: 9.5, fontFamily: "Helvetica", color: BRAND.ink, lineHeight: 1.35 },

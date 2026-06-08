@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Save, X, Trash2, Upload, FileText, MapPin, Mail, Phone, ExternalLink, User, Briefcase } from "lucide-react";
+import { ArrowLeft, Pencil, Save, X, Trash2, Upload, FileText, MapPin, Mail, Phone, ExternalLink, User, Briefcase, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { ActivityLog } from "@/components/ActivityLog";
 
@@ -416,6 +416,16 @@ function CandidateDetail() {
               {!cv.cv_url && !editing && <span className="text-sm text-muted-foreground">No CV uploaded</span>}
             </div>
           </Field>
+
+          {!editing && (
+            <Field label="Branded export">
+              <Button asChild variant="outline" size="sm" className="w-fit">
+                <Link to="/talent-hub/generate/$cvId" params={{ cvId }}>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Generate ITROAD CV
+                </Link>
+              </Button>
+            </Field>
+          )}
         </CardContent>
       </Card>
 

@@ -6,10 +6,8 @@ import itroadLogo from "@/assets/itroad-logo.jpg.asset.json";
 const styles = StyleSheet.create({
   page: { paddingTop: 36, paddingBottom: 36, paddingHorizontal: 40, fontSize: 9.5, fontFamily: "Helvetica", color: BRAND.ink, lineHeight: 1.35 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16, paddingBottom: 8 },
-  brand: { flexDirection: "column" },
-  brandLine1: { color: BRAND.primary, fontSize: 11, fontFamily: "Helvetica-Bold", letterSpacing: 2 },
-  brandLine2: { color: BRAND.muted, fontSize: 8, letterSpacing: 4, marginTop: 1 },
-  headerRight: { flexDirection: "column", alignItems: "flex-end", maxWidth: "65%" },
+  logo: { width: 70, height: 70, objectFit: "contain" },
+  headerRight: { flexDirection: "column", alignItems: "flex-end", maxWidth: "70%" },
   name: { fontFamily: "Helvetica-Bold", fontSize: 20, color: BRAND.ink, textAlign: "right" },
   role: { fontFamily: "Helvetica", fontSize: 14, color: BRAND.ink, textAlign: "right", marginTop: 2 },
   contact: { fontSize: 8.5, color: BRAND.muted, marginTop: 4, textAlign: "right" },
@@ -36,10 +34,7 @@ export function ItroadCvPdf({ cv, anonymize, logoUrl }: { cv: CvData; anonymize:
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header} fixed>
-          <View style={styles.brand}>
-            <Text style={styles.brandLine1}>ITROAD</Text>
-            <Text style={styles.brandLine2}>CONSULTING</Text>
-          </View>
+          <Image style={styles.logo} src={itroadLogo.url} />
           <View style={styles.headerRight}>
             <Text style={styles.name}>{displayName.toUpperCase()}</Text>
             {cv.role_title ? <Text style={styles.role}>{cv.role_title.toUpperCase()}</Text> : null}

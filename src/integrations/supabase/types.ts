@@ -273,6 +273,50 @@ export type Database = {
           },
         ]
       }
+      generated_cvs: {
+        Row: {
+          anonymized: boolean
+          created_at: string
+          cv_id: string
+          display_name: string
+          format: string
+          generated_by: string | null
+          id: string
+          role_title: string | null
+          storage_path: string
+        }
+        Insert: {
+          anonymized?: boolean
+          created_at?: string
+          cv_id: string
+          display_name: string
+          format: string
+          generated_by?: string | null
+          id?: string
+          role_title?: string | null
+          storage_path: string
+        }
+        Update: {
+          anonymized?: boolean
+          created_at?: string
+          cv_id?: string
+          display_name?: string
+          format?: string
+          generated_by?: string | null
+          id?: string
+          role_title?: string | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_cvs_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "talent_hub_cvs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string

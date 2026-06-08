@@ -34,7 +34,6 @@ const emptyEdu = (): CvEducation => ({ title: "", school: "", location: "", peri
 
 function GenerateCvPage() {
   const { cvId } = Route.useParams();
-  const navigate = useNavigate();
   const parseFn = useServerFn(parseFullCv);
 
   const { data: candidate } = useQuery({

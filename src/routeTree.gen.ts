@@ -9,38 +9,37 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SetPasswordRouteImport } from './routes/set-password'
-import { Route as RootRouteImport } from './routes/root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedTalentHubRouteImport } from './routes/_authenticated/talent-hub'
-import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
-import { Route as AuthenticatedFinancialsRouteImport } from './routes/_authenticated/financials'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as RootRouteImport } from './routes/root'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
-import { Route as AuthenticatedTalentHubIndexRouteImport } from './routes/_authenticated/talent-hub.index'
-import { Route as AuthenticatedDemandsIndexRouteImport } from './routes/_authenticated/demands.index'
-import { Route as AuthenticatedClientsIndexRouteImport } from './routes/_authenticated/clients.index'
-import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authenticated/talent-hub.new'
-import { Route as AuthenticatedTalentHubCvIdRouteImport } from './routes/_authenticated/talent-hub.$cvId'
-import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
-import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
-import { Route as AuthenticatedClientsClientIdRouteImport } from './routes/_authenticated/clients.$clientId'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFinancialsRouteImport } from './routes/_authenticated/financials'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedTalentHubRouteImport } from './routes/_authenticated/talent-hub'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
-import { Route as AuthenticatedTalentHubGenerateCvIdRouteImport } from './routes/_authenticated/talent-hub.generate.$cvId'
+import { Route as AuthenticatedClientsIndexRouteImport } from './routes/_authenticated/clients.index'
+import { Route as AuthenticatedClientsClientIdRouteImport } from './routes/_authenticated/clients.$clientId'
+import { Route as AuthenticatedDemandsIndexRouteImport } from './routes/_authenticated/demands.index'
+import { Route as AuthenticatedDemandsDemandIdRouteImport } from './routes/_authenticated/demands.$demandId'
+import { Route as AuthenticatedDemandsNewRouteImport } from './routes/_authenticated/demands.new'
+import { Route as AuthenticatedTalentHubIndexRouteImport } from './routes/_authenticated/talent-hub.index'
+import { Route as AuthenticatedTalentHubCvIdRouteImport } from './routes/_authenticated/talent-hub.$cvId'
+import { Route as AuthenticatedTalentHubNewRouteImport } from './routes/_authenticated/talent-hub.new'
 import { Route as AuthenticatedDemandsDemandIdEditRouteImport } from './routes/_authenticated/demands.$demandId.edit'
+import { Route as AuthenticatedTalentHubGenerateCvIdRouteImport } from './routes/_authenticated/talent-hub.generate.$cvId'
 
-const SetPasswordRoute = SetPasswordRouteImport.update({
-  id: '/set-password',
-  path: '/set-password',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RootRoute = RootRouteImport.update({
-  id: '/root',
-  path: '/root',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -48,28 +47,29 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const RootRoute = RootRouteImport.update({
+  id: '/root',
+  path: '/root',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedTalentHubRoute = AuthenticatedTalentHubRouteImport.update({
-  id: '/talent-hub',
-  path: '/talent-hub',
+const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const AuthenticatedFinancialsRoute = AuthenticatedFinancialsRouteImport.update({
+  id: '/financials',
+  path: '/financials',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNotificationsRoute =
@@ -78,19 +78,53 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedFinancialsRoute = AuthenticatedFinancialsRouteImport.update({
-  id: '/financials',
-  path: '/financials',
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
-  id: '/clients',
-  path: '/clients',
+const AuthenticatedTalentHubRoute = AuthenticatedTalentHubRouteImport.update({
+  id: '/talent-hub',
+  path: '/talent-hub',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedClientsIndexRoute =
+  AuthenticatedClientsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedClientsRoute,
+  } as any)
+const AuthenticatedClientsClientIdRoute =
+  AuthenticatedClientsClientIdRouteImport.update({
+    id: '/$clientId',
+    path: '/$clientId',
+    getParentRoute: () => AuthenticatedClientsRoute,
+  } as any)
+const AuthenticatedDemandsIndexRoute =
+  AuthenticatedDemandsIndexRouteImport.update({
+    id: '/demands/',
+    path: '/demands/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDemandsDemandIdRoute =
+  AuthenticatedDemandsDemandIdRouteImport.update({
+    id: '/demands/$demandId',
+    path: '/demands/$demandId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDemandsNewRoute = AuthenticatedDemandsNewRouteImport.update({
+  id: '/demands/new',
+  path: '/demands/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTalentHubIndexRoute =
@@ -99,17 +133,11 @@ const AuthenticatedTalentHubIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedTalentHubRoute,
   } as any)
-const AuthenticatedDemandsIndexRoute =
-  AuthenticatedDemandsIndexRouteImport.update({
-    id: '/demands/',
-    path: '/demands/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedClientsIndexRoute =
-  AuthenticatedClientsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedClientsRoute,
+const AuthenticatedTalentHubCvIdRoute =
+  AuthenticatedTalentHubCvIdRouteImport.update({
+    id: '/$cvId',
+    path: '/$cvId',
+    getParentRoute: () => AuthenticatedTalentHubRoute,
   } as any)
 const AuthenticatedTalentHubNewRoute =
   AuthenticatedTalentHubNewRouteImport.update({
@@ -117,45 +145,17 @@ const AuthenticatedTalentHubNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedTalentHubRoute,
   } as any)
-const AuthenticatedTalentHubCvIdRoute =
-  AuthenticatedTalentHubCvIdRouteImport.update({
-    id: '/$cvId',
-    path: '/$cvId',
-    getParentRoute: () => AuthenticatedTalentHubRoute,
-  } as any)
-const AuthenticatedDemandsNewRoute = AuthenticatedDemandsNewRouteImport.update({
-  id: '/demands/new',
-  path: '/demands/new',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedDemandsDemandIdRoute =
-  AuthenticatedDemandsDemandIdRouteImport.update({
-    id: '/demands/$demandId',
-    path: '/demands/$demandId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedClientsClientIdRoute =
-  AuthenticatedClientsClientIdRouteImport.update({
-    id: '/$clientId',
-    path: '/$clientId',
-    getParentRoute: () => AuthenticatedClientsRoute,
-  } as any)
-const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedTalentHubGenerateCvIdRoute =
-  AuthenticatedTalentHubGenerateCvIdRouteImport.update({
-    id: '/generate/$cvId',
-    path: '/generate/$cvId',
-    getParentRoute: () => AuthenticatedTalentHubRoute,
-  } as any)
 const AuthenticatedDemandsDemandIdEditRoute =
   AuthenticatedDemandsDemandIdEditRouteImport.update({
     id: '/edit',
     path: '/edit',
     getParentRoute: () => AuthenticatedDemandsDemandIdRoute,
+  } as any)
+const AuthenticatedTalentHubGenerateCvIdRoute =
+  AuthenticatedTalentHubGenerateCvIdRouteImport.update({
+    id: '/generate/$cvId',
+    path: '/generate/$cvId',
+    getParentRoute: () => AuthenticatedTalentHubRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -314,25 +314,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/set-password': {
-      id: '/set-password'
-      path: '/set-password'
-      fullPath: '/set-password'
-      preLoaderRoute: typeof SetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/root': {
-      id: '/root'
-      path: '/root'
-      fullPath: '/root'
-      preLoaderRoute: typeof RootRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -342,46 +328,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/talent-hub': {
-      id: '/_authenticated/talent-hub'
-      path: '/talent-hub'
-      fullPath: '/talent-hub'
-      preLoaderRoute: typeof AuthenticatedTalentHubRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/root': {
+      id: '/root'
+      path: '/root'
+      fullPath: '/root'
+      preLoaderRoute: typeof RootRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/reports': {
-      id: '/_authenticated/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AuthenticatedReportsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/notifications': {
-      id: '/_authenticated/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/financials': {
-      id: '/_authenticated/financials'
-      path: '/financials'
-      fullPath: '/financials'
-      preLoaderRoute: typeof AuthenticatedFinancialsRouteImport
+    '/_authenticated/clients': {
+      id: '/_authenticated/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof AuthenticatedClientsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -391,25 +363,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/clients': {
-      id: '/_authenticated/clients'
-      path: '/clients'
-      fullPath: '/clients'
-      preLoaderRoute: typeof AuthenticatedClientsRouteImport
+    '/_authenticated/financials': {
+      id: '/_authenticated/financials'
+      path: '/financials'
+      fullPath: '/financials'
+      preLoaderRoute: typeof AuthenticatedFinancialsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/talent-hub/': {
-      id: '/_authenticated/talent-hub/'
-      path: '/'
-      fullPath: '/talent-hub/'
-      preLoaderRoute: typeof AuthenticatedTalentHubIndexRouteImport
-      parentRoute: typeof AuthenticatedTalentHubRoute
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/demands/': {
-      id: '/_authenticated/demands/'
-      path: '/demands'
-      fullPath: '/demands/'
-      preLoaderRoute: typeof AuthenticatedDemandsIndexRouteImport
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/talent-hub': {
+      id: '/_authenticated/talent-hub'
+      path: '/talent-hub'
+      fullPath: '/talent-hub'
+      preLoaderRoute: typeof AuthenticatedTalentHubRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/clients/': {
@@ -419,25 +412,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientsIndexRouteImport
       parentRoute: typeof AuthenticatedClientsRoute
     }
-    '/_authenticated/talent-hub/new': {
-      id: '/_authenticated/talent-hub/new'
-      path: '/new'
-      fullPath: '/talent-hub/new'
-      preLoaderRoute: typeof AuthenticatedTalentHubNewRouteImport
-      parentRoute: typeof AuthenticatedTalentHubRoute
+    '/_authenticated/clients/$clientId': {
+      id: '/_authenticated/clients/$clientId'
+      path: '/$clientId'
+      fullPath: '/clients/$clientId'
+      preLoaderRoute: typeof AuthenticatedClientsClientIdRouteImport
+      parentRoute: typeof AuthenticatedClientsRoute
     }
-    '/_authenticated/talent-hub/$cvId': {
-      id: '/_authenticated/talent-hub/$cvId'
-      path: '/$cvId'
-      fullPath: '/talent-hub/$cvId'
-      preLoaderRoute: typeof AuthenticatedTalentHubCvIdRouteImport
-      parentRoute: typeof AuthenticatedTalentHubRoute
-    }
-    '/_authenticated/demands/new': {
-      id: '/_authenticated/demands/new'
-      path: '/demands/new'
-      fullPath: '/demands/new'
-      preLoaderRoute: typeof AuthenticatedDemandsNewRouteImport
+    '/_authenticated/demands/': {
+      id: '/_authenticated/demands/'
+      path: '/demands'
+      fullPath: '/demands/'
+      preLoaderRoute: typeof AuthenticatedDemandsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/demands/$demandId': {
@@ -447,25 +433,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandsDemandIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/clients/$clientId': {
-      id: '/_authenticated/clients/$clientId'
-      path: '/$clientId'
-      fullPath: '/clients/$clientId'
-      preLoaderRoute: typeof AuthenticatedClientsClientIdRouteImport
-      parentRoute: typeof AuthenticatedClientsRoute
-    }
-    '/_authenticated/admin/users': {
-      id: '/_authenticated/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+    '/_authenticated/demands/new': {
+      id: '/_authenticated/demands/new'
+      path: '/demands/new'
+      fullPath: '/demands/new'
+      preLoaderRoute: typeof AuthenticatedDemandsNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/talent-hub/generate/$cvId': {
-      id: '/_authenticated/talent-hub/generate/$cvId'
-      path: '/generate/$cvId'
-      fullPath: '/talent-hub/generate/$cvId'
-      preLoaderRoute: typeof AuthenticatedTalentHubGenerateCvIdRouteImport
+    '/_authenticated/talent-hub/': {
+      id: '/_authenticated/talent-hub/'
+      path: '/'
+      fullPath: '/talent-hub/'
+      preLoaderRoute: typeof AuthenticatedTalentHubIndexRouteImport
+      parentRoute: typeof AuthenticatedTalentHubRoute
+    }
+    '/_authenticated/talent-hub/$cvId': {
+      id: '/_authenticated/talent-hub/$cvId'
+      path: '/$cvId'
+      fullPath: '/talent-hub/$cvId'
+      preLoaderRoute: typeof AuthenticatedTalentHubCvIdRouteImport
+      parentRoute: typeof AuthenticatedTalentHubRoute
+    }
+    '/_authenticated/talent-hub/new': {
+      id: '/_authenticated/talent-hub/new'
+      path: '/new'
+      fullPath: '/talent-hub/new'
+      preLoaderRoute: typeof AuthenticatedTalentHubNewRouteImport
       parentRoute: typeof AuthenticatedTalentHubRoute
     }
     '/_authenticated/demands/$demandId/edit': {
@@ -474,6 +467,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/demands/$demandId/edit'
       preLoaderRoute: typeof AuthenticatedDemandsDemandIdEditRouteImport
       parentRoute: typeof AuthenticatedDemandsDemandIdRoute
+    }
+    '/_authenticated/talent-hub/generate/$cvId': {
+      id: '/_authenticated/talent-hub/generate/$cvId'
+      path: '/generate/$cvId'
+      fullPath: '/talent-hub/generate/$cvId'
+      preLoaderRoute: typeof AuthenticatedTalentHubGenerateCvIdRouteImport
+      parentRoute: typeof AuthenticatedTalentHubRoute
     }
   }
 }

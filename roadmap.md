@@ -8,3 +8,6 @@
 - [x] Security finding status, privileged access review, rollback doc, tests + build
 - Stage 4 not started (by instruction); do not accept draft
 - [x] TJM amendment invalidates active final approval; placed rows flagged (0007)
+
+## Stage 4 (main thread)
+- [ ] Stage 4 dashboards running in draft "Stage 4 — Role-based dashboards"; waits on draft report + user approval

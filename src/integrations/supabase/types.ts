@@ -50,6 +50,7 @@ export type Database = {
       }
       candidate_financials: {
         Row: {
+          amendment_pending: boolean
           candidate_rate: number | null
           client_rate: number | null
           contract_duration_months: number | null
@@ -66,6 +67,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amendment_pending?: boolean
           candidate_rate?: number | null
           client_rate?: number | null
           contract_duration_months?: number | null
@@ -82,6 +84,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amendment_pending?: boolean
           candidate_rate?: number | null
           client_rate?: number | null
           contract_duration_months?: number | null

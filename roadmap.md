@@ -7,4 +7,4 @@
 - [x] UI end-to-end flow per role (Playwright) + DB-level blocks
 - [x] Security finding status, privileged access review, rollback doc, tests + build
 - Stage 4 not started (by instruction); do not accept draft
-- [ ] Known gap: approved final decision not reset when its TJM goes back to draft (needs your decision)
+- [x] TJM amendment invalidates active final approval; placed rows flagged (0007)

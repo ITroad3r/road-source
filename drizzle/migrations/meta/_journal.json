@@ -50,6 +50,13 @@
       "when": 1794930108417,
       "tag": "0006_restrict_tjm_activity_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794930380264,
+      "tag": "0007_tjm_amendment_resets_final_decision",
+      "breakpoints": true
     }
   ]
 }

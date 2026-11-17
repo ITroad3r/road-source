@@ -258,7 +258,8 @@
       "approved": "TJM approved",
       "approve": "Approve TJM",
       "locked": "Locked — approved by Operations",
-      "by": "Approved on"
+      "by": "Approved on",
+      "amendmentPending": "Amendment after placement — reapproval required (placement unchanged)"
     }
   }
 }

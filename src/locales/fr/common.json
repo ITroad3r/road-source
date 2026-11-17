@@ -258,7 +258,8 @@
       "approved": "TJM validé",
       "approve": "Valider le TJM",
       "locked": "Verrouillé — validé par les Opérations",
-      "by": "Validé le"
+      "by": "Validé le",
+      "amendmentPending": "Avenant après placement — réapprobation requise (placement inchangé)"
     }
   }
 }

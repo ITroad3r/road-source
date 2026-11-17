@@ -70,3 +70,11 @@ CREATE POLICY "Activity: business read" ON public.activity_log FOR SELECT TO aut
 ```
 3. Access policies on candidate_financials, user_roles and storage are unchanged by Stage 3; no rollback needed.
 4. Data: new columns are additive; historical stages and rates are untouched, so no data restore is required.
+
+### TJM amendment invalidates final approval (`0007_tjm_amendment_resets_final_decision.sql`, draft only)
+- Operations edits an approved TJM → TJM draft; if candidature final_decision=approved and stage≠placed, final_decision → pending in the same transaction; audit keeps previous approver/time/notes and old rates.
+- Placed candidates: stage and decision untouched; `candidate_financials.amendment_pending=true` until Operations reapproves the TJM.
+- Final approval locks the financial row (`FOR UPDATE`) and TJM edits lock the candidature, so concurrent requests serialize.
+- `qualification` / `final_decision` / `tjm_approval` audit rows are system-written only and immutable for signed-in users.
+- Regression: `tests/security/stage3_regression.py`, `tests/security/financial_confidentiality.py` (draft backend only).
+Rollback: `DROP TRIGGER trg_protect_decision_audit ON public.activity_log; DROP FUNCTION public.protect_decision_audit();` then re-run function bodies from 0005 (enforce_tjm_approval) and 0004 (enforce_pipeline_decisions); `amendment_pending` column can stay (mark DEPRECATED).

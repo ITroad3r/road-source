@@ -14,7 +14,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Shield, Search, Plus, X, User as UserIcon, UserPlus, Mail, Trash2 } from "lucide-react";
-import { useMyRoles, AppRole, ROLE_LABEL } from "@/hooks/useMyRoles";
+import { useMyRoles, AppRole } from "@/hooks/useMyRoles";
+import { capabilitiesFor } from "@/lib/permissions";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import { inviteUser, resendInvite, deleteUser } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
@@ -34,6 +37,8 @@ const roleColors: Record<AppRole, string> = {
 };
 
 function AdminUsers() {
+  const { t } = useTranslation();
+  const ROLE_LABEL = Object.fromEntries(ROLES.map((r) => [r, t(`roles.${r}`)])) as Record<AppRole, string>;
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
@@ -67,12 +72,26 @@ function AdminUsers() {
     },
   });
 
+  const { data: audit } = useQuery({
+    queryKey: ["admin-role-audit"],
+    enabled: !!myRoles?.includes("admin"),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("role_audit_log")
+        .select("id, target_user_id, role, action, actor_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const addRole = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); toast.success("Role added"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); qc.invalidateQueries({ queryKey: ["admin-role-audit"] }); toast.success("Role added"); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -81,7 +100,7 @@ function AdminUsers() {
       const { error } = await supabase.from("user_roles").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); toast.success("Role removed"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); qc.invalidateQueries({ queryKey: ["admin-role-audit"] }); toast.success("Role removed"); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -122,6 +141,7 @@ function AdminUsers() {
     rolesByUser.set(r.user_id, arr);
   });
 
+  const nameOf = (id: string) => { const p = profiles?.find((x) => x.id === id); return p ? (p.full_name ?? p.email) : id.slice(0, 8); };
   const term = q.trim().toLowerCase();
   const filtered = (profiles ?? []).filter((p) =>
     !term || p.email.toLowerCase().includes(term) || (p.full_name ?? "").toLowerCase().includes(term)
@@ -134,7 +154,7 @@ function AdminUsers() {
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-7 w-7" /> Users &amp; roles</h1>
           <p className="text-muted-foreground mt-1">Invite teammates, assign their role, and manage access. Invitees receive an email to complete their profile.</p>
         </div>
-        <InviteUserDialog onSubmit={(v) => inviteMut.mutateAsync(v)} loading={inviteMut.isPending} />
+        <InviteUserDialog labels={ROLE_LABEL} onSubmit={(v) => inviteMut.mutateAsync(v)} loading={inviteMut.isPending} />
       </header>
 
       <Card>
@@ -155,14 +175,15 @@ function AdminUsers() {
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Roles</TableHead>
+                <TableHead>Effective permissions</TableHead>
                 <TableHead className="w-48">Add role</TableHead>
                 <TableHead className="w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No users match.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No users match.</TableCell></TableRow>
               )}
               {filtered.map((p) => {
                 const userRoles = rolesByUser.get(p.id) ?? [];
@@ -189,7 +210,7 @@ function AdminUsers() {
                         {userRoles.map((r) => (
                           <Badge key={r.id} variant="outline" className={`gap-1 ${roleColors[r.role]}`}>
                             {ROLE_LABEL[r.role]}
-                            <button
+                            {!isSelf && <button
                               type="button"
                               onClick={() => {
                                 if (isSelf && r.role === "admin") {
@@ -202,13 +223,17 @@ function AdminUsers() {
                               aria-label={`Remove ${r.role}`}
                             >
                               <X className="h-3 w-3" />
-                            </button>
+                            </button>}
                           </Badge>
                         ))}
                       </div>
                     </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-56">
+                      {capabilitiesFor(userRoles.map((r) => r.role)).join(", ") || "—"}
+                    </TableCell>
                     <TableCell>
-                      <AddRoleControl available={available} onAdd={(role) => addRole.mutate({ userId: p.id, role })} />
+                      {isSelf ? <span className="text-xs text-muted-foreground">Another admin must change your roles</span> :
+                      <AddRoleControl labels={ROLE_LABEL} available={available} onAdd={(role) => addRole.mutate({ userId: p.id, role })} />}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -248,11 +273,38 @@ function AdminUsers() {
           </Table>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Role change history</CardTitle></CardHeader>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>When</TableHead>
+                <TableHead>Account</TableHead>
+                <TableHead>Change</TableHead>
+                <TableHead>By</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(audit ?? []).length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">No role changes recorded yet.</TableCell></TableRow>}
+              {(audit ?? []).map((a) => (
+                <TableRow key={a.id}>
+                  <TableCell className="text-xs whitespace-nowrap">{format(new Date(a.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
+                  <TableCell className="text-sm">{nameOf(a.target_user_id)}</TableCell>
+                  <TableCell className="text-sm">{a.action === "granted" ? "+ " : "− "}{ROLE_LABEL[a.role as AppRole] ?? a.role}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{a.actor_id ? nameOf(a.actor_id) : "System"}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-function AddRoleControl({ available, onAdd }: { available: AppRole[]; onAdd: (role: AppRole) => void }) {
+function AddRoleControl({ available, onAdd, labels }: { available: AppRole[]; onAdd: (role: AppRole) => void; labels: Record<AppRole, string> }) {
   const [val, setVal] = useState<string>("");
   if (available.length === 0) return <span className="text-xs text-muted-foreground">All assigned</span>;
   return (
@@ -260,7 +312,7 @@ function AddRoleControl({ available, onAdd }: { available: AppRole[]; onAdd: (ro
       <Select value={val} onValueChange={setVal}>
         <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select role" /></SelectTrigger>
         <SelectContent>
-          {available.map((r) => <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>)}
+          {available.map((r) => <SelectItem key={r} value={r}>{labels[r]}</SelectItem>)}
         </SelectContent>
       </Select>
       <Button size="sm" variant="outline" disabled={!val} onClick={() => { onAdd(val as AppRole); setVal(""); }}>
@@ -270,7 +322,7 @@ function AddRoleControl({ available, onAdd }: { available: AppRole[]; onAdd: (ro
   );
 }
 
-function InviteUserDialog({ onSubmit, loading }: { onSubmit: (v: { email: string; fullName: string; role: AppRole }) => Promise<unknown>; loading: boolean }) {
+function InviteUserDialog({ onSubmit, loading, labels }: { labels: Record<AppRole, string>; onSubmit: (v: { email: string; fullName: string; role: AppRole }) => Promise<unknown>; loading: boolean }) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -306,7 +358,7 @@ function InviteUserDialog({ onSubmit, loading }: { onSubmit: (v: { email: string
             <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {ROLES.map((r) => <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>)}
+                {ROLES.map((r) => <SelectItem key={r} value={r}>{labels[r]}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

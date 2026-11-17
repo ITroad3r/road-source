@@ -209,5 +209,12 @@
     "apr": "Apr",
     "may": "May",
     "jun": "Jun"
+  },
+  "roles": {
+    "sourceur": "Sourcer",
+    "hrbp": "HRBP",
+    "operations": "Operations Management",
+    "ceo": "CEO",
+    "admin": "Admin"
   }
 }

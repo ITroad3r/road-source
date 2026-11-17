@@ -386,6 +386,33 @@ export type Database = {
         }
         Relationships: []
       }
+      role_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       talent_hub_cvs: {
         Row: {
           availability:
@@ -491,6 +518,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles_backup_rbac: {
+        Row: {
+          backed_up_at: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          backed_up_at?: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          backed_up_at?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -525,6 +576,9 @@ export type Database = {
         | "division_director"
         | "ceo"
         | "admin"
+        | "sourceur"
+        | "hrbp"
+        | "operations"
       availability_status: "available" | "available_soon" | "unavailable"
       candidate_stage:
         | "identified"
@@ -691,6 +745,9 @@ export const Constants = {
         "division_director",
         "ceo",
         "admin",
+        "sourceur",
+        "hrbp",
+        "operations",
       ],
       availability_status: ["available", "available_soon", "unavailable"],
       candidate_stage: [

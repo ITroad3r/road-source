@@ -23,14 +23,14 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsers,
 });
 
-const ROLES: AppRole[] = ["sourcing_team", "division_manager", "division_director", "ceo", "admin"];
+const ROLES: AppRole[] = ["sourceur", "hrbp", "operations", "ceo", "admin"];
 
 const roleColors: Record<AppRole, string> = {
   admin: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
   ceo: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-  division_director: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
-  division_manager: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-  sourcing_team: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+  operations: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
+  hrbp: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+  sourceur: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
 };
 
 function AdminUsers() {
@@ -274,7 +274,7 @@ function InviteUserDialog({ onSubmit, loading }: { onSubmit: (v: { email: string
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<AppRole>("sourcing_team");
+  const [role, setRole] = useState<AppRole>("sourceur");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -289,7 +289,7 @@ function InviteUserDialog({ onSubmit, loading }: { onSubmit: (v: { email: string
           onSubmit={async (e) => {
             e.preventDefault();
             await onSubmit({ email, fullName, role });
-            setEmail(""); setFullName(""); setRole("sourcing_team"); setOpen(false);
+            setEmail(""); setFullName(""); setRole("sourceur"); setOpen(false);
           }}
           className="space-y-3"
         >

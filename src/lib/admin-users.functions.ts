@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const ROLES = ["sourcing_team", "division_manager", "division_director", "ceo", "admin"] as const;
+const ROLES = ["sourceur", "hrbp", "operations", "ceo", "admin"] as const;
 type Role = (typeof ROLES)[number];
 
 const InviteSchema = z.object({
@@ -47,8 +47,7 @@ export const inviteUser = createServerFn({ method: "POST" })
       .update({ full_name: data.fullName })
       .eq("id", newUserId);
 
-    // Trigger gives 'sourcing_team' by default; replace with requested role
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", newUserId);
+    // New users get no role by default; assign the requested one
     const { error: roleErr } = await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: newUserId, role: data.role });

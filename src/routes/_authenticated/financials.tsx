@@ -1,3 +1,4 @@
+import { can } from "@/lib/permissions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -47,7 +48,7 @@ function Financials() {
   const { user } = Route.useRouteContext();
   const { t } = useTranslation();
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
-  const canView = !!roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r));
+  const canView = can(roles, "financials.view");
   const [stageFilter, setStageFilter] = useState<string>("all");
 
   const { data: rows, isLoading } = useQuery({

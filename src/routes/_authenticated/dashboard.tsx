@@ -51,9 +51,9 @@ function Dashboard() {
   switch (primary) {
     case "admin":     return <AdminDashboard fullName={fullName} />;
     case "ceo":       return <CeoDashboard fullName={fullName} />;
-    case "division_director": return <DirectorDashboard fullName={fullName} />;
-    case "division_manager":  return <ManagerDashboard fullName={fullName} />;
-    case "sourcing_team":
+    case "operations": return <DirectorDashboard fullName={fullName} />;
+    case "hrbp":       return <ManagerDashboard fullName={fullName} />;
+    case "sourceur":
     default:          return <SourcingDashboard userId={user.id} fullName={fullName} />;
   }
 }
@@ -65,17 +65,13 @@ function AdminDashboard({ fullName }: { fullName: string | null }) {
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
           <Shield className="h-7 w-7" /> Admin console{fullName ? ` · ${fullName.split(" ")[0]}` : ""}
         </h1>
-        <p className="text-muted-foreground mt-1">You see the full picture. Manage users, then dive into operational metrics below.</p>
+        <p className="text-muted-foreground mt-1">Manage users, roles and account access. Business data requires a business role.</p>
       </header>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <ShortcutCard to="/admin/users" icon={UserPlus} title="Users & roles" body="Invite people, assign roles, manage access." />
-        <ShortcutCard to="/demands" icon={Briefcase} title="All demands" body="Full company demand backlog." />
-        <ShortcutCard to="/financials" icon={Euro} title="Financials" body="Revenue, cost, margins." />
-        <ShortcutCard to="/reports" icon={BarChart3} title="Reports" body="Team activity, conversion, trends." />
       </div>
 
-      <DirectorDashboard fullName={fullName} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { can } from "@/lib/permissions";
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,17 +38,18 @@ function AuthLayout() {
   }
 
   const { data: roles } = useMyRoles(user.id);
-  const isAdmin = roles?.includes("admin") ?? false;
-  const canCreateDemand = !!roles?.some((r) => ["admin", "division_manager"].includes(r));
-  const canSeeFinancials = !!roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r));
-  const canSeeReports = canSeeFinancials;
+  const isAdmin = can(roles, "users.manage");
+  const canCreateDemand = can(roles, "demands.manage");
+  const canSeeFinancials = can(roles, "financials.view");
+  const hasBusinessRole = can(roles, "candidates.view");
+  const canSeeReports = can(roles, "reports.view");
 
   const navItems = [
     { to: "/dashboard", label: t("nav.myDemands"), icon: LayoutDashboard },
-    { to: "/demands", label: t("nav.allDemands"), icon: Briefcase },
+    ...(hasBusinessRole ? [{ to: "/demands" as const, label: t("nav.allDemands"), icon: Briefcase }] : []),
     ...(canCreateDemand ? [{ to: "/demands/new" as const, label: t("nav.newDemand"), icon: FilePlus }] : []),
-    { to: "/clients", label: t("nav.clients"), icon: Building2 },
-    { to: "/talent-hub", label: t("nav.talentHub"), icon: Users },
+    ...(can(roles, "clients.view") ? [{ to: "/clients" as const, label: t("nav.clients"), icon: Building2 }] : []),
+    ...(can(roles, "candidates.view") ? [{ to: "/talent-hub" as const, label: t("nav.talentHub"), icon: Users }] : []),
     ...(canSeeFinancials ? [{ to: "/financials" as const, label: t("nav.financials"), icon: Euro }] : []),
     ...(canSeeReports ? [{ to: "/reports" as const, label: t("nav.reports"), icon: BarChart3 }] : []),
     { to: "/notifications", label: t("nav.notifications"), icon: Bell },

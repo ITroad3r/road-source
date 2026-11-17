@@ -1,3 +1,4 @@
+import { can } from "@/lib/permissions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,7 +43,7 @@ function ReportsPage() {
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
   const [rangeDays, setRangeDays] = useState<number>(90);
 
-  const canView = roles?.some((r) => ["admin", "division_manager", "division_director", "ceo"].includes(r)) ?? false;
+  const canView = can(roles, "reports.view");
 
   const since = useMemo(() => subDays(new Date(), rangeDays).toISOString(), [rangeDays]);
 

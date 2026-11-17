@@ -110,12 +110,4 @@ export function DemandCard({ d, compact = false }: { d: DemandRow; compact?: boo
   );
 }
 
-export function pickPrimaryRole(roles: string[] | undefined):
-  "admin" | "ceo" | "division_director" | "division_manager" | "sourcing_team" {
-  const r = roles ?? [];
-  if (r.includes("admin")) return "admin";
-  if (r.includes("ceo")) return "ceo";
-  if (r.includes("division_director")) return "division_director";
-  if (r.includes("division_manager")) return "division_manager";
-  return "sourcing_team";
-}
+export { pickPrimaryRole } from "@/lib/permissions";

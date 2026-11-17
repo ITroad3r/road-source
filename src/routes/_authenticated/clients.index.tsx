@@ -1,3 +1,4 @@
+import { can } from "@/lib/permissions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
@@ -44,7 +45,7 @@ function ClientsPage() {
   const qc = useQueryClient();
   const { user } = Route.useRouteContext();
   const { data: roles } = useMyRoles(user.id);
-  const canManage = !!roles?.some((r) => ["admin", "division_manager", "division_director"].includes(r));
+  const canManage = can(roles, "clients.manage");
 
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<ClientRow | null>(null);

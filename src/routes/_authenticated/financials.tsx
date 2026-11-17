@@ -1,5 +1,6 @@
 import { can } from "@/lib/permissions";
 import { createFileRoute } from "@tanstack/react-router";
+import { canApproveTjmFor } from "@/lib/decisions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -261,7 +262,7 @@ function Financials() {
                           </Badge>
                           {f.amendment_pending && <Badge variant="outline" className="bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20 text-[10px]">{t("decisions.tjm.amendmentPending")}</Badge>}
                           {f.tjm_status === "approved" && f.tjm_approved_at && <span className="text-[10px] text-muted-foreground">{t("decisions.tjm.by")} {format(new Date(f.tjm_approved_at), "dd/MM/yyyy")}</span>}
-                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && (
+                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && canApproveTjmFor(r.qualification_status, r.stage) && (
                             <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={() => approveTjm(f.id)}>{t("decisions.tjm.approve")}</Button>
                           )}
                         </div>

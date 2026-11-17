@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { finalApprovalBlocker } from "./decisions";
+import { finalApprovalBlocker, canApproveTjmFor } from "./decisions";
 import { can } from "./permissions";
 
 describe("qualification & TJM rules", () => {
@@ -11,8 +11,14 @@ describe("qualification & TJM rules", () => {
     expect(finalApprovalBlocker("qualified", "draft")).toBe("tjmNotApproved");
     expect(finalApprovalBlocker("qualified", "approved")).toBeNull();
   });
-  it("final approval allowed when qualified and no rate row", () => {
-    expect(finalApprovalBlocker("qualified", null)).toBeNull();
+  it("final approval blocked when qualified but no rate row exists", () => {
+    expect(finalApprovalBlocker("qualified", null)).toBe("tjmNotApproved");
+  });
+  it("TJM approval needs qualification, except historical placed rows", () => {
+    expect(canApproveTjmFor("pending", "submitted")).toBe(false);
+    expect(canApproveTjmFor("rejected", "offer")).toBe(false);
+    expect(canApproveTjmFor("qualified", "identified")).toBe(true);
+    expect(canApproveTjmFor("pending", "placed")).toBe(true);
   });
   it("HRBP qualifies but cannot decide or approve TJM", () => {
     expect(can(["hrbp"], "pipeline.qualify")).toBe(true);

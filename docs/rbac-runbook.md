@@ -78,3 +78,10 @@ CREATE POLICY "Activity: business read" ON public.activity_log FOR SELECT TO aut
 - `qualification` / `final_decision` / `tjm_approval` audit rows are system-written only and immutable for signed-in users.
 - Regression: `tests/security/stage3_regression.py`, `tests/security/financial_confidentiality.py` (draft backend only).
 Rollback: `DROP TRIGGER trg_protect_decision_audit ON public.activity_log; DROP FUNCTION public.protect_decision_audit();` then re-run function bodies from 0005 (enforce_tjm_approval) and 0004 (enforce_pipeline_decisions); `amendment_pending` column can stay (mark DEPRECATED).
+
+### SQL audit fixes (`0008_final_approval_requires_tjm_and_lock_order.sql`, draft only)
+- Final approval requires an existing, approved TJM (no financial row = rejected).
+- TJM approval (INSERT approved or UPDATE draft→approved) requires qualification_status='qualified'; historical `placed` rows are exempt so post-placement amendments can be re-approved.
+- Lock order: the only cross-table lock path is financial row → candidate row (TJM trigger). The final-approval trigger reads the financial row without locking; a concurrent TJM amendment waits on the candidate row, re-reads it, and resets the decision. No cycle is possible between these triggers.
+- Tests: `tests/security/stage3_regression.py` (E1–E4), `tests/security/stage3_concurrency.py` (pg_stat_database.deadlocks delta).
+Rollback: re-run the function bodies from 0007.

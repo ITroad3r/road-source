@@ -64,5 +64,19 @@ for i in range(6):
     [t.start() for t in ts]; [t.join() for t in ts]
     if dc(ACTIVE)["final_decision"]=="approved" and fin(ACTIVE)["tjm_status"]!="approved": bad+=1
 check("D simultaneous amendment + approval never leaves approved candidate with draft TJM (6 races)", bad==0, f"violations={bad}")
+# --- E. audit fixes (0008)
+NOQ="aaaaaaaa-0000-4000-8000-00000000000b"
+requests.delete(f"{U}/rest/v1/candidate_financials?demand_candidate_id=eq.{NOQ}",headers=H("ops"))
+pdc("hrbp",NOQ,{"qualification_status":"pending"})
+r=requests.post(f"{U}/rest/v1/candidate_financials",headers=H("ops"),json={"demand_candidate_id":NOQ,"client_rate":640,"tjm_status":"approved"})
+check("E1 INSERT approved TJM before qualification rejected", not r.ok and fin(NOQ) is None, str(r.status_code))
+r=requests.post(f"{U}/rest/v1/candidate_financials",headers=H("ops"),json={"demand_candidate_id":NOQ,"client_rate":640})
+check("E2 draft TJM before qualification allowed", r.ok, str(r.status_code))
+r=pfin("ops",NOQ,{"tjm_status":"approved"})
+check("E3 UPDATE draft->approved before qualification rejected", not r.ok and fin(NOQ)["tjm_status"]=="draft", str(r.status_code))
+requests.delete(f"{U}/rest/v1/candidate_financials?demand_candidate_id=eq.{NOQ}",headers=H("ops"))
+pdc("hrbp",NOQ,{"qualification_status":"qualified"})
+r=pdc("ops",NOQ,{"final_decision":"approved"})
+check("E4 final approval of qualified candidate with NO financial record rejected", not r.ok and dc(NOQ)["final_decision"]=="pending", r.text[:80])
 for s,n,d in res: print(f"{s}\t{n}\t{d}")
 print("TOTAL",sum(1 for x in res if x[0]=="PASS"),"/",len(res))

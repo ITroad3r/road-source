@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { finalApprovalBlocker, canApproveTjmFor } from "./decisions";
+import { finalApprovalBlocker, canApproveTjmFor, placementBlocker } from "./decisions";
 import { can } from "./permissions";
 
 describe("qualification & TJM rules", () => {
@@ -14,11 +14,18 @@ describe("qualification & TJM rules", () => {
   it("final approval blocked when qualified but no rate row exists", () => {
     expect(finalApprovalBlocker("qualified", null)).toBe("tjmNotApproved");
   });
-  it("TJM approval needs qualification, except historical placed rows", () => {
-    expect(canApproveTjmFor("pending", "submitted")).toBe(false);
-    expect(canApproveTjmFor("rejected", "offer")).toBe(false);
-    expect(canApproveTjmFor("qualified", "identified")).toBe(true);
-    expect(canApproveTjmFor("pending", "placed")).toBe(true);
+  it("TJM approval needs qualification, except grandfathered placements", () => {
+    expect(canApproveTjmFor("pending", false)).toBe(false);
+    expect(canApproveTjmFor("rejected", false)).toBe(false);
+    expect(canApproveTjmFor("qualified", false)).toBe(true);
+    expect(canApproveTjmFor("pending", true)).toBe(true);
+  });
+  it("new placement needs qualification, approved TJM and final approval", () => {
+    expect(placementBlocker("pending", "approved", "approved", false)).toBe("notQualified");
+    expect(placementBlocker("qualified", null, "approved", false)).toBe("tjmNotApproved");
+    expect(placementBlocker("qualified", "approved", "pending", false)).toBe("noFinalApproval");
+    expect(placementBlocker("qualified", "approved", "approved", false)).toBeNull();
+    expect(placementBlocker("pending", null, "pending", true)).toBeNull();
   });
   it("HRBP qualifies but cannot decide or approve TJM", () => {
     expect(can(["hrbp"], "pipeline.qualify")).toBe(true);

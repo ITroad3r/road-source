@@ -30,6 +30,7 @@ type Row = {
   id: string;
   stage: string;
   qualification_status: "pending" | "qualified" | "rejected";
+  legacy_placement: boolean;
   demand_id: string;
   cv_id: string;
   talent_hub_cvs: { full_name: string; headline: string | null } | null;
@@ -71,7 +72,7 @@ function Financials() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, qualification_status, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at, amendment_pending)")
+        .select("id, stage, qualification_status, legacy_placement, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at, amendment_pending)")
         // Qualified candidates appear as soon as HRBP/Operations qualifies them (any Kanban stage);
         // historical offer/placed rows stay visible.
         .or("qualification_status.eq.qualified,stage.in.(offer,placed)")
@@ -262,7 +263,7 @@ function Financials() {
                           </Badge>
                           {f.amendment_pending && <Badge variant="outline" className="bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20 text-[10px]">{t("decisions.tjm.amendmentPending")}</Badge>}
                           {f.tjm_status === "approved" && f.tjm_approved_at && <span className="text-[10px] text-muted-foreground">{t("decisions.tjm.by")} {format(new Date(f.tjm_approved_at), "dd/MM/yyyy")}</span>}
-                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && canApproveTjmFor(r.qualification_status, r.stage) && (
+                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && canApproveTjmFor(r.qualification_status, r.legacy_placement) && (
                             <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={() => approveTjm(f.id)}>{t("decisions.tjm.approve")}</Button>
                           )}
                         </div>

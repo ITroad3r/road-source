@@ -159,6 +159,7 @@ export type Database = {
           demand_id: string
           final_decision: Database["public"]["Enums"]["final_decision"]
           id: string
+          legacy_placement: boolean
           notes: string | null
           qualification_notes: string | null
           qualification_status: Database["public"]["Enums"]["qualification_status"]
@@ -177,6 +178,7 @@ export type Database = {
           demand_id: string
           final_decision?: Database["public"]["Enums"]["final_decision"]
           id?: string
+          legacy_placement?: boolean
           notes?: string | null
           qualification_notes?: string | null
           qualification_status?: Database["public"]["Enums"]["qualification_status"]
@@ -195,6 +197,7 @@ export type Database = {
           demand_id?: string
           final_decision?: Database["public"]["Enums"]["final_decision"]
           id?: string
+          legacy_placement?: boolean
           notes?: string | null
           qualification_notes?: string | null
           qualification_status?: Database["public"]["Enums"]["qualification_status"]

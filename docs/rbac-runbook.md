@@ -85,3 +85,10 @@ Rollback: `DROP TRIGGER trg_protect_decision_audit ON public.activity_log; DROP 
 - Lock order: the only cross-table lock path is financial row → candidate row (TJM trigger). The final-approval trigger reads the financial row without locking; a concurrent TJM amendment waits on the candidate row, re-reads it, and resets the decision. No cycle is possible between these triggers.
 - Tests: `tests/security/stage3_regression.py` (E1–E4), `tests/security/stage3_concurrency.py` (pg_stat_database.deadlocks delta).
 Rollback: re-run the function bodies from 0007.
+
+### Legacy placements & placement gate (`0009`, `0010`, draft only)
+- `demand_candidates.legacy_placement`: set once to true for rows already `placed` when 0009 runs; forced false on insert and immutable for signed-in users. Only legacy rows may re-approve TJM without qualification.
+- Non-legacy rows can move to `placed` only with qualification=qualified, approved TJM and final_decision=approved; inserting as `placed` is refused.
+- Qualification revoked after final approval: active row → final_decision reset to pending (audited, reason `qualification_revoked`); placed row → change refused.
+- 0010 fixes a pre-existing bug (also present in production): `auto_close_demand_on_hire` set `demands.status='filled'`, which is not a valid status, so every move to `placed` failed. Now sets `status='placed'`.
+Rollback: re-run function bodies from 0008 (and the original auto-close body if desired); `legacy_placement` column can stay (mark DEPRECATED).

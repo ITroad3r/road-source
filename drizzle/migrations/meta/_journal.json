@@ -64,6 +64,20 @@
       "when": 1794930714862,
       "tag": "0008_final_approval_requires_tjm_and_lock_order",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794931222626,
+      "tag": "0009_legacy_placement_and_placement_gate",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794931287374,
+      "tag": "0010_fix_auto_close_demand_status",
+      "breakpoints": true
     }
   ]
 }

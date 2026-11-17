@@ -10,7 +10,18 @@ export function finalApprovalBlocker(q: QualificationStatus, tjm: TjmStatus | nu
   return null;
 }
 
-/** TJM approval needs a qualified candidate; historical placed rows are exempt so amendments can be re-approved. */
-export function canApproveTjmFor(q: QualificationStatus, stage: string): boolean {
-  return q === "qualified" || stage === "placed";
+/** TJM approval needs a qualified candidate; only grandfathered (pre-Stage 3) placements are exempt. */
+export function canApproveTjmFor(q: QualificationStatus, legacyPlacement: boolean): boolean {
+  return q === "qualified" || legacyPlacement;
+}
+
+/** Why a new candidature cannot move to "placed", or null. Legacy placements are never re-checked. */
+export function placementBlocker(
+  q: QualificationStatus, tjm: TjmStatus | null, decision: FinalDecision, legacyPlacement: boolean,
+): "notQualified" | "tjmNotApproved" | "noFinalApproval" | null {
+  if (legacyPlacement) return null;
+  if (q !== "qualified") return "notQualified";
+  if (tjm !== "approved") return "tjmNotApproved";
+  if (decision !== "approved") return "noFinalApproval";
+  return null;
 }

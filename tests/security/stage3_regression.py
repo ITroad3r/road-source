@@ -78,5 +78,44 @@ requests.delete(f"{U}/rest/v1/candidate_financials?demand_candidate_id=eq.{NOQ}"
 pdc("hrbp",NOQ,{"qualification_status":"qualified"})
 r=pdc("ops",NOQ,{"final_decision":"approved"})
 check("E4 final approval of qualified candidate with NO financial record rejected", not r.ok and dc(NOQ)["final_decision"]=="pending", r.text[:80])
+# --- F/G/H/I. placement gate, grandfathering, revocation (0009)
+import time
+DEM="aaaaaaaa-0000-4000-8000-000000000002"
+cv=requests.post(f"{U}/rest/v1/talent_hub_cvs",headers=H("sourceur"),json={"full_name":f"[SYNTH] New {int(time.time())}"}).json()[0]["id"]
+r=requests.post(f"{U}/rest/v1/demand_candidates",headers=H("sourceur"),json={"demand_id":DEM,"cv_id":cv,"stage":"placed"})
+check("F1 new candidature cannot be inserted as placed", not r.ok, str(r.status_code))
+NEW=requests.post(f"{U}/rest/v1/demand_candidates",headers=H("sourceur"),json={"demand_id":DEM,"cv_id":cv,"stage":"identified"}).json()[0]["id"]
+st=lambda id: requests.get(f"{U}/rest/v1/demand_candidates?id=eq.{id}&select=stage,legacy_placement,qualification_status,final_decision",headers=H("ops")).json()[0]
+r=pdc("sourceur",NEW,{"stage":"placed"}); check("F2 unqualified candidate cannot be placed (Kanban/API)", not r.ok and st(NEW)["stage"]=="identified", r.text[:70])
+pdc("hrbp",NEW,{"qualification_status":"qualified"})
+requests.post(f"{U}/rest/v1/candidate_financials",headers=H("ops"),json={"demand_candidate_id":NEW,"client_rate":700,"candidate_rate":500,"margin":200})
+r=pdc("ops",NEW,{"stage":"placed"}); check("F3 qualified but TJM draft cannot be placed", not r.ok and st(NEW)["stage"]=="identified", r.text[:70])
+pfin("ops",NEW,{"tjm_status":"approved"})
+r=pdc("ops",NEW,{"stage":"placed"}); check("F4 TJM approved but no final approval cannot be placed", not r.ok and st(NEW)["stage"]=="identified", r.text[:70])
+pdc("ops",NEW,{"final_decision":"approved"})
+for role in ["ceo","admin"]:
+    r=pdc(role,NEW,{"stage":"placed"}); check(f"I {role}: cannot move candidate to placed", st(NEW)["stage"]=="identified", str(r.status_code))
+for role in ["sourceur","hrbp","ops"]:
+    pdc(role,NEW,{"legacy_placement":True})
+check("I nobody can set the legacy flag (sourceur/hrbp/ops)", st(NEW)["legacy_placement"] is False)
+r=pdc("sourceur",NEW,{"stage":"placed"}); s2=st(NEW)
+check("F5 full chain complete: assigned sourceur can place; not legacy", r.ok and s2["stage"]=="placed" and s2["legacy_placement"] is False, r.text[:70])
+r=pdc("hrbp",NEW,{"qualification_status":"rejected"})
+check("H1 revoking qualification of placed+approved candidate is blocked with explanation", not r.ok and "placed" in r.text and st(NEW)["qualification_status"]=="qualified", r.text[:90])
+pfin("ops",NEW,{"client_rate":710}); r=pfin("ops",NEW,{"tjm_status":"approved"})
+check("G1 new placed candidate: amended TJM re-approved (qualified)", fin(NEW)["tjm_status"]=="approved")
+# grandfathered
+g=st(PLACED); check("G2 pre-Stage 3 placement is flagged legacy", g["legacy_placement"] is True and g["qualification_status"]!="qualified")
+pdc("ops",PLACED,{"legacy_placement":False}); check("G3 legacy flag cannot be removed", st(PLACED)["legacy_placement"] is True)
+pfin("ops",PLACED,{"client_rate":fin(PLACED)["client_rate"]+1}); r=pfin("ops",PLACED,{"tjm_status":"approved"})
+check("G4 legacy placement: TJM re-approval without qualification allowed", fin(PLACED)["tjm_status"]=="approved" and st(PLACED)["stage"]=="placed")
+# revocation on active approved candidature
+set_active_approved(); prev=dc(ACTIVE)
+r=pdc("hrbp",ACTIVE,{"qualification_status":"rejected"}); a=st(ACTIVE)
+check("H2 revocation after final approval resets active approval to pending", r.ok and a["qualification_status"]=="rejected" and a["final_decision"]=="pending", r.text[:70])
+lg=requests.get(f"{U}/rest/v1/activity_log?demand_candidate_id=eq.{ACTIVE}&kind=eq.final_decision&order=created_at.desc&limit=1&select=metadata",headers=H("ops")).json()[0]["metadata"]
+check("H3 history keeps previous approval on revocation", lg.get("reason")=="qualification_revoked" and lg.get("previous_decided_by")==prev["decided_by"])
+r=pdc("ops",ACTIVE,{"final_decision":"approved"}); check("H4 cannot re-approve while qualification rejected", not r.ok)
+pdc("hrbp",ACTIVE,{"qualification_status":"qualified"}); pdc("ops",ACTIVE,{"final_decision":"approved"})
 for s,n,d in res: print(f"{s}\t{n}\t{d}")
 print("TOTAL",sum(1 for x in res if x[0]=="PASS"),"/",len(res))

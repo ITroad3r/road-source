@@ -22,6 +22,13 @@
       "when": 1794928220155,
       "tag": "0002_block_self_role_change",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794928512904,
+      "tag": "0003_revoke_anon_business_tables",
+      "breakpoints": true
     }
   ]
 }

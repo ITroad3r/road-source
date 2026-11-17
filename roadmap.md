@@ -3,7 +3,7 @@
 - [x] Stage 2: admin console with permissions + role history (UI)
 - [x] Block admins changing their own roles in the database
 - [x] Financial access test in isolated test copy (all pass)
-- [ ] Optional: refuse not-signed-in visitors outright (awaiting approval)
+- [x] Refuse not-signed-in visitors outright on business data
 - [ ] Stage 3: qualification + TJM approval workflow
 - [ ] Stage 4: dashboards + FR/EN labels
 - [ ] Stage 5: role-scoped security tests, regression, readiness runbook

@@ -33,3 +33,4 @@ Ran in draft "Financial RBAC test (isolated)" with its own test database; 5 synt
 Result: all checks PASS (see chat report). Production verified unchanged afterwards
 (0 rate rows, 0 @test.local users, 7 role rows, 2 audit rows).
 Recommended (not applied): REVOKE ALL on business tables FROM anon.
+- Applied `0003_revoke_anon_business_tables.sql`: anon has no grants on business tables. Rollback: re-GRANT SELECT to anon (not recommended).

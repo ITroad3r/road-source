@@ -1,7 +1,7 @@
 # Roadmap — RBAC refactoring
 - [x] Stage 1: roles, migration, RLS, audit (applied to shared DB)
 - [x] Stage 2: admin console with permissions + role history (UI)
-- [ ] Block admins changing their own roles in the database (waiting for approval to change shared database)
+- [x] Block admins changing their own roles in the database
 - [ ] Financial access test with sample rows (waiting for approval on test method)
 - [ ] Stage 3: qualification + TJM approval workflow
 - [ ] Stage 4: dashboards + FR/EN labels

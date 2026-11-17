@@ -20,3 +20,10 @@ Old enum values remain (Postgres cannot drop enum values) but are not referenced
 2. Re-apply the previous policies from `supabase/migrations/20260606104406_*.sql` and `20260607114513_*.sql` (policy sections).
 3. Revert frontend commit "RBAC stage 1–2".
 The last-admin trigger may need `ALTER TABLE user_roles DISABLE TRIGGER trg_prevent_last_admin` during step 1.
+
+## Self-role-change guard (applied 17 Nov 2026, `0002_block_self_role_change.sql`)
+- No signed-in user can add or remove their own roles; admins manage other accounts only.
+- Verified: self-grant blocked, self-revoke blocked, granting another user allowed (auto-rolled-back test).
+- Recovery with no second admin: run the role change from the backend SQL console (no signed-in user);
+  it is recorded in role_audit_log with actor "System".
+- Rollback: `DROP TRIGGER trg_prevent_self_role_change ON public.user_roles;`

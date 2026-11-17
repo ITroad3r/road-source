@@ -15,6 +15,13 @@
       "when": 1794927424934,
       "tag": "0001_rbac_remap_and_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794928220155,
+      "tag": "0002_block_self_role_change",
+      "breakpoints": true
     }
   ]
 }

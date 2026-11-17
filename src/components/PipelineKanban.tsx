@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,9 @@ export function PipelineKanban({
   candidates,
   onStageChange,
   onRemove,
+  renderExtra,
 }: {
+  renderExtra?: (id: string) => ReactNode;
   candidates: KanbanCandidate[];
   onStageChange: (id: string, stage: KanbanStage) => void;
   onRemove: (id: string) => void;
@@ -135,6 +137,7 @@ export function PipelineKanban({
                           )}
                         </div>
                       )}
+                      {renderExtra?.(dc.id)}
                     </CardContent>
                   </Card>
                 ))}

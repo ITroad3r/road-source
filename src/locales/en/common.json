@@ -216,5 +216,48 @@
     "operations": "Operations Management",
     "ceo": "CEO",
     "admin": "Admin"
+  },
+  "decisions": {
+    "saved": "Decision saved",
+    "q": {
+      "pending": "Awaiting qualification",
+      "qualified": "Qualified",
+      "rejected": "Rejected by HRBP"
+    },
+    "d": {
+      "pending": "Decision pending",
+      "approved": "Approved",
+      "rejected": "Not approved"
+    },
+    "qualify": "Qualify",
+    "reject": "Reject",
+    "approve": "Final approve",
+    "rejectFinal": "Final reject",
+    "blocker": {
+      "notQualified": "Needs HRBP qualification first.",
+      "tjmNotApproved": "Approve the TJM on the Financials page first."
+    },
+    "awaitHrbp": "Awaiting HRBP review",
+    "awaitOps": "Awaiting Operations decision",
+    "rejectedByHrbp": "Not retained by HRBP",
+    "notesPlaceholder": "Notes (optional)",
+    "confirm": "Confirm",
+    "dialog": {
+      "qualification": {
+        "qualified": "Qualify candidate",
+        "rejected": "Reject candidate"
+      },
+      "decision": {
+        "approved": "Approve candidature",
+        "rejected": "Reject candidature"
+      }
+    },
+    "tjm": {
+      "draft": "TJM draft",
+      "approved": "TJM approved",
+      "approve": "Approve TJM",
+      "locked": "Locked — approved by Operations",
+      "by": "Approved on"
+    }
   }
 }

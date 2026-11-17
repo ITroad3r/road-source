@@ -41,6 +41,8 @@ type Row = {
     placement_date: string | null;
     contract_duration_months: number | null;
     notes: string | null;
+    tjm_status: "draft" | "approved";
+    tjm_approved_at: string | null;
   }>;
 };
 
@@ -49,6 +51,15 @@ function Financials() {
   const { t } = useTranslation();
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
   const canView = can(roles, "financials.view");
+  const canEdit = can(roles, "financials.edit");
+  const canApproveTjm = can(roles, "tjm.approve");
+  const qcFin = useQueryClient();
+  async function approveTjm(id: string) {
+    const { error } = await supabase.from("candidate_financials").update({ tjm_status: "approved" }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(t("decisions.saved"));
+    qcFin.invalidateQueries({ queryKey: ["financials-rows"] });
+  }
   const [stageFilter, setStageFilter] = useState<string>("all");
 
   const { data: rows, isLoading } = useQuery({
@@ -57,7 +68,7 @@ function Financials() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes)")
+        .select("id, stage, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at)")
         .in("stage", ["offer", "placed"])
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -206,14 +217,15 @@ function Financials() {
                 <TableHead className="text-right">{t("financials.clientRate")}</TableHead>
                 <TableHead className="text-right">{t("financials.candidateRate")}</TableHead>
                 <TableHead className="text-right">{t("financials.margin")}</TableHead>
+                <TableHead>TJM</TableHead>
                 <TableHead>{t("financials.placement")}</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">{t("common.loading")}</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">{t("common.loading")}</TableCell></TableRow>}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">{t("financials.noPipeline")}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">{t("financials.noPipeline")}</TableCell></TableRow>
               )}
               {filtered.map((r) => {
                 const f = r.candidate_financials?.[0];
@@ -231,8 +243,21 @@ function Financials() {
                     <TableCell className="text-right tabular-nums">{f?.client_rate != null ? `€${f.client_rate}` : "—"}</TableCell>
                     <TableCell className="text-right tabular-nums">{f?.candidate_rate != null ? `€${f.candidate_rate}` : "—"}</TableCell>
                     <TableCell className="text-right tabular-nums font-medium">{f?.margin != null ? `€${f.margin}` : "—"}</TableCell>
+                    <TableCell>
+                      {f ? (
+                        <div className="flex flex-col items-start gap-1">
+                          <Badge variant="outline" className={f.tjm_status === "approved" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20" : "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"}>
+                            {f.tjm_status === "approved" && <Lock className="h-3 w-3 mr-1" />}{t(`decisions.tjm.${f.tjm_status}`)}
+                          </Badge>
+                          {f.tjm_status === "approved" && f.tjm_approved_at && <span className="text-[10px] text-muted-foreground">{t("decisions.tjm.by")} {format(new Date(f.tjm_approved_at), "dd/MM/yyyy")}</span>}
+                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && (
+                            <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={() => approveTjm(f.id)}>{t("decisions.tjm.approve")}</Button>
+                          )}
+                        </div>
+                      ) : "—"}
+                    </TableCell>
                     <TableCell className="text-sm">{f?.placement_date ? format(new Date(f.placement_date), "MMM d, yyyy") : "—"}</TableCell>
-                    <TableCell><EditFinancials row={r} existing={f} /></TableCell>
+                    <TableCell>{canEdit ? <EditFinancials row={r} existing={f} /> : f?.tjm_status === "approved" ? <span title={t("decisions.tjm.locked")}><Lock className="h-4 w-4 text-muted-foreground" /></span> : null}</TableCell>
                   </TableRow>
                 );
               })}

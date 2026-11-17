@@ -34,3 +34,21 @@ Result: all checks PASS (see chat report). Production verified unchanged afterwa
 (0 rate rows, 0 @test.local users, 7 role rows, 2 audit rows).
 Recommended (not applied): REVOKE ALL on business tables FROM anon.
 - Applied `0003_revoke_anon_business_tables.sql`: anon has no grants on business tables. Rollback: re-GRANT SELECT to anon (not recommended).
+
+## Stage 3 — qualification & TJM approval (draft only, not yet in production)
+Migration: `drizzle/migrations/0004_qualification_and_tjm_approval.sql` (applies to production only if the draft is accepted).
+- All existing pipeline rows start qualification=pending, decision=pending; rows already `placed` keep their stage (placement not invalidated) with pending decision fields.
+- All existing rates start tjm_status=draft (never auto-approved).
+- Changing rates on an approved TJM resets it to draft; re-approval is a separate Operations step.
+- Backend console (no signed-in user) bypasses these triggers for recovery.
+
+Rollback:
+```sql
+DROP TRIGGER IF EXISTS trg_enforce_pipeline_decisions ON public.demand_candidates;
+DROP TRIGGER IF EXISTS trg_enforce_tjm_approval ON public.candidate_financials;
+DROP FUNCTION IF EXISTS public.enforce_pipeline_decisions();
+DROP FUNCTION IF EXISTS public.enforce_tjm_approval();
+-- Columns can stay (harmless) or be marked deprecated:
+COMMENT ON COLUMN public.demand_candidates.qualification_status IS 'DEPRECATED: stage 3 rolled back';
+COMMENT ON COLUMN public.candidate_financials.tjm_status IS 'DEPRECATED: stage 3 rolled back';
+```

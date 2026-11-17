@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       activity_log: {
@@ -65,6 +60,9 @@ export type Database = {
           margin: number | null
           notes: string | null
           placement_date: string | null
+          tjm_approved_at: string | null
+          tjm_approved_by: string | null
+          tjm_status: Database["public"]["Enums"]["tjm_status"]
           updated_at: string
         }
         Insert: {
@@ -78,6 +76,9 @@ export type Database = {
           margin?: number | null
           notes?: string | null
           placement_date?: string | null
+          tjm_approved_at?: string | null
+          tjm_approved_by?: string | null
+          tjm_status?: Database["public"]["Enums"]["tjm_status"]
           updated_at?: string
         }
         Update: {
@@ -91,6 +92,9 @@ export type Database = {
           margin?: number | null
           notes?: string | null
           placement_date?: string | null
+          tjm_approved_at?: string | null
+          tjm_approved_by?: string | null
+          tjm_status?: Database["public"]["Enums"]["tjm_status"]
           updated_at?: string
         }
         Relationships: [
@@ -146,9 +150,17 @@ export type Database = {
         Row: {
           created_at: string
           cv_id: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
           demand_id: string
+          final_decision: Database["public"]["Enums"]["final_decision"]
           id: string
           notes: string | null
+          qualification_notes: string | null
+          qualification_status: Database["public"]["Enums"]["qualification_status"]
+          qualified_at: string | null
+          qualified_by: string | null
           stage: Database["public"]["Enums"]["candidate_stage"]
           submitted_by: string | null
           updated_at: string
@@ -156,9 +168,17 @@ export type Database = {
         Insert: {
           created_at?: string
           cv_id: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
           demand_id: string
+          final_decision?: Database["public"]["Enums"]["final_decision"]
           id?: string
           notes?: string | null
+          qualification_notes?: string | null
+          qualification_status?: Database["public"]["Enums"]["qualification_status"]
+          qualified_at?: string | null
+          qualified_by?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
           submitted_by?: string | null
           updated_at?: string
@@ -166,9 +186,17 @@ export type Database = {
         Update: {
           created_at?: string
           cv_id?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_notes?: string | null
           demand_id?: string
+          final_decision?: Database["public"]["Enums"]["final_decision"]
           id?: string
           notes?: string | null
+          qualification_notes?: string | null
+          qualification_status?: Database["public"]["Enums"]["qualification_status"]
+          qualified_at?: string | null
+          qualified_by?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
           submitted_by?: string | null
           updated_at?: string
@@ -607,11 +635,14 @@ export type Database = {
         | "closed"
         | "lost"
       engagement_type: "freelance" | "permanent"
+      final_decision: "pending" | "approved" | "rejected"
       notification_type:
         | "demand_assigned"
         | "pipeline_changed"
         | "candidate_added"
+      qualification_status: "pending" | "qualified" | "rejected"
       seniority_level: "junior" | "mid" | "senior" | "lead" | "principal"
+      tjm_status: "draft" | "approved"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -780,12 +811,16 @@ export const Constants = {
         "lost",
       ],
       engagement_type: ["freelance", "permanent"],
+      final_decision: ["pending", "approved", "rejected"],
       notification_type: [
         "demand_assigned",
         "pipeline_changed",
         "candidate_added",
       ],
+      qualification_status: ["pending", "qualified", "rejected"],
       seniority_level: ["junior", "mid", "senior", "lead", "principal"],
+      tjm_status: ["draft", "approved"],
     },
   },
 } as const
+

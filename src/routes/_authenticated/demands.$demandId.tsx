@@ -16,6 +16,8 @@ import { ActivityLog } from "@/components/ActivityLog";
 import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OUTCOME_LABEL, OUTCOME_COLORS, type Lifecycle, type Outcome } from "@/lib/demand-status";
 import { PipelineKanban, type KanbanStage } from "@/components/PipelineKanban";
 import { SendPackageDialog } from "@/components/SendPackageDialog";
+import { CandidateDecisions, type DecisionRow } from "@/components/CandidateDecisions";
+import { useMyRoles } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,
@@ -57,6 +59,12 @@ function DemandDetail() {
   const [addOpen, setAddOpen] = useState(false);
   const [view, setView] = useState<"list" | "kanban">("kanban");
   const [packageOpen, setPackageOpen] = useState(false);
+  const { data: myRoles } = useMyRoles(user.id);
+  const decisionRow = (dc: { id: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null }): DecisionRow => {
+    const fin = Array.isArray(dc.candidate_financials) ? dc.candidate_financials[0] : dc.candidate_financials;
+    return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null };
+  };
+  const refreshCandidates = () => qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
 
   const { data: demand, isLoading } = useQuery({
     queryKey: ["demand", demandId],
@@ -76,7 +84,7 @@ function DemandDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, notes, created_at, cv_id, talent_hub_cvs(id, full_name, headline, email, skills, years_experience, seniority, location, daily_rate, salary_expectation, cv_url, linkedin_url)")
+        .select("id, stage, notes, created_at, cv_id, qualification_status, final_decision, candidate_financials(tjm_status), talent_hub_cvs(id, full_name, headline, email, skills, years_experience, seniority, location, daily_rate, salary_expectation, cv_url, linkedin_url)")
         .eq("demand_id", demandId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -286,6 +294,10 @@ function DemandDetail() {
           }))}
           onStageChange={(id, stage) => updateStage.mutate({ id, stage: stage as Stage })}
           onRemove={(id) => removeCandidate.mutate(id)}
+          renderExtra={(id) => {
+            const dc = candidates?.find((c) => c.id === id);
+            return dc ? <CandidateDecisions compact row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} /> : null;
+          }}
         />
       ) : (
         <div className="space-y-3">
@@ -336,6 +348,7 @@ function DemandDetail() {
                         {cv.daily_rate != null && <span>TJM: €{cv.daily_rate}</span>}
                         {cv.salary_expectation != null && <span>Salary: €{cv.salary_expectation}</span>}
                       </div>
+                      <CandidateDecisions row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
                     </div>
                   </div>
                 </CardContent>

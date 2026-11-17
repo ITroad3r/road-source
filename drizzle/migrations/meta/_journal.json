@@ -29,6 +29,13 @@
       "when": 1794928512904,
       "tag": "0003_revoke_anon_business_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794928694283,
+      "tag": "0004_qualification_and_tjm_approval",
+      "breakpoints": true
     }
   ]
 }

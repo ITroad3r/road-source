@@ -216,5 +216,48 @@
     "operations": "Direction des Opérations",
     "ceo": "CEO",
     "admin": "Admin"
+  },
+  "decisions": {
+    "saved": "Décision enregistrée",
+    "q": {
+      "pending": "En attente de qualification",
+      "qualified": "Qualifié",
+      "rejected": "Rejeté par HRBP"
+    },
+    "d": {
+      "pending": "Décision en attente",
+      "approved": "Validé",
+      "rejected": "Non retenu"
+    },
+    "qualify": "Qualifier",
+    "reject": "Rejeter",
+    "approve": "Validation finale",
+    "rejectFinal": "Refus final",
+    "blocker": {
+      "notQualified": "Qualification HRBP requise d'abord.",
+      "tjmNotApproved": "Validez d'abord le TJM sur la page Finances."
+    },
+    "awaitHrbp": "En attente de revue HRBP",
+    "awaitOps": "En attente de décision des Opérations",
+    "rejectedByHrbp": "Non retenu par HRBP",
+    "notesPlaceholder": "Notes (facultatif)",
+    "confirm": "Confirmer",
+    "dialog": {
+      "qualification": {
+        "qualified": "Qualifier le candidat",
+        "rejected": "Rejeter le candidat"
+      },
+      "decision": {
+        "approved": "Valider la candidature",
+        "rejected": "Refuser la candidature"
+      }
+    },
+    "tjm": {
+      "draft": "TJM brouillon",
+      "approved": "TJM validé",
+      "approve": "Valider le TJM",
+      "locked": "Verrouillé — validé par les Opérations",
+      "by": "Validé le"
+    }
   }
 }

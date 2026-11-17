@@ -27,3 +27,9 @@ The last-admin trigger may need `ALTER TABLE user_roles DISABLE TRIGGER trg_prev
 - Recovery with no second admin: run the role change from the backend SQL console (no signed-in user);
   it is recorded in role_audit_log with actor "System".
 - Rollback: `DROP TRIGGER trg_prevent_self_role_change ON public.user_roles;`
+
+## Isolated financial authorization test (17 Nov 2026)
+Ran in draft "Financial RBAC test (isolated)" with its own test database; 5 synthetic users, synthetic rates.
+Result: all checks PASS (see chat report). Production verified unchanged afterwards
+(0 rate rows, 0 @test.local users, 7 role rows, 2 audit rows).
+Recommended (not applied): REVOKE ALL on business tables FROM anon.

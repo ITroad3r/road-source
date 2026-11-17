@@ -6,7 +6,7 @@
 - [x] Column-level confidentiality check (sourceur/hrbp/admin none, CEO read-only)
 - [x] UI end-to-end flow per role (Playwright) + DB-level blocks
 - [x] Security finding status, privileged access review, rollback doc, tests + build
-- Stage 4 not started (by instruction); do not accept draft
+- [x] Stage 4 role dashboards + workspace switcher (draft only; not accepted)
 - [x] TJM amendment invalidates active final approval; placed rows flagged (0007)
 
 ## Stage 4 (main thread)

@@ -18,6 +18,12 @@ export const CAPABILITIES = {
   "tjm.approve": ["operations"],
   "reports.view": ["hrbp", "operations", "ceo"],
   "users.manage": ["admin"],
+  // Dashboard workspaces: one per role, never inherited (admin is not a business superuser).
+  "workspace.sourceur": ["sourceur"],
+  "workspace.hrbp": ["hrbp"],
+  "workspace.operations": ["operations"],
+  "workspace.ceo": ["ceo"],
+  "workspace.admin": ["admin"],
 } as const satisfies Record<string, readonly AppRole[]>;
 
 export type Capability = keyof typeof CAPABILITIES;
@@ -39,4 +45,16 @@ export function pickPrimaryRole(roles: readonly string[]): PrimaryRole {
     if (roles.includes(r)) return r;
   }
   return "none";
+}
+
+export const WORKSPACES = ["operations", "ceo", "hrbp", "sourceur", "admin"] as const;
+export type Workspace = (typeof WORKSPACES)[number];
+/** Workspaces the user may open, in priority order (business before admin). */
+export function workspacesFor(roles: readonly string[] | undefined | null): Workspace[] {
+  return WORKSPACES.filter((w) => can(roles, `workspace.${w}` as Capability));
+}
+/** Requested workspace if authorized, otherwise the first authorized one (or null). */
+export function resolveWorkspace(roles: readonly string[] | undefined | null, requested?: string | null): Workspace | null {
+  const ws = workspacesFor(roles);
+  return (ws as readonly string[]).includes(requested ?? "") ? (requested as Workspace) : ws[0] ?? null;
 }

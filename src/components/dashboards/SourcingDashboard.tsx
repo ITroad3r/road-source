@@ -1,116 +1,103 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Search, Send, Users, Clock, CheckCircle2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { StatCard, DemandCard, type DemandRow } from "./shared";
+import { Briefcase, Search, Send, Users, Clock, CheckCircle2, XCircle, Activity } from "lucide-react";
+import { can } from "@/lib/permissions";
+import { sourceurKpis, ACTIVE_LIFECYCLES } from "@/lib/dashboard-kpis";
+import { StatCard, DashHeader, Panel, statusColors, useAgo } from "./shared";
+import { useDashDemands, useDashCandidates, useDashActivity } from "./data";
 
-export function SourcingDashboard({ userId, fullName }: { userId: string; fullName: string | null }) {
-  const { data: demands, isLoading } = useQuery({
-    queryKey: ["sourcing-dash", "my-demands", userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("demands")
-        .select("id,title,description,engagement,required_skills,location,budget_min,budget_max,status,lifecycle,start_date,priority,created_at,assigned_to,positions_count,clients(name,industry)")
-        .eq("assigned_to", userId)
-        .in("lifecycle", ["open", "in_progress"])
-        .order("priority", { ascending: true })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data as unknown as (DemandRow & { lifecycle: string })[]).map((d) => ({ ...d, status: d.lifecycle }));
-    },
-  });
-
-  const { data: myCandidates } = useQuery({
-    queryKey: ["sourcing-dash", "my-candidates", userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("demand_candidates")
-        .select("id,stage,created_at,demand_id,cv_id,demands(title),talent_hub_cvs(full_name)")
-        .eq("submitted_by", userId)
-        .order("created_at", { ascending: false })
-        .limit(15);
-      if (error) throw error;
-      return data as unknown as {
-        id: string; stage: string; created_at: string; demand_id: string;
-        demands: { title: string } | null; talent_hub_cvs: { full_name: string } | null;
-      }[];
-    },
-  });
-
-  const stageCounts = (myCandidates ?? []).reduce<Record<string, number>>((acc, c) => {
-    acc[c.stage] = (acc[c.stage] ?? 0) + 1; return acc;
-  }, {});
-
-  const newToday = (demands ?? []).filter((d) => {
-    const h = (Date.now() - new Date(d.created_at).getTime()) / 36e5;
-    return h < 24;
-  }).length;
+// Sourceur workspace: own assigned demands and own candidatures only. No financial data is requested.
+export function SourcingDashboard({ userId, fullName, roles }: { userId: string; fullName: string | null; roles: string[] }) {
+  const { t } = useTranslation();
+  const ago = useAgo();
+  const demandsQ = useDashDemands();
+  const candsQ = useDashCandidates();
+  const activityQ = useDashActivity(undefined, userId);
+  const demands = (demandsQ.data ?? []).filter((d) => d.assigned_to === userId);
+  const cands = candsQ.data ?? [];
+  const k = sourceurKpis(userId, demands, cands);
+  const mine = cands.filter((c) => c.submitted_by === userId);
+  const active = demands.filter((d) => ACTIVE_LIFECYCLES.includes(d.lifecycle));
+  const canHub = can(roles, "candidates.view");
+  const loading = demandsQ.isLoading || candsQ.isLoading;
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <header className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hi {fullName?.split(" ")[0] ?? "there"}, ready to source?</h1>
-          <p className="text-muted-foreground mt-1">Your assigned demands and the candidates you've moved through the pipeline.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline"><Link to="/talent-hub"><Search className="h-4 w-4 mr-2" />Search Talent Hub</Link></Button>
-          <Button asChild><Link to="/talent-hub/new"><Users className="h-4 w-4 mr-2" />Add candidate</Link></Button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <DashHeader title={t("dash.sourceur.title", { name: fullName?.split(" ")[0] ?? "" })} subtitle={t("dash.sourceur.subtitle")}>
+        {canHub && <Button asChild variant="outline"><Link to="/talent-hub"><Search className="h-4 w-4 mr-2" />{t("dash.links.talentHub")}</Link></Button>}
+        {can(roles, "candidates.edit") && <Button asChild><Link to="/talent-hub/new"><Users className="h-4 w-4 mr-2" />{t("dash.links.addCandidate")}</Link></Button>}
+      </DashHeader>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Active demands" value={demands?.length ?? 0} icon={Briefcase} accent="primary" hint={newToday ? `${newToday} new today` : "All caught up"} />
-        <StatCard label="Submitted" value={stageCounts.submitted ?? 0} icon={Send} accent="warning" hint="Awaiting manager review" />
-        <StatCard label="In interview" value={stageCounts.client_interview ?? 0} icon={Clock} accent="primary" />
-        <StatCard label="Placed" value={stageCounts.placed ?? 0} icon={CheckCircle2} accent="success" />
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        <StatCard label={t("dash.k.assignedDemands")} value={loading ? "…" : k.activeDemands} icon={Briefcase} to="/demands" />
+        <StatCard label={t("dash.k.sourced")} value={loading ? "…" : k.sourced} icon={Users} />
+        <StatCard label={t("dash.k.submitted")} value={loading ? "…" : k.submitted} icon={Send} />
+        <StatCard label={t("dash.k.awaitingQualification")} value={loading ? "…" : k.awaitingQualification} icon={Clock} accent="warning" />
+        <StatCard label={t("dash.k.qualified")} value={loading ? "…" : k.qualified} icon={CheckCircle2} accent="success" />
+        <StatCard label={t("dash.k.rejected")} value={loading ? "…" : k.rejected} icon={XCircle} accent="danger" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4">
-        <section className="lg:col-span-2 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Demands assigned to you</h2>
-            <Link to="/demands" className="text-xs text-primary hover:underline">All demands →</Link>
-          </div>
-          {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {!isLoading && demands?.length === 0 && (
-            <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">
-              <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              No demands assigned to you yet. Your manager will dispatch new requests here.
-            </CardContent></Card>
-          )}
-          {demands?.slice(0, 6).map((d) => <DemandCard key={d.id} d={d} />)}
-        </section>
+        <Panel className="lg:col-span-2" title={t("dash.sourceur.assigned")} icon={Briefcase} loading={demandsQ.isLoading} error={demandsQ.error}
+          empty={active.length === 0} emptyText={t("dash.sourceur.noAssigned")}
+          action={<Link to="/demands" className="text-xs text-primary hover:underline shrink-0">{t("dash.links.all")}</Link>}>
+          <ul className="divide-y">
+            {active.slice(0, 8).map((d) => {
+              const n = cands.filter((c) => c.demand_id === d.id).length;
+              return (
+                <li key={d.id}>
+                  <Link to="/demands/$demandId" params={{ demandId: d.id }} className="flex items-center justify-between gap-3 p-3 hover:bg-accent">
+                    <div className="min-w-0"><div className="text-sm font-medium truncate">{d.title}</div>
+                      <div className="text-xs text-muted-foreground truncate">{d.clients?.name ?? "—"} · {t("dash.nCandidates", { count: n })}</div></div>
+                    <Badge variant="outline" className={statusColors[d.lifecycle] ?? ""}>{t(`demandStatus.${d.lifecycle}`)}</Badge>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </Panel>
 
-        <aside className="space-y-3">
-          <h2 className="text-lg font-semibold">My recent submissions</h2>
-          <Card>
-            <CardContent className="p-0">
-              {(myCandidates ?? []).length === 0 ? (
-                <div className="p-6 text-sm text-muted-foreground text-center">Nothing submitted yet.</div>
-              ) : (
-                <ul className="divide-y">
-                  {(myCandidates ?? []).map((c) => (
-                    <li key={c.id} className="p-3">
-                      <Link to="/demands/$demandId" params={{ demandId: c.demand_id }} className="block hover:bg-accent rounded-md p-2 -m-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="text-sm font-medium truncate">{c.talent_hub_cvs?.full_name ?? "Candidate"}</div>
-                          <Badge variant="outline" className="text-[10px]">{c.stage.replace("_", " ")}</Badge>
-                        </div>
-                        <div className="text-xs text-muted-foreground truncate">{c.demands?.title} · {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}</div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
-        </aside>
+        <Panel title={t("dash.sourceur.recentSubmissions")} icon={Send} loading={candsQ.isLoading} error={candsQ.error} empty={mine.length === 0} emptyText={t("dash.sourceur.noSubmissions")}>
+          <ul className="divide-y">
+            {mine.slice(0, 8).map((c) => (
+              <li key={c.id}>
+                <Link to="/demands/$demandId" params={{ demandId: c.demand_id }} className="block p-3 hover:bg-accent">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium truncate">{c.talent_hub_cvs?.full_name ?? "—"}</span>
+                    <Badge variant="outline" className="text-[10px] shrink-0">{t(`decisions.q.${c.qualification_status}`)}</Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">{c.demands?.title} · {ago(c.created_at)}</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       </div>
+
+      <ActivityPanel q={activityQ} title={t("dash.sourceur.activity")} />
     </div>
+  );
+}
+
+export function ActivityPanel({ q, title }: { q: ReturnType<typeof useDashActivity>; title: string }) {
+  const { t } = useTranslation();
+  const ago = useAgo();
+  const rows = q.data ?? [];
+  return (
+    <Panel title={title} icon={Activity} loading={q.isLoading} error={q.error} empty={rows.length === 0} emptyText={t("dash.noActivity")}>
+      <ul className="divide-y">
+        {rows.map((a) => (
+          <li key={a.id} className="p-3 text-sm flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <Badge variant="secondary" className="text-[10px] mr-2">{t(`dash.kind.${a.kind}`, { defaultValue: a.kind })}</Badge>
+              {a.demand_id ? <Link to="/demands/$demandId" params={{ demandId: a.demand_id }} className="hover:underline break-words">{a.body ?? "—"}</Link> : <span className="break-words">{a.body ?? "—"}</span>}
+            </div>
+            <span className="text-xs text-muted-foreground shrink-0">{ago(a.created_at)}</span>
+          </li>
+        ))}
+      </ul>
+    </Panel>
   );
 }

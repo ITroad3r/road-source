@@ -45,7 +45,7 @@ export function DispatchDemandDialog({
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["manager-dash", "demands"] });
+      qc.invalidateQueries({ queryKey: ["dash", "demands"] });
       qc.invalidateQueries({ queryKey: ["demand", demandId] });
       qc.invalidateQueries({ queryKey: ["demands"] });
       toast.success("Demand dispatched");

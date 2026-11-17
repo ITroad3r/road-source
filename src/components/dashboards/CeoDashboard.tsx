@@ -1,122 +1,116 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
-import { TrendingUp, Users, Briefcase, Target, BarChart3 } from "lucide-react";
-import { format, subMonths, startOfMonth } from "date-fns";
-import { StatCard } from "./shared";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, LineChart, Line, Legend } from "recharts";
+import { Briefcase, Activity, Trophy, Euro, Percent, CheckCircle2, Eye, Users } from "lucide-react";
+import { financialKpis, conversion, hrbpKpis, pipelineDistribution, monthlyTrend, ACTIVE_LIFECYCLES, placementStats } from "@/lib/dashboard-kpis";
+import { StatCard, DashHeader, Panel } from "./shared";
+import { useDashDemands, useDashCandidates, useDashFinancials } from "./data";
 
-export function CeoDashboard({ fullName }: { fullName: string | null }) {
-  const { data: demands } = useQuery({
-    queryKey: ["ceo-dash", "demands"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("demands").select("id,lifecycle,commercial_outcome,created_at,clients(name)");
-      if (error) throw error;
-      return (data as unknown as { id: string; lifecycle: string; commercial_outcome: string; created_at: string; clients: { name: string } | null }[])
-        .map((d) => ({ ...d, status: d.lifecycle }));
-    },
-  });
+const STAGES = ["identified", "contacted", "screened", "submitted", "client_interview", "offer", "placed", "rejected", "withdrawn"] as const;
+const PERIODS = ["all", "30", "90", "365"] as const;
 
-  const { data: candidates } = useQuery({
-    queryKey: ["ceo-dash", "candidates"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("demand_candidates").select("stage");
-      if (error) throw error;
-      return data as { stage: string }[];
-    },
-  });
+// CEO workspace: strictly read-only (no action buttons). Every figure is computed from rows RLS returns.
+export function CeoDashboard({ fullName, roles }: { fullName: string | null; roles: string[] }) {
+  const { t } = useTranslation();
+  const demandsQ = useDashDemands();
+  const candsQ = useDashCandidates();
+  const finsQ = useDashFinancials(roles);
+  const [period, setPeriod] = useState<(typeof PERIODS)[number]>("all");
+  const [client, setClient] = useState("all");
+  const [demand, setDemand] = useState("all");
 
-  const { data: financials } = useQuery({
-    queryKey: ["ceo-dash", "financials"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("candidate_financials")
-        .select("client_rate,candidate_rate,margin,placement_date,contract_duration_months");
-      if (error) throw error;
-      return data as { client_rate: number | null; candidate_rate: number | null; margin: number | null; placement_date: string | null; contract_duration_months: number | null }[];
-    },
-  });
+  const clients = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const d of demandsQ.data ?? []) if (d.client_id) m.set(d.client_id, d.clients?.name ?? "—");
+    return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [demandsQ.data]);
 
-  const open = (demands ?? []).filter((d) => d.status === "open" || d.status === "in_progress").length;
-  const active = (candidates ?? []).filter((c) => !["placed","rejected","withdrawn"].includes(c.stage)).length;
-  const placed = (candidates ?? []).filter((c) => c.stage === "placed").length;
-  const totalCandidates = (candidates ?? []).length;
-  const placementRate = totalCandidates ? Math.round((placed / totalCandidates) * 100) : 0;
+  const { demands, cands, fins } = useMemo(() => {
+    const since = period === "all" ? null : new Date(Date.now() - Number(period) * 864e5).toISOString();
+    const ds = (demandsQ.data ?? []).filter((d) =>
+      (client === "all" || d.client_id === client) && (demand === "all" || d.id === demand) && (!since || d.created_at >= since));
+    const allIds = new Set((demandsQ.data ?? []).filter((d) => (client === "all" || d.client_id === client) && (demand === "all" || d.id === demand)).map((d) => d.id));
+    const cs = (candsQ.data ?? []).filter((c) => allIds.has(c.demand_id) && (!since || c.created_at >= since));
+    const cids = new Set(cs.map((c) => c.id));
+    return { demands: ds, cands: cs, fins: (finsQ.data ?? []).filter((f) => cids.has(f.demand_candidate_id)) };
+  }, [demandsQ.data, candsQ.data, finsQ.data, period, client, demand]);
 
-  const pipelineValue = (financials ?? []).reduce((s, f) => {
-    const days = (f.contract_duration_months ?? 1) * 21;
-    return s + (f.client_rate ?? 0) * days;
-  }, 0);
-
-  // Revenue by month (last 6)
-  const months = Array.from({ length: 6 }).map((_, i) => startOfMonth(subMonths(new Date(), 5 - i)));
-  const revenueByMonth = months.map((m) => {
-    const label = format(m, "MMM");
-    const rev = (financials ?? []).filter((f) => f.placement_date && startOfMonth(new Date(f.placement_date)).getTime() === m.getTime())
-      .reduce((s, f) => s + (f.client_rate ?? 0) * (f.contract_duration_months ?? 1) * 21, 0);
-    return { month: label, revenue: Math.round(rev) };
-  });
-
-  const funnel = ["identified","submitted","screened","client_interview","offer","placed"].map((stage) => ({
-    stage: stage.replace("_"," "),
-    count: (candidates ?? []).filter((c) => c.stage === stage).length,
-  }));
+  const loading = demandsQ.isLoading || candsQ.isLoading || finsQ.isLoading;
+  const fk = financialKpis(fins);
+  const conv = conversion(cands);
+  const h = hrbpKpis(cands);
+  const p = placementStats(cands);
+  const dist = pipelineDistribution(cands, STAGES).map((r) => ({ ...r, label: t(`dash.stage.${r.stage}`) }));
+  const trend = monthlyTrend(demands, cands, new Date());
+  const v = (x: number | string) => (loading ? "…" : x);
+  const na = t("dash.na");
+  const money = (n: number | null) => (n == null ? na : `€${n.toLocaleString()}`);
+  const demandOpts = (demandsQ.data ?? []).filter((d) => client === "all" || d.client_id === client);
 
   return (
-    <div className="p-4 md:p-8 space-y-6 bg-gradient-to-br from-background via-background to-primary/5 min-h-full">
-      <header className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Executive overview{fullName ? ` · ${fullName.split(" ")[0]}` : ""}</h1>
-          <p className="text-muted-foreground mt-1">Company performance across demand, pipeline and revenue.</p>
-        </div>
-        <Button asChild variant="outline"><Link to="/reports"><BarChart3 className="h-4 w-4 mr-2" />Detailed reports</Link></Button>
-      </header>
+    <div className="space-y-6">
+      <DashHeader title={t("dash.ceo.title", { name: fullName?.split(" ")[0] ?? "" })} subtitle={t("dash.ceo.subtitle")}>
+        <Badge variant="outline" className="gap-1 h-8"><Eye className="h-3.5 w-3.5" />{t("dash.readOnly")}</Badge>
+      </DashHeader>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Open demands" value={open} icon={Briefcase} accent="primary" />
-        <StatCard label="Active candidates" value={active} icon={Users} accent="primary" />
-        <StatCard label="Placement rate" value={`${placementRate}%`} icon={Target} accent="success" hint={`${placed} of ${totalCandidates}`} />
-        <StatCard label="Pipeline value" value={`€${Math.round(pipelineValue).toLocaleString()}`} icon={TrendingUp} accent="success" />
+      <Card>
+        <CardContent className="p-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <Select value={period} onValueChange={(x) => setPeriod(x as typeof period)}>
+            <SelectTrigger aria-label={t("dash.f.period")}><SelectValue /></SelectTrigger>
+            <SelectContent>{PERIODS.map((x) => <SelectItem key={x} value={x}>{t(`dash.f.p${x}`)}</SelectItem>)}</SelectContent>
+          </Select>
+          <Select value={client} onValueChange={(x) => { setClient(x); setDemand("all"); }}>
+            <SelectTrigger aria-label={t("dash.f.client")}><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="all">{t("dash.f.allClients")}</SelectItem>{clients.map(([id, n]) => <SelectItem key={id} value={id}>{n}</SelectItem>)}</SelectContent>
+          </Select>
+          <Select value={demand} onValueChange={setDemand}>
+            <SelectTrigger aria-label={t("dash.f.demand")}><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="all">{t("dash.f.allDemands")}</SelectItem>{demandOpts.map((d) => <SelectItem key={d.id} value={d.id}>{d.title}</SelectItem>)}</SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label={t("dash.k.totalDemands")} value={v(demands.length)} icon={Briefcase} hint={t("dash.ceo.activeHint", { count: demands.filter((d) => ACTIVE_LIFECYCLES.includes(d.lifecycle)).length })} />
+        <StatCard label={t("dash.k.candidatures")} value={v(conv.candidatures)} icon={Users} />
+        <StatCard label={t("dash.k.approvedPlacements")} value={v(p.approvedPlacements)} icon={Trophy} accent="success" />
+        <StatCard label={t("dash.k.placementRate")} value={v(conv.placementRate == null ? na : `${conv.placementRate}%`)} icon={Percent} hint={t("dash.k.placementRateHint")} />
+        <StatCard label={t("dash.k.qualificationRate")} value={v(h.qualificationRate == null ? na : `${h.qualificationRate}%`)} icon={CheckCircle2} hint={t("dash.ops.qualHint", { q: h.qualified, r: h.rejected })} />
+        <StatCard label={t("dash.k.approvedTjm")} value={v(fk.approvedTjm)} icon={Euro} />
+        <StatCard label={t("dash.k.avgDailyMargin")} value={v(money(fk.avgDailyMargin))} icon={Euro} accent="success" hint={fk.marginRate == null ? t("dash.ceo.approvedOnly") : t("dash.ceo.marginRate", { pct: fk.marginRate })} />
+        <StatCard label={t("dash.k.avgClientRate")} value={v(money(fk.avgClientRate))} icon={Euro} hint={t("dash.ceo.approvedOnly")} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base">Revenue · last 6 months</CardTitle></CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueByMonth}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
-                  <YAxis stroke="var(--muted-foreground)" fontSize={12} tickFormatter={(v) => `€${v/1000}k`} />
-                  <Tooltip contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} formatter={(v: number) => `€${v.toLocaleString()}`} />
-                  <Line type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={2.5} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base">Pipeline funnel</CardTitle></CardHeader>
-          <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={funnel} layout="vertical" margin={{ left: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} />
-                  <YAxis type="category" dataKey="stage" stroke="var(--muted-foreground)" fontSize={12} width={90} />
-                  <Tooltip contentStyle={{ background: "var(--background)", border: "1px solid var(--border)" }} />
-                  <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <Panel title={t("dash.ceo.distribution")} icon={Activity} loading={loading} error={candsQ.error} empty={cands.length === 0}>
+          <div className="h-64 p-2"><ResponsiveContainer width="100%" height="100%">
+            <BarChart data={dist} layout="vertical" margin={{ left: 10, right: 16 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis type="number" allowDecimals={false} fontSize={11} stroke="var(--muted-foreground)" />
+              <YAxis type="category" dataKey="label" width={110} fontSize={11} stroke="var(--muted-foreground)" />
+              <Tooltip /><Bar dataKey="count" name={t("dash.k.candidatures")} fill="var(--primary)" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer></div>
+        </Panel>
+        <Panel title={t("dash.ceo.trend")} icon={Activity} loading={loading} error={demandsQ.error}>
+          <div className="h-64 p-2"><ResponsiveContainer width="100%" height="100%">
+            <LineChart data={trend} margin={{ left: -10, right: 16 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="month" fontSize={11} stroke="var(--muted-foreground)" />
+              <YAxis allowDecimals={false} fontSize={11} stroke="var(--muted-foreground)" />
+              <Tooltip /><Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line type="linear" dataKey="demands" name={t("dash.k.totalDemands")} stroke="var(--primary)" strokeWidth={2} />
+              <Line type="linear" dataKey="candidatures" name={t("dash.k.candidatures")} stroke="var(--chart-2)" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer></div>
+        </Panel>
       </div>
+
+      <Card><CardHeader className="pb-2"><CardTitle className="text-sm">{t("dash.ceo.unavailableTitle")}</CardTitle></CardHeader>
+        <CardContent className="text-xs text-muted-foreground">{t("dash.ceo.unavailableBody")}</CardContent></Card>
     </div>
   );
 }

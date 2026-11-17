@@ -1,118 +1,103 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { Euro, TrendingUp, Target, Trophy, AlertTriangle, BarChart3 } from "lucide-react";
-import { StatCard } from "./shared";
+import { Button } from "@/components/ui/button";
+import { Briefcase, Gavel, Euro, FilePenLine, Trophy, Plus, AlertCircle, Users, Percent } from "lucide-react";
+import { can } from "@/lib/permissions";
+import { opsQueues, placementStats, hrbpKpis, conversion, ACTIVE_LIFECYCLES } from "@/lib/dashboard-kpis";
+import { DispatchDemandDialog } from "@/components/DispatchDemandDialog";
+import { StatCard, DashHeader, Panel } from "./shared";
+import { useDashDemands, useDashCandidates, useDashFinancials, type CandRow } from "./data";
 
-export function DirectorDashboard({ fullName }: { fullName: string | null }) {
-  const { data: demands } = useQuery({
-    queryKey: ["director-dash", "demands"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("demands")
-        .select("id,title,lifecycle,commercial_outcome,lost_reason,assigned_to,created_at,clients(name)");
-      if (error) throw error;
-      return (data as unknown as { id: string; title: string; lifecycle: string; commercial_outcome: string; lost_reason: string | null; assigned_to: string | null; created_at: string; clients: { name: string } | null }[])
-        .map((d) => ({ ...d, status: d.lifecycle }));
-    },
-  });
+// Operations workspace: highlights pending decisions; approvals themselves stay on the demand page and /financials.
+export function DirectorDashboard({ fullName, roles }: { fullName: string | null; roles: string[] }) {
+  const { t } = useTranslation();
+  const demandsQ = useDashDemands();
+  const candsQ = useDashCandidates();
+  const finsQ = useDashFinancials(roles);
+  const demands = demandsQ.data ?? [];
+  const cands = candsQ.data ?? [];
+  const fins = finsQ.data ?? [];
+  const q = opsQueues(cands, fins);
+  const p = placementStats(cands);
+  const h = hrbpKpis(cands);
+  const conv = conversion(cands);
+  const active = demands.filter((d) => ACTIVE_LIFECYCLES.includes(d.lifecycle));
+  const unassigned = active.filter((d) => !d.assigned_to);
+  const byId = new Map(cands.map((c) => [c.id, c]));
+  const amendCands = q.amendments.map((f) => byId.get(f.demand_candidate_id)).filter(Boolean) as CandRow[];
+  const loading = candsQ.isLoading || finsQ.isLoading;
+  const canFin = can(roles, "financials.edit");
+  const canManage = can(roles, "demands.manage");
+  const v = (n: number) => (loading ? "…" : n);
 
-  const { data: financials } = useQuery({
-    queryKey: ["director-dash", "financials"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("candidate_financials")
-        .select("client_rate,candidate_rate,margin,placement_date,contract_duration_months");
-      if (error) throw error;
-      return data as { client_rate: number | null; candidate_rate: number | null; margin: number | null; placement_date: string | null; contract_duration_months: number | null }[];
-    },
-  });
-
-  const won = (demands ?? []).filter((d) => d.commercial_outcome === "won").length;
-  const lost = (demands ?? []).filter((d) => d.commercial_outcome === "lost").length;
-  const pending = (demands ?? []).filter((d) => d.commercial_outcome === "pending").length;
-  const winRate = won + lost > 0 ? Math.round((won / (won + lost)) * 100) : 0;
-
-  const totalMargin = (financials ?? []).reduce((s, f) => {
-    const m = f.margin ?? ((f.client_rate ?? 0) - (f.candidate_rate ?? 0));
-    const days = (f.contract_duration_months ?? 1) * 21;
-    return s + m * days;
-  }, 0);
-  const placements = (financials ?? []).filter((f) => f.placement_date).length;
-  const avgMargin = placements ? Math.round(totalMargin / placements) : 0;
-
-  const lostReasons = (demands ?? [])
-    .filter((d) => d.commercial_outcome === "lost" && d.lost_reason)
-    .reduce<Record<string, number>>((acc, d) => {
-      const k = d.lost_reason!.trim().slice(0, 60);
-      acc[k] = (acc[k] ?? 0) + 1; return acc;
-    }, {});
-  const topLost = Object.entries(lostReasons).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const list = (rows: CandRow[], emptyText: string, link: "demand" | "financials") => (
+    rows.length === 0 ? <div className="p-6 text-sm text-muted-foreground text-center">{emptyText}</div> : (
+      <ul className="divide-y">
+        {rows.slice(0, 6).map((c) => (
+          <li key={c.id}>
+            {link === "financials" && canFin ? (
+              <Link to="/financials" className="flex items-center justify-between gap-2 p-3 hover:bg-accent">
+                <Row c={c} /><Badge variant="outline" className="shrink-0">{t("decisions.tjm.approve")}</Badge>
+              </Link>
+            ) : (
+              <Link to="/demands/$demandId" params={{ demandId: c.demand_id }} className="flex items-center justify-between gap-2 p-3 hover:bg-accent">
+                <Row c={c} /><Badge variant="outline" className="shrink-0">{t("dash.ops.decide")}</Badge>
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    )
+  );
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <header className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Division performance{fullName ? ` · ${fullName.split(" ")[0]}` : ""}</h1>
-          <p className="text-muted-foreground mt-1">Margins, win-rate and pipeline health across all demands.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline"><Link to="/financials"><Euro className="h-4 w-4 mr-2" />Financials</Link></Button>
-          <Button asChild><Link to="/reports"><BarChart3 className="h-4 w-4 mr-2" />Reports</Link></Button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <DashHeader title={t("dash.ops.title", { name: fullName?.split(" ")[0] ?? "" })} subtitle={t("dash.ops.subtitle")}>
+        {canFin && <Button asChild variant="outline"><Link to="/financials"><Euro className="h-4 w-4 mr-2" />{t("dash.links.tjm")}</Link></Button>}
+        {canManage && <Button asChild><Link to="/demands/new"><Plus className="h-4 w-4 mr-2" />{t("dashboard.newDemand")}</Link></Button>}
+      </DashHeader>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Win rate" value={`${winRate}%`} icon={Trophy} accent="success" hint={`${won} won · ${lost} lost`} />
-        <StatCard label="Total margin (est.)" value={`€${Math.round(totalMargin).toLocaleString()}`} icon={Euro} accent="success" />
-        <StatCard label="Avg margin / placement" value={`€${avgMargin.toLocaleString()}`} icon={Target} accent="primary" />
-        <StatCard label="Pending outcome" value={pending} icon={TrendingUp} accent="warning" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label={t("dash.k.activeDemands")} value={demandsQ.isLoading ? "…" : active.length} icon={Briefcase} to={canManage ? "/demands" : undefined} hint={t("dash.ops.unassigned", { count: unassigned.length })} />
+        <StatCard label={t("dash.k.awaitingFinal")} value={v(q.awaitingFinal.length)} icon={Gavel} accent={q.awaitingFinal.length ? "warning" : "primary"} />
+        <StatCard label={t("dash.k.tjmAwaiting")} value={v(q.tjmAwaiting.length)} icon={Euro} accent={q.tjmAwaiting.length ? "warning" : "primary"} to={canFin ? "/financials" : undefined} />
+        <StatCard label={t("dash.k.amendments")} value={v(q.amendments.length)} icon={FilePenLine} accent={q.amendments.length ? "danger" : "primary"} to={canFin ? "/financials" : undefined} />
+        <StatCard label={t("dash.k.queue")} value={v(h.queue)} icon={Users} hint={t("dash.ops.qualHint", { q: h.qualified, r: h.rejected })} />
+        <StatCard label={t("dash.k.placements")} value={v(p.placed)} icon={Trophy} accent="success" hint={t("dash.ops.approvedPlacements", { count: p.approvedPlacements })} />
+        <StatCard label={t("dash.k.placementRate")} value={loading ? "…" : conv.placementRate == null ? t("dash.na") : `${conv.placementRate}%`} icon={Percent} hint={t("dash.k.placementRateHint")} />
+        <StatCard label={t("dash.k.qualificationRate")} value={loading ? "…" : h.qualificationRate == null ? t("dash.na") : `${h.qualificationRate}%`} icon={Percent} />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-600" /> Top reasons for lost deals</CardTitle></CardHeader>
-          <CardContent>
-            {topLost.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No lost deals recorded yet.</p>
-            ) : (
-              <ul className="space-y-2">
-                {topLost.map(([reason, count]) => (
-                  <li key={reason} className="flex items-center justify-between text-sm">
-                    <span className="truncate pr-3">{reason}</span>
-                    <Badge variant="outline" className="shrink-0">{count}</Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base">Recent decisions needed</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y">
-              {(demands ?? []).filter((d) => d.commercial_outcome === "pending" && d.status === "in_progress").slice(0,8).map((d) => (
-                <li key={d.id}>
-                  <Link to="/demands/$demandId" params={{ demandId: d.id }} className="flex items-center justify-between p-3 hover:bg-accent">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">{d.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">{d.clients?.name ?? "—"}</div>
-                    </div>
-                    <Badge variant="outline">Review</Badge>
-                  </Link>
-                </li>
-              ))}
-              {(demands ?? []).filter((d) => d.commercial_outcome === "pending").length === 0 && (
-                <li className="p-6 text-sm text-muted-foreground text-center">Everything reviewed.</li>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
+      <div className="grid lg:grid-cols-3 gap-4">
+        <Panel title={t("dash.ops.awaitingFinal")} icon={Gavel} loading={loading} error={candsQ.error ?? finsQ.error}>{list(q.awaitingFinal, t("dash.ops.none"), "demand")}</Panel>
+        <Panel title={t("dash.ops.tjmAwaiting")} icon={Euro} loading={loading} error={candsQ.error ?? finsQ.error}>{list(q.tjmAwaiting, t("dash.ops.none"), "financials")}</Panel>
+        <Panel title={t("dash.ops.amendments")} icon={FilePenLine} loading={loading} error={candsQ.error ?? finsQ.error}>{list(amendCands, t("dash.ops.none"), "financials")}</Panel>
       </div>
+
+      <Panel title={t("dash.ops.unassignedTitle")} icon={AlertCircle} loading={demandsQ.isLoading} error={demandsQ.error} empty={unassigned.length === 0} emptyText={t("dash.ops.allAssigned")}
+        action={<Link to="/demands" className="text-xs text-primary hover:underline shrink-0">{t("dash.links.all")}</Link>}>
+        <ul className="divide-y">
+          {unassigned.slice(0, 6).map((d) => (
+            <li key={d.id} className="flex items-center justify-between gap-3 p-3">
+              <Link to="/demands/$demandId" params={{ demandId: d.id }} className="min-w-0 flex-1 hover:underline">
+                <div className="text-sm font-medium truncate">{d.title}</div>
+                <div className="text-xs text-muted-foreground truncate">{d.clients?.name ?? "—"}</div>
+              </Link>
+              {canManage && <DispatchDemandDialog demandId={d.id} demandTitle={d.title} currentAssignee={d.assigned_to} />}
+            </li>
+          ))}
+        </ul>
+      </Panel>
+    </div>
+  );
+}
+
+function Row({ c }: { c: CandRow }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-sm font-medium truncate">{c.talent_hub_cvs?.full_name ?? "—"}</div>
+      <div className="text-xs text-muted-foreground truncate">{c.demands?.title ?? "—"}</div>
     </div>
   );
 }

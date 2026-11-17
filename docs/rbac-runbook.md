@@ -52,3 +52,21 @@ DROP FUNCTION IF EXISTS public.enforce_tjm_approval();
 COMMENT ON COLUMN public.demand_candidates.qualification_status IS 'DEPRECATED: stage 3 rolled back';
 COMMENT ON COLUMN public.candidate_financials.tjm_status IS 'DEPRECATED: stage 3 rolled back';
 ```
+
+### Stage 3 final corrections (draft only)
+- `0005_tjm_audit_previous_approval.sql`: editing an approved TJM resets it to draft (even if `approved` is sent in the same update) and logs previous approver/date and old/new rates.
+- `0006_restrict_tjm_activity_entries.sql`: `tjm_approval` history entries (contain rates) readable only by operations/ceo.
+- Financials page lists candidates with qualification `qualified` at any stage, plus historical offer/placed rows; fixed one-to-one financials display bug (values previously shown as "—").
+- Known gap: a final decision already `approved` stays approved if its TJM is later edited back to draft.
+
+Full rollback (in order):
+1. Code: revert the Stage 3 commits in this draft (or delete the draft before accepting — nothing reaches production until accept).
+2. Database, if already accepted:
+```sql
+DROP POLICY IF EXISTS "Activity: business read" ON public.activity_log;
+CREATE POLICY "Activity: business read" ON public.activity_log FOR SELECT TO authenticated
+  USING (public.has_any_role(auth.uid(), ARRAY['sourceur','hrbp','operations','ceo']::public.app_role[]));
+-- then the Stage 3 rollback block above (drops both triggers + functions; 0005 only redefines enforce_tjm_approval)
+```
+3. Access policies on candidate_financials, user_roles and storage are unchanged by Stage 3; no rollback needed.
+4. Data: new columns are additive; historical stages and rates are untouched, so no data restore is required.

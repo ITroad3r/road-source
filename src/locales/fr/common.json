@@ -148,7 +148,7 @@
     "title": "Finances",
     "subtitle": "Revenus, coûts opérationnels et marge nette sur l'ensemble du pipeline.",
     "restrictedBody": "Les finances sont accessibles aux managers, directeurs, CEO et admins.",
-    "allOfferPlaced": "Tous : offre + placés",
+    "allOfferPlaced": "Tous (qualifiés / offre / placés)",
     "stageOffer": "Offre",
     "stagePlaced": "Placé",
     "totalRevenue": "Revenu total",
@@ -176,7 +176,8 @@
     "durationMonths": "Durée (mois)",
     "placementDate": "Date de placement",
     "notes": "Notes",
-    "financialsSaved": "Finances enregistrées"
+    "financialsSaved": "Finances enregistrées",
+    "stageQualified": "Qualifiés"
   },
   "demandStatus": {
     "open": "Ouverte",

@@ -1,6 +1,10 @@
 # Roadmap — Stage 3 draft
 - [x] Qualification + final decision + TJM approval (database rules, activity log)
-- [x] Pipeline badges/buttons (Kanban + list), Financials TJM status/approve, FR/EN
-- [x] Role-based tests in this draft (27/27), historical rows unchanged, unit tests 12/12
-- [ ] Decision: Financials page lists only offer/placed candidates, so a TJM can't be approved earlier from the screen (needs user decision)
-- Stage 4 not started (by instruction)
+- [x] Pipeline badges/buttons, Financials TJM status/approve, FR/EN
+- [x] Financials lists qualified candidates regardless of stage; Operations can create/edit/approve TJM early
+- [x] Audit trail keeps previous approval when approved TJM is edited (reset to draft)
+- [x] Column-level confidentiality check (sourceur/hrbp/admin none, CEO read-only)
+- [x] UI end-to-end flow per role (Playwright) + DB-level blocks
+- [x] Security finding status, privileged access review, rollback doc, tests + build
+- Stage 4 not started (by instruction); do not accept draft
+- [ ] Known gap: approved final decision not reset when its TJM goes back to draft (needs your decision)

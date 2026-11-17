@@ -28,6 +28,7 @@ export const Route = createFileRoute("/_authenticated/financials")({
 type Row = {
   id: string;
   stage: string;
+  qualification_status: "pending" | "qualified" | "rejected";
   demand_id: string;
   cv_id: string;
   talent_hub_cvs: { full_name: string; headline: string | null } | null;
@@ -68,15 +69,22 @@ function Financials() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at)")
-        .in("stage", ["offer", "placed"])
+        .select("id, stage, qualification_status, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at)")
+        // Qualified candidates appear as soon as HRBP/Operations qualifies them (any Kanban stage);
+        // historical offer/placed rows stay visible.
+        .or("qualification_status.eq.qualified,stage.in.(offer,placed)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as Row[];
+      // candidate_financials is one-to-one (unique FK), so the API returns an object, not an array.
+      // Normalize to an array so `[0]` works for both shapes.
+      return (data ?? []).map((r) => {
+        const fin = (r as { candidate_financials: unknown }).candidate_financials;
+        return { ...r, candidate_financials: Array.isArray(fin) ? fin : fin ? [fin] : [] };
+      }) as unknown as Row[];
     },
   });
 
-  const filtered = (rows ?? []).filter((r) => stageFilter === "all" || r.stage === stageFilter);
+  const filtered = (rows ?? []).filter((r) => stageFilter === "all" || (stageFilter === "qualified" ? r.qualification_status === "qualified" : r.stage === stageFilter));
 
   // Executive aggregates: revenue = client_rate * days, cost = candidate_rate * days, profit = margin * days
   // Days estimate: contract_duration_months * 20 working days
@@ -143,6 +151,7 @@ function Financials() {
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("financials.allOfferPlaced")}</SelectItem>
+            <SelectItem value="qualified">{t("financials.stageQualified")}</SelectItem>
             <SelectItem value="offer">{t("financials.stageOffer")}</SelectItem>
             <SelectItem value="placed">{t("financials.stagePlaced")}</SelectItem>
           </SelectContent>

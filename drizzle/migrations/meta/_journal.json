@@ -36,6 +36,20 @@
       "when": 1794928694283,
       "tag": "0004_qualification_and_tjm_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794929800169,
+      "tag": "0005_tjm_audit_previous_approval",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794930108417,
+      "tag": "0006_restrict_tjm_activity_entries",
+      "breakpoints": true
     }
   ]
 }

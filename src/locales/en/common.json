@@ -148,7 +148,7 @@
     "title": "Financials",
     "subtitle": "Revenue, operational cost and net margin across the pipeline.",
     "restrictedBody": "Financials are available to managers, directors, CEO, and admins.",
-    "allOfferPlaced": "All offer + placed",
+    "allOfferPlaced": "All (qualified / offer / placed)",
     "stageOffer": "Offer",
     "stagePlaced": "Placed",
     "totalRevenue": "Total Revenue",
@@ -176,7 +176,8 @@
     "durationMonths": "Duration (months)",
     "placementDate": "Placement date",
     "notes": "Notes",
-    "financialsSaved": "Financials saved"
+    "financialsSaved": "Financials saved",
+    "stageQualified": "Qualified"
   },
   "demandStatus": {
     "open": "Open",

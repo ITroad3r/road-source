@@ -92,6 +92,13 @@
       "when": 1795083499715,
       "tag": "0012_stage5b_authorization_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795083813463,
+      "tag": "0013_stage5b_global_default_function_privileges",
+      "breakpoints": true
     }
   ]
 }

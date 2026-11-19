@@ -147,7 +147,7 @@
     "pageTitle": "Financials — RoadSource",
     "title": "Financials",
     "subtitle": "Revenue, operational cost and net margin across the pipeline.",
-    "restrictedBody": "Financials are available to managers, directors, CEO, and admins.",
+    "restrictedBody": "Company daily rates (TJM) and margins are accessible only to Operations (financial management) and CEO (read-only). Sourcer, HRBP and Admin-only accounts do not have access.",
     "allOfferPlaced": "All (qualified / offer / placed)",
     "stageOffer": "Offer",
     "stagePlaced": "Placed",

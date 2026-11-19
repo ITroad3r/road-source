@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,12 +18,25 @@ import { PipelineKanban, type KanbanStage } from "@/components/PipelineKanban";
 import { SendPackageDialog } from "@/components/SendPackageDialog";
 import { CandidateDecisions, type DecisionRow } from "@/components/CandidateDecisions";
 import { useMyRoles } from "@/hooks/useMyRoles";
+import { can } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Demand — RoadSource" }] }),
-  component: DemandDetail,
+  head: () => ({ meta: [
+    { title: "Demand — RoadSource" },
+    { name: "description", content: "Review a RoadSource client demand and its candidate qualification pipeline." },
+    { property: "og:title", content: "Demand — RoadSource" },
+    { property: "og:description", content: "Review a RoadSource client demand and its candidate qualification pipeline." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: DemandRoute,
 });
+
+function DemandRoute() {
+  const hasChild = useRouterState({ select: (state) => state.matches.some((match) => match.routeId === "/_authenticated/demands/$demandId/edit") });
+  return hasChild ? <Outlet /> : <DemandDetail />;
+}
 
 const STAGES = [
   "identified",
@@ -60,6 +73,7 @@ function DemandDetail() {
   const [view, setView] = useState<"list" | "kanban">("kanban");
   const [packageOpen, setPackageOpen] = useState(false);
   const { data: myRoles } = useMyRoles(user.id);
+  const canManageDemand = can(myRoles, "demands.manage");
   const decisionRow = (dc: { id: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null }): DecisionRow => {
     const fin = Array.isArray(dc.candidate_financials) ? dc.candidate_financials[0] : dc.candidate_financials;
     return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null };
@@ -118,6 +132,7 @@ function DemandDetail() {
 
   const updateLifecycle = useMutation({
     mutationFn: async (lifecycle: Lifecycle) => {
+      if (!canManageDemand) throw new Error("Demand management access required");
       const { error } = await supabase.from("demands").update({ lifecycle }).eq("id", demandId);
       if (error) throw error;
     },
@@ -130,6 +145,7 @@ function DemandDetail() {
 
   const updateOutcome = useMutation({
     mutationFn: async ({ outcome, lost_reason }: { outcome: Outcome; lost_reason?: string | null }) => {
+      if (!canManageDemand) throw new Error("Demand management access required");
       const { error } = await supabase
         .from("demands")
         .update({
@@ -169,6 +185,7 @@ function DemandDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-end">
+              {canManageDemand && <>
               <Button asChild variant="outline" size="sm">
                 <Link to="/demands/$demandId/edit" params={{ demandId }}>
                   <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
@@ -198,6 +215,7 @@ function DemandDetail() {
                   {OUTCOME_VALUES.map((s) => <SelectItem key={s} value={s}>{OUTCOME_LABEL[s]}</SelectItem>)}
                 </SelectContent>
               </Select>
+              </>}
               <Badge variant="outline" className={LIFECYCLE_COLORS[demand.lifecycle as Lifecycle]}>{LIFECYCLE_LABEL[demand.lifecycle as Lifecycle]}</Badge>
               <Badge variant="outline" className={OUTCOME_COLORS[demand.commercial_outcome as Outcome]}>{OUTCOME_LABEL[demand.commercial_outcome as Outcome]}</Badge>
               {demand.is_rfo && (

@@ -147,7 +147,7 @@
     "pageTitle": "Finances — RoadSource",
     "title": "Finances",
     "subtitle": "Revenus, coûts opérationnels et marge nette sur l'ensemble du pipeline.",
-    "restrictedBody": "Les finances sont accessibles aux managers, directeurs, CEO et admins.",
+    "restrictedBody": "Les TJM et marges de l'entreprise sont accessibles uniquement à la Direction des Opérations (gestion financière) et au CEO (lecture seule). Les comptes Sourceur, HRBP et Admin uniquement n'y ont pas accès.",
     "allOfferPlaced": "Tous (qualifiés / offre / placés)",
     "stageOffer": "Offre",
     "stagePlaced": "Placé",

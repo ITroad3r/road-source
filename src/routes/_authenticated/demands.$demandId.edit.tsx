@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { z } from "zod";
@@ -13,6 +13,9 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ArrowLeft, X } from "lucide-react";
+import { useMyRoles } from "@/hooks/useMyRoles";
+import { can } from "@/lib/permissions";
+import { useTranslation } from "react-i18next";
 import {
   LIFECYCLE_VALUES,
   LIFECYCLE_LABEL,
@@ -24,9 +27,26 @@ import {
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId/edit")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Edit Demand — RoadSource" }] }),
-  component: EditDemand,
+  head: () => ({ meta: [
+    { title: "Edit Demand — RoadSource" },
+    { name: "description", content: "Operations workspace for updating RoadSource demand details and assignments." },
+    { property: "og:title", content: "Edit Demand — RoadSource" },
+    { property: "og:description", content: "Operations workspace for updating RoadSource demand details and assignments." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: EditDemandAccess,
 });
+
+function EditDemandAccess() {
+  const { user } = Route.useRouteContext();
+  const { data: roles, isPending, isError } = useMyRoles(user.id);
+  const { t } = useTranslation();
+  if (isPending) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{t("common.loading")}</div>;
+  if (isError || !can(roles, "demands.manage")) return <Navigate to="/dashboard" replace />;
+  // Mount form queries only after roles have resolved and management is authorized.
+  return <EditDemand />;
+}
 
 const demandSchema = z.object({
   client_id: z.string().uuid({ message: "Select a client" }),
@@ -52,6 +72,8 @@ const demandSchema = z.object({
 
 function EditDemand() {
   const { demandId } = Route.useParams();
+  const { user } = Route.useRouteContext();
+  const { data: roles } = useMyRoles(user.id);
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -136,6 +158,7 @@ function EditDemand() {
 
   const updateMutation = useMutation({
     mutationFn: async (values: z.infer<typeof demandSchema>) => {
+      if (!can(roles, "demands.manage")) throw new Error("Demand management access required");
       const { error } = await supabase
         .from("demands")
         .update({

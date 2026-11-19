@@ -33,4 +33,22 @@ describe("RBAC rules", () => {
     expect(pickPrimaryRole(["admin", "operations"])).toBe("operations");
     expect(pickPrimaryRole(["admin"])).toBe("admin");
   });
+  it("unresolved roles cannot open demand management", () => {
+    expect(can(undefined, "demands.manage")).toBe(false);
+    expect(can(null, "demands.manage")).toBe(false);
+    expect(can([], "demands.manage")).toBe(false);
+  });
+  it("HRBP plus Admin cannot edit demands but keeps qualification", () => {
+    expect(can(["hrbp", "admin"], "demands.manage")).toBe(false);
+    expect(can(["hrbp", "admin"], "pipeline.qualify")).toBe(true);
+  });
+  it("Operations retains management even alongside another role", () => {
+    expect(can(["operations", "hrbp"], "demands.manage")).toBe(true);
+    expect(can(["operations"], "financials.edit")).toBe(true);
+  });
+  it("company financial access excludes HRBP and Admin-only", () => {
+    expect(can(["hrbp"], "financials.view")).toBe(false);
+    expect(can(["admin"], "financials.view")).toBe(false);
+    expect(can(["hrbp", "admin", "sourceur"], "financials.view")).toBe(false);
+  });
 });

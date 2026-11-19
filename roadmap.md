@@ -9,5 +9,12 @@
 - [x] Stage 4 role dashboards + workspace switcher (draft only; not accepted)
 - [x] TJM amendment invalidates active final approval; placed rows flagged (0007)
 
-## Stage 4 (main thread)
-- [ ] Stage 4 dashboards running in draft "Stage 4 — Role-based dashboards"; waits on draft report + user approval
+## Post-Stage-4 corrective pass (main, source code only)
+- [x] Correct FR/EN financial restriction wording.
+- [x] Gate demand-detail management controls and direct edit-page access; preserve qualification and candidate workflows.
+- [x] Run permission, dashboard and decision regression tests; inspect local RLS source without database requests.
+- [x] Report neighboring gaps and correction readiness; no data changes, migrations or deployment (docs/stage4-corrective-pass.md).
+
+## Deferred enhancements (not started)
+- Invitation acceptance tracking requires separate design and approval.
+- Stage 3 security scripts need reproducible isolated fixtures and isolation checks before future execution.

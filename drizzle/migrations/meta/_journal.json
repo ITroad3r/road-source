@@ -78,6 +78,13 @@
       "when": 1794931287374,
       "tag": "0010_fix_auto_close_demand_status",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795082849747,
+      "tag": "0011_operations_only_demand_updates",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,537 @@
+[
+  {
+    "test": "sourceur real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ops real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur2 real password session",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Sourceur assigned demand SELECT",
+    "result": "PASS",
+    "http": null
+  },
+  {
+    "test": "Sourceur other demand hidden",
+    "result": "PASS",
+    "http": null
+  },
+  {
+    "test": "sourceur UPDATE title blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE description blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE required_skills blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE budget_min blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE budget_max blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE lifecycle blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE commercial_outcome blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE client_id blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur UPDATE assigned_to blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur existing-row upsert blocked",
+    "result": "PASS",
+    "http": 403
+  },
+  {
+    "test": "sourceur self-escalation blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "hrbp UPDATE title blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE description blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE required_skills blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE budget_min blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE budget_max blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE lifecycle blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE commercial_outcome blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE client_id blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp UPDATE assigned_to blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp existing-row upsert blocked",
+    "result": "PASS",
+    "http": 403
+  },
+  {
+    "test": "hrbp self-escalation blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "ceo UPDATE title blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE description blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE required_skills blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE budget_min blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE budget_max blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE lifecycle blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE commercial_outcome blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE client_id blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo UPDATE assigned_to blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo existing-row upsert blocked",
+    "result": "PASS",
+    "http": 403
+  },
+  {
+    "test": "ceo self-escalation blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "admin UPDATE title blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE description blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE required_skills blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE budget_min blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE budget_max blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE lifecycle blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE commercial_outcome blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE client_id blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin UPDATE assigned_to blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin existing-row upsert blocked",
+    "result": "PASS",
+    "http": 403
+  },
+  {
+    "test": "admin self-escalation blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "norole UPDATE title blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE description blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE required_skills blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE budget_min blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE budget_max blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE lifecycle blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE commercial_outcome blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE client_id blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole UPDATE assigned_to blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "norole existing-row upsert blocked",
+    "result": "PASS",
+    "http": 403
+  },
+  {
+    "test": "norole self-escalation blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "anonymous UPDATE blocked",
+    "result": "PASS",
+    "http": 401
+  },
+  {
+    "test": "Operations UPDATE title",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE description",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE required_skills",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE budget_min",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE budget_max",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE lifecycle",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE commercial_outcome",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE client_id",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations UPDATE assigned_to",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations upsert allowed",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Sourceur creates own pipeline candidate",
+    "result": "PASS",
+    "http": 201
+  },
+  {
+    "test": "Sourceur pipeline contacted",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Sourceur pipeline screened",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Sourceur pipeline submitted",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Other Sourceur pipeline edit blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur qualification blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "ceo qualification blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin qualification blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "premature placement blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "TJM approval before qualification blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "HRBP qualification allowed",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "final decision without approved TJM blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "Operations creates TJM draft",
+    "result": "PASS",
+    "http": 201
+  },
+  {
+    "test": "sourceur TJM editing/approval blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur financial SELECT visibility",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp TJM editing/approval blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "hrbp financial SELECT visibility",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo TJM editing/approval blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ceo financial SELECT visibility",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin TJM editing/approval blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin financial SELECT visibility",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations approves qualified TJM at submitted",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "sourceur final approval blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "hrbp final approval blocked",
+    "result": "PASS",
+    "http": 400
+  },
+  {
+    "test": "ceo final approval blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "admin final approval blocked",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Operations final approval succeeds",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "TJM amendment resets draft and final approval",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Sourceur approved placement succeeds",
+    "result": "PASS",
+    "http": 200
+  },
+  {
+    "test": "auto-close still fills and wins demand",
+    "result": "PASS",
+    "http": null
+  },
+  {
+    "test": "Operations creates demand",
+    "result": "PASS",
+    "http": 201
+  },
+  {
+    "test": "Operations deletes demand",
+    "result": "PASS",
+    "http": 200
+  }
+]

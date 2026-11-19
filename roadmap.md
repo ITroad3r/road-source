@@ -1,4 +1,10 @@
 # Roadmap — Stage 3 draft
+## Stage 5A isolated remediation
+- [x] Verify separate draft database and inspect active policies/grants/privileged paths.
+- [x] Restrict demand UPDATE with recorded migration; preserve pipeline policies (0011, isolated only).
+- [x] Run real-session API matrix and full qualification/TJM/placement regression (107 PASS, 0 FAIL; 33 unit PASS).
+- [x] Record evidence, rollback and remaining issues in docs/stage5a-security-review.md; do not accept, deploy or mark Stage 5 complete.
+
 - [x] Qualification + final decision + TJM approval (database rules, activity log)
 - [x] Pipeline badges/buttons, Financials TJM status/approve, FR/EN
 - [x] Financials lists qualified candidates regardless of stage; Operations can create/edit/approve TJM early

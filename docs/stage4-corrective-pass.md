@@ -27,7 +27,7 @@ Source code only. No database requests, writes, migrations, role changes, test r
 
 ## Neighboring screens and remaining gaps
 - Demand list assignment/lifecycle and create affordances already use `demands.manage`; unchanged.
-- New-demand URL still mounts a creation form without its own role-aware page guard. Reported, not changed in this focused corrective pass.
+- New-demand URL guard was subsequently corrected in the focused follow-up below.
 - Demand detail candidate stage/removal/add/package controls remain outside demand management gating, as requested. Separate CEO/read-only and Admin route-level review would be needed before claiming all business interfaces enforce read-only behavior.
 - Other content routes still have incomplete leaf social metadata; only the two edited demand pages were updated here.
 
@@ -37,3 +37,22 @@ Source code only. No database requests, writes, migrations, role changes, test r
 
 ## Readiness
 The requested source-code corrections are verified and ready for review. This is **not** a fresh all-clear on deployed security: the Sourceur demand UPDATE discrepancy and authenticated end-to-end security checks remain outstanding for isolated verification. No publishing or data changes occurred.
+
+## New Demand follow-up (from commit 4802ba9)
+Changed files in this follow-up:
+- `src/routes/_authenticated/demands.new.tsx`: loading/error-aware page wrapper matching Edit; unauthorized accounts redirect to dashboard before creation form/client/team queries mount. Queries also require `demands.manage`, and demand submit/new-client save handlers recheck it. Added unique leaf metadata. Existing Operations payloads/workflows retained.
+- `src/lib/permissions.test.ts`: added unknown/no-role demand/client management rule test.
+- `tests/browser/new_demand_access.py`: retained reproducible source-only Playwright check; all auth, reads and writes intercepted and all non-local traffic blocked.
+- `AGENTS.md`: extended the form-mounting rule to creation and handler checks.
+- `docs/demand-update-policy-proposal.md`: consequences, narrow future isolated policy proposal, direct-session test matrix, backup and rollback guidance; no executable migration.
+- `roadmap.md` and this report: follow-up results and outstanding blocker.
+
+Final verification:
+- Unit suite: **33 passed, 0 failed**, 3 files (12 permissions, 14 dashboard/workspace, 7 Stage 3 decision rules).
+- `python3 tests/browser/new_demand_access.py`: **7 passed, 0 failed** (HRBP, Sourceur, CEO, Admin-only, no-role, unknown role, Operations). All seven assert no form or client/team queries while the role response is held pending. Six unauthorized states redirect without creation requests. Operations creates a mocked client, selects it, creates a mocked demand and reads its detail page. These are mocked identities, not live authenticated security tests.
+- Browser test development initially exposed mock-contract mismatches (read RPC uses POST; maybeSingle may request an array). Those harness issues were corrected; final run passed. Existing new-client automatic selection did not hold in this mocked flow, so the test explicitly selects the new client before submission; automatic preselection remains unverified and was not changed.
+- Operations form and HRBP redirect screenshots inspected; HRBP capture is during dashboard loading, not a dashboard functionality assertion.
+- Harness compilation: **build OK** at `2026-11-19T10:00:16Z`; diff whitespace check passed. No manual build was run.
+- No live database requests, migrations, user/record changes, publishing or Stage 5 implementation. Earlier corrective code preserved.
+
+Readiness: New Demand frontend access is verified for the requested role cases. **Stage 5 security sign-off remains blocked** on resolving the recorded assigned-Sourceur demand UPDATE policy discrepancy through separately approved isolated testing. Live policy state and direct authenticated enforcement remain unverified.

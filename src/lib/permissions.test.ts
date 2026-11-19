@@ -38,6 +38,11 @@ describe("RBAC rules", () => {
     expect(can(null, "demands.manage")).toBe(false);
     expect(can([], "demands.manage")).toBe(false);
   });
+  it("unknown and no-role accounts cannot create demands or clients", () => {
+    expect(can(["unknown"], "demands.manage")).toBe(false);
+    expect(can([], "demands.manage")).toBe(false);
+    expect(can(["unknown"], "clients.manage")).toBe(false);
+  });
   it("HRBP plus Admin cannot edit demands but keeps qualification", () => {
     expect(can(["hrbp", "admin"], "demands.manage")).toBe(false);
     expect(can(["hrbp", "admin"], "pipeline.qualify")).toBe(true);

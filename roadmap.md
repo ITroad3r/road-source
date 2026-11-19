@@ -18,3 +18,9 @@
 ## Deferred enhancements (not started)
 - Invitation acceptance tracking requires separate design and approval.
 - Stage 3 security scripts need reproducible isolated fixtures and isolation checks before future execution.
+
+## New Demand source-only follow-up
+- [x] Guard form mounting, restricted queries and creation handlers.
+- [x] Run unit and mocked-role browser checks, including Operations creation flows (33 unit tests; 7 browser scenarios pass).
+- [x] Document future isolated demand UPDATE policy proposal and security sign-off blocker; no migration or data changes.
+- Stage 5 security sign-off blocker: assigned-Sourceur demand UPDATE discrepancy requires separately approved isolated policy verification; proposal only in docs/demand-update-policy-proposal.md.

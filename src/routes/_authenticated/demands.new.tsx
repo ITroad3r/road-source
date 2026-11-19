@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
@@ -14,12 +14,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useMyRoles } from "@/hooks/useMyRoles";
+import { can } from "@/lib/permissions";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/demands/new")({
   ssr: false,
-  head: () => ({ meta: [{ title: "New Demand — RoadSource" }] }),
-  component: NewDemand,
+  head: () => ({ meta: [
+    { title: "New Demand — RoadSource" },
+    { name: "description", content: "Operations workspace for creating and assigning RoadSource client demands." },
+    { property: "og:title", content: "New Demand — RoadSource" },
+    { property: "og:description", content: "Operations workspace for creating and assigning RoadSource client demands." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+  component: NewDemandAccess,
 });
+
+function NewDemandAccess() {
+  const { user } = Route.useRouteContext();
+  const { data: roles, isPending, isError } = useMyRoles(user.id);
+  const { t } = useTranslation();
+  if (isPending) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{t("common.loading")}</div>;
+  if (isError || !can(roles, "demands.manage")) return <Navigate to="/dashboard" replace />;
+  return <NewDemand />;
+}
 
 const demandSchema = z.object({
   client_id: z.string().uuid({ message: "Select a client" }),
@@ -41,6 +60,9 @@ function NewDemand() {
   const navigate = useNavigate();
   const { user } = Route.useRouteContext();
 
+  const { data: roles } = useMyRoles(user.id);
+  const canManageDemand = can(roles, "demands.manage");
+
   const [clientId, setClientId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -61,6 +83,7 @@ function NewDemand() {
 
   const { data: clients, refetch: refetchClients } = useQuery({
     queryKey: ["clients"],
+    enabled: canManageDemand,
     queryFn: async () => {
       const { data, error } = await supabase.from("clients").select("id, name, industry").order("name");
       if (error) throw error;
@@ -70,6 +93,7 @@ function NewDemand() {
 
   const { data: users } = useQuery({
     queryKey: ["team-members"],
+    enabled: canManageDemand,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_team_members");
       if (error) throw error;
@@ -86,6 +110,7 @@ function NewDemand() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!canManageDemand) return;
     const parsed = demandSchema.safeParse({
       client_id: clientId, title, description, engagement, location,
       budget_min: budgetMin, budget_max: budgetMax, start_date: startDate, priority, assigned_to: assignedTo,
@@ -297,6 +322,7 @@ const clientSchema = z.object({
 });
 
 function NewClientForm({ createdBy, onCreated }: { createdBy: string; onCreated: (id: string) => void }) {
+  const { data: roles } = useMyRoles(createdBy);
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
   const [contactName, setContactName] = useState("");
@@ -306,6 +332,7 @@ function NewClientForm({ createdBy, onCreated }: { createdBy: string; onCreated:
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (!can(roles, "demands.manage")) return;
     const parsed = clientSchema.safeParse({ name, industry, contact_name: contactName, contact_email: contactEmail, contact_phone: contactPhone });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setSaving(true);

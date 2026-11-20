@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import {
-  CONTRACT_TYPES, COMMENT_REQUIRED, allowedActions, currentValues, frequencyFor, parseAmount, validateProposal,
+  CONTRACT_TYPES, CURRENCIES, COMMENT_REQUIRED, blockedBySeparationOfDuties, allowedActions, currentValues, frequencyFor, parseAmount, validateProposal,
   type CompAction, type CompStatus, type ContractType, type ProposalLike,
 } from "@/lib/compensation";
 
@@ -119,7 +119,9 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p?.version, p?.status]);
 
-  const actions = allowedActions(p?.status ?? null, roles, isAssignedSourceur);
+  const { data: me } = useQuery({ queryKey: ["auth-uid"], enabled: open, queryFn: async () => (await supabase.auth.getUser()).data.user?.id ?? null });
+  const reviewers = [p?.manager_by, ...(data?.audit ?? []).filter((e) => e.action === "manager_review" || e.action === "forward").map((e) => e.actor_id)];
+  const actions = allowedActions(p?.status ?? null, roles, isAssignedSourceur).filter((a) => !blockedBySeparationOfDuties(a, me, reviewers));
   const editable = actions.some((a) => ["save_draft", "submit", "manager_review", "forward", "approve"].includes(a));
   const freq = frequencyFor(type || null);
 
@@ -221,7 +223,7 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
                       <Label htmlFor={`cur-${dcId}`}>{t("comp.currency")}</Label>
                       <Select value={currency} onValueChange={setCurrency}>
                         <SelectTrigger id={`cur-${dcId}`}><SelectValue /></SelectTrigger>
-                        <SelectContent>{["EUR", "MAD", "USD", "GBP", "CHF"].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   )}

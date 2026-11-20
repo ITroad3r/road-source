@@ -438,6 +438,7 @@
       "reject": "Reject",
       "return_to_manager": "Return to manager",
       "reopen": "Reopen for renegotiation",
+      "request_reconsideration": "Request reconsideration",
       "request_alternatives": "Request alternative candidates",
       "start_amendment": "Start amendment"
     },

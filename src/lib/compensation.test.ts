@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { allowedActions, frequencyFor, validateProposal, currentValues, inQueue } from "./compensation";
+import { allowedActions, frequencyFor, validateProposal, currentValues, inQueue, blockedBySeparationOfDuties, isAllowedCurrency, DEFAULT_CURRENCY } from "./compensation";
 import { finalApprovalBlocker, placementBlocker } from "./decisions";
 
 describe("compensation rules", () => {
@@ -31,7 +31,7 @@ describe("compensation rules", () => {
     expect(allowedActions("pending_operations_review", ["operations"], false)).toEqual(["approve", "return_to_manager", "reject"]);
     expect(allowedActions("pending_operations_review", ["hrbp"], false)).toEqual([]);
     expect(allowedActions("rejected", ["operations"], false)).toEqual(["reopen"]);
-    expect(allowedActions("rejected", ["hrbp"], false)).toEqual(["reopen", "request_alternatives"]);
+    expect(allowedActions("rejected", ["hrbp"], false)).toEqual(["request_reconsideration", "request_alternatives"]);
     expect(allowedActions("rejected", ["sourceur"], true)).toEqual([]);
     expect(allowedActions("approved", ["operations"], false)).toEqual(["start_amendment"]);
     expect(allowedActions("approved", ["hrbp"], false)).toEqual([]);
@@ -77,5 +77,26 @@ describe("compensation dashboard counts", () => {
       { requires_compensation: true, assigned_to: me, status: "approved" as const },
     ];
     expect(compQueueCounts(rows, me)).toEqual({ sourceur: 2, returnedToSourceur: 1, hrbp: 2, returnedToManager: 1, operations: 1, approved: 1 });
+  });
+  it("only the assigned Sourceur can submit the initial proposal", () => {
+    expect(allowedActions(null, ["sourceur"], true)).toEqual(["save_draft", "submit"]);
+    expect(allowedActions(null, ["sourceur"], false)).toEqual([]);
+    expect(allowedActions(null, ["hrbp"], false)).toEqual([]);
+    expect(allowedActions(null, ["operations"], false)).toEqual([]);
+    expect(allowedActions("returned_to_sourceur", ["hrbp", "operations"], false)).toEqual([]);
+  });
+  it("only Operations reopens a rejected proposal", () => {
+    expect(allowedActions("rejected", ["hrbp"], false)).not.toContain("reopen");
+    expect(allowedActions("rejected", ["operations"], false)).toContain("reopen");
+  });
+  it("the HRBP reviewer cannot also give final approval", () => {
+    expect(blockedBySeparationOfDuties("approve", "u1", ["u1"])).toBe(true);
+    expect(blockedBySeparationOfDuties("approve", "u2", ["u1"])).toBe(false);
+    expect(blockedBySeparationOfDuties("reject", "u1", ["u1"])).toBe(false);
+  });
+  it("accepts exactly EUR, MAD, USD, GBP and CHF", () => {
+    for (const c of ["EUR", "MAD", "USD", "GBP", "CHF"]) expect(isAllowedCurrency(c)).toBe(true);
+    for (const c of ["JPY", "eur", "", null]) expect(isAllowedCurrency(c)).toBe(false);
+    expect(DEFAULT_CURRENCY).toBe("EUR");
   });
 });

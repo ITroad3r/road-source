@@ -120,6 +120,20 @@
       "when": 1795173964261,
       "tag": "0016_stage6_business_alignment_rejection_followup",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795175459567,
+      "tag": "0017_stage6_final_business_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795175574919,
+      "tag": "0018_stage6_reconsideration_notification_type_fix",
+      "breakpoints": true
     }
   ]
 }

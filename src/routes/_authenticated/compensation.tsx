@@ -71,15 +71,14 @@ function CompensationPage() {
     const st: CompStatus = r.comp?.status ?? "draft";
     if (active === "all") return true;
     if (active === "sourceur") {
-      // Sourceurs see their assigned demands; HRBP/Operations submitters see candidatures with nothing submitted yet.
-      const mine = r.demands?.assigned_to === user.id || !can(roles, "compensation.review") && !can(roles, "compensation.finalize") ? r.demands?.assigned_to === user.id : true;
-      return mine && inQueue(st, "sourceur");
+      // Only the assigned Sourceur submits, so this queue lists their own demands only.
+      return r.demands?.assigned_to === user.id && inQueue(st, "sourceur");
     }
     return r.comp ? inQueue(st, active) : false;
   });
   const counts = Object.fromEntries(queues.map((q) => [q, q === "all" ? rows.length : rows.filter((r) => {
     const st: CompStatus = r.comp?.status ?? "draft";
-    if (q === "sourceur") return (r.demands?.assigned_to === user.id || can(roles, "compensation.review") || can(roles, "compensation.finalize")) && inQueue(st, "sourceur");
+    if (q === "sourceur") return r.demands?.assigned_to === user.id && inQueue(st, "sourceur");
     return r.comp ? inQueue(st, q) : false;
   }).length]));
 

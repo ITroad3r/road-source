@@ -10,7 +10,15 @@ export const COMP_STATUSES = [
 export type CompStatus = (typeof COMP_STATUSES)[number];
 export type CompAction =
   | "save_draft" | "submit" | "manager_review" | "forward" | "return_to_sourceur"
-  | "approve" | "reject" | "return_to_manager" | "reopen" | "request_alternatives" | "start_amendment";
+  | "approve" | "reject" | "return_to_manager" | "reopen" | "request_alternatives" | "request_reconsideration" | "start_amendment";
+
+/** Allowed currencies (mirrors the database check); EUR is the default. */
+export const CURRENCIES = ["EUR", "MAD", "USD", "GBP", "CHF"] as const;
+export type Currency = (typeof CURRENCIES)[number];
+export const DEFAULT_CURRENCY: Currency = "EUR";
+export function isAllowedCurrency(c: string | null | undefined): c is Currency {
+  return !!c && (CURRENCIES as readonly string[]).includes(c);
+}
 
 export type Frequency = "monthly" | "daily";
 export function frequencyFor(t: ContractType | null | undefined): Frequency | null {
@@ -38,21 +46,22 @@ export function currentValues(p: ProposalLike | null): { type: ContractType | nu
 export function allowedActions(status: CompStatus | null, roles: readonly string[] | undefined | null, isAssignedSourceur: boolean): CompAction[] {
   const out: CompAction[] = [];
   const s = status ?? "draft";
-  const canSubmit = (isAssignedSourceur && can(roles, "compensation.submit")) || can(roles, "compensation.review") || can(roles, "compensation.finalize");
+  // Only the Sourceur assigned to the demand creates, submits and corrects the proposal.
+  const canSubmit = isAssignedSourceur && can(roles, "compensation.submit");
   if (canSubmit && (s === "draft" || s === "returned_to_sourceur")) out.push("save_draft", "submit");
   if (can(roles, "compensation.review") && ["pending_manager_review", "reviewed_by_manager", "returned_to_manager"].includes(s))
     out.push("manager_review", "forward", "return_to_sourceur");
   // Rejected compensation is not candidate rejection: HRBP follows up (renegotiate or ask for alternatives).
-  if (can(roles, "compensation.review") && s === "rejected") out.push("reopen", "request_alternatives");
+  if (can(roles, "compensation.review") && s === "rejected") out.push("request_reconsideration", "request_alternatives");
   if (can(roles, "compensation.finalize")) {
     if (s === "pending_operations_review") out.push("approve", "return_to_manager", "reject");
-    if (s === "rejected" && !out.includes("reopen")) out.push("reopen");
+    if (s === "rejected") out.push("reopen"); // Operations alone reopens.
     if (s === "approved") out.push("start_amendment");
   }
   return out;
 }
 
-export const COMMENT_REQUIRED: readonly CompAction[] = ["return_to_sourceur", "return_to_manager", "reject", "reopen", "request_alternatives", "start_amendment"];
+export const COMMENT_REQUIRED: readonly CompAction[] = ["return_to_sourceur", "return_to_manager", "reject", "reopen", "request_alternatives", "request_reconsideration", "start_amendment"];
 
 export type ValidationError = "typeRequired" | "amountRequired" | "amountInvalid";
 /** Client-side validation before submission (drafts may be incomplete). */
@@ -98,4 +107,9 @@ export function compQueueCounts(rows: readonly CompQueueRow[], userId: string) {
     if (s === "approved") approved++;
   }
   return { sourceur, returnedToSourceur, hrbp, returnedToManager, operations, approved };
+}
+
+/** Separation of duties: the user who reviewed/forwarded as HRBP cannot give final approval. */
+export function blockedBySeparationOfDuties(action: CompAction, userId: string | null | undefined, reviewerIds: readonly (string | null | undefined)[]): boolean {
+  return action === "approve" && !!userId && reviewerIds.includes(userId);
 }

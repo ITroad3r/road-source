@@ -86,6 +86,9 @@ check('Operations upsert allowed', r.ok and row('demands', 'id=eq.' + D)['title'
 req('ops', 'PATCH', 'demands?id=eq.' + D, {'title': baseline['title']})
 
 # Full new candidate chain under an existing synthetic assigned demand.
+# Re-runnable: remove the chain left by a previous run and reopen the demand (synthetic fixtures only).
+req('ops', 'DELETE', f'demand_candidates?demand_id=eq.{D}&cv_id=eq.{CV}')
+req('ops', 'PATCH', 'demands?id=eq.' + D, {'lifecycle': 'in_progress', 'commercial_outcome': 'pending', 'status': 'in_progress'})
 r = req('sourceur', 'POST', 'demand_candidates', {'demand_id': D, 'cv_id': CV, 'submitted_by': SOURCEUR, 'stage': 'identified'})
 check('Sourceur creates own pipeline candidate', r.ok and len(r.json()) == 1, r.status_code)
 assert r.ok, 'Pipeline fixture creation failed'
@@ -119,6 +122,15 @@ check('Operations approves qualified TJM at submitted', r.ok and row('candidate_
 for role in ['sourceur', 'hrbp', 'ceo', 'admin']:
     r = req(role, 'PATCH', 'demand_candidates?id=eq.' + dc, {'final_decision': 'approved'})
     check(role + ' final approval blocked', row('demand_candidates', 'id=eq.' + dc)['final_decision'] == 'pending', r.status_code)
+# Stage 6: new candidatures also need an approved compensation proposal (Freelance keeps the TJM rule).
+r = req('ops', 'PATCH', 'demand_candidates?id=eq.' + dc, {'final_decision': 'approved'})
+check('Stage 6: final approval blocked until compensation approved', not r.ok, r.status_code)
+def _ca(role, action, v=None, **k):
+    b = {'_demand_candidate_id': dc, '_action': action, **k}
+    if v is not None: b['_expected_version'] = v
+    x = req(role, 'POST', 'rpc/compensation_action', b); return x.json()[0]['version'] if x.ok else None
+_v = _ca('sourceur', 'submit', _contract_type='freelance', _amount=450); _v = _ca('hrbp', 'forward', _v); _v = _ca('ops', 'approve', _v)
+check('Stage 6: compensation chain Sourceur -> HRBP -> Operations', _v is not None)
 r = req('ops', 'PATCH', 'demand_candidates?id=eq.' + dc, {'final_decision': 'approved'})
 check('Operations final approval succeeds', r.ok and row('demand_candidates', 'id=eq.' + dc)['final_decision'] == 'approved', r.status_code)
 r = req('ops', 'PATCH', 'candidate_financials?demand_candidate_id=eq.' + dc, {'client_rate': 610})

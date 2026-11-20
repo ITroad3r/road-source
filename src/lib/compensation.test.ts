@@ -59,3 +59,21 @@ describe("compensation rules", () => {
     expect(placementBlocker("qualified", null, "approved", false, { status: "approved", final_contract_type: "cdd" })).toBeNull();
   });
 });
+
+import { compQueueCounts } from "./compensation";
+describe("compensation dashboard counts", () => {
+  it("counts only real pending work for each role", () => {
+    const me = "u1";
+    const rows = [
+      { requires_compensation: true, assigned_to: me, status: null },                       // new, nothing submitted
+      { requires_compensation: false, assigned_to: me, status: null },                      // legacy: not pending
+      { requires_compensation: true, assigned_to: me, status: "returned_to_sourceur" as const },
+      { requires_compensation: true, assigned_to: "u2", status: "draft" as const },           // someone else's
+      { requires_compensation: true, assigned_to: me, status: "pending_manager_review" as const },
+      { requires_compensation: true, assigned_to: me, status: "returned_to_manager" as const },
+      { requires_compensation: true, assigned_to: me, status: "pending_operations_review" as const },
+      { requires_compensation: true, assigned_to: me, status: "approved" as const },
+    ];
+    expect(compQueueCounts(rows, me)).toEqual({ sourceur: 2, returnedToSourceur: 1, hrbp: 2, returnedToManager: 1, operations: 1, approved: 1 });
+  });
+});

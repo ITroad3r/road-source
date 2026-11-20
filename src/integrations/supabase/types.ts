@@ -367,6 +367,7 @@ export type Database = {
           qualification_status: Database["public"]["Enums"]["qualification_status"]
           qualified_at: string | null
           qualified_by: string | null
+          requires_compensation: boolean
           stage: Database["public"]["Enums"]["candidate_stage"]
           submitted_by: string | null
           updated_at: string
@@ -386,6 +387,7 @@ export type Database = {
           qualification_status?: Database["public"]["Enums"]["qualification_status"]
           qualified_at?: string | null
           qualified_by?: string | null
+          requires_compensation?: boolean
           stage?: Database["public"]["Enums"]["candidate_stage"]
           submitted_by?: string | null
           updated_at?: string
@@ -405,6 +407,7 @@ export type Database = {
           qualification_status?: Database["public"]["Enums"]["qualification_status"]
           qualified_at?: string | null
           qualified_by?: string | null
+          requires_compensation?: boolean
           stage?: Database["public"]["Enums"]["candidate_stage"]
           submitted_by?: string | null
           updated_at?: string

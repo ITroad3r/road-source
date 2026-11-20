@@ -49,8 +49,10 @@ export function CompStatusBadge({ status }: { status: CompStatus | null }) {
 }
 
 /** Compact summary used in pipelines and queues; opens the full workflow dialog. */
-export function CompensationSummary({ dcId, candidateName, proposal, roles, isAssignedSourceur, compact }: {
+export function CompensationSummary({ dcId, candidateName, proposal, roles, isAssignedSourceur, compact, onOpen }: {
   dcId: string; candidateName: string; proposal: ProposalSummary | null; roles: string[] | undefined; isAssignedSourceur: boolean; compact?: boolean;
+  /** When set, the parent owns the dialog (keeps it open if the row moves to another queue). */
+  onOpen?: () => void;
 }) {
   const { t } = useTranslation();
   const money = useMoney();
@@ -63,7 +65,7 @@ export function CompensationSummary({ dcId, candidateName, proposal, roles, isAs
         {cur.type && <Badge variant="secondary" className="text-[10px]">{t(`comp.types.${cur.type}`)}</Badge>}
         {cur.amount != null && <span className="text-[11px] text-muted-foreground">{money(cur.amount, cur.type, proposal?.currency)}</span>}
       </div>
-      <Button size="sm" variant="outline" className={compact ? "h-6 px-2 text-[11px]" : "h-7 px-2 text-xs"} onClick={() => setOpen(true)}>
+      <Button size="sm" variant="outline" className={compact ? "h-6 px-2 text-[11px]" : "h-7 px-2 text-xs"} onClick={() => (onOpen ? onOpen() : setOpen(true))}>
         <Wallet className="h-3 w-3 mr-1" />{t("comp.manage")}
       </Button>
       {open && <CompensationDialog open={open} onOpenChange={setOpen} dcId={dcId} candidateName={candidateName} roles={roles} isAssignedSourceur={isAssignedSourceur} />}

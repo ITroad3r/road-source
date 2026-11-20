@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { can } from "@/lib/permissions";
 import { currentValues, inQueue, type CompStatus } from "@/lib/compensation";
-import { CompensationSummary, type ProposalSummary, useMoney } from "@/components/CompensationPanel";
+import { CompensationSummary, CompensationDialog, type ProposalSummary, useMoney } from "@/components/CompensationPanel";
 
 export const Route = createFileRoute("/_authenticated/compensation")({
   ssr: false,
@@ -49,6 +49,7 @@ function CompensationPage() {
     return q;
   }, [roles]);
   const [tab, setTab] = useState<Queue | null>(null);
+  const [openRow, setOpenRow] = useState<{ id: string; name: string; assigned: boolean } | null>(null);
   const active = tab ?? queues[0] ?? "all";
 
   const { data, isLoading, error } = useQuery({
@@ -115,7 +116,8 @@ function CompensationPage() {
                         {cur.amount != null && <> · {money(cur.amount, cur.type, r.comp?.currency)}</>}
                       </div>
                     </div>
-                    <CompensationSummary dcId={r.id} candidateName={r.talent_hub_cvs?.full_name ?? ""} proposal={r.comp} roles={roles} isAssignedSourceur={r.demands?.assigned_to === user.id} />
+                    <CompensationSummary dcId={r.id} candidateName={r.talent_hub_cvs?.full_name ?? ""} proposal={r.comp} roles={roles} isAssignedSourceur={r.demands?.assigned_to === user.id}
+                      onOpen={() => setOpenRow({ id: r.id, name: r.talent_hub_cvs?.full_name ?? "", assigned: r.demands?.assigned_to === user.id })} />
                   </li>
                 );
               })}
@@ -123,6 +125,9 @@ function CompensationPage() {
           )}
         </CardContent>
       </Card>
+      {openRow && (
+        <CompensationDialog open onOpenChange={(o) => { if (!o) setOpenRow(null); }} dcId={openRow.id} candidateName={openRow.name} roles={roles} isAssignedSourceur={openRow.assigned} />
+      )}
     </div>
   );
 }

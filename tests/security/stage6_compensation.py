@@ -145,6 +145,18 @@ try:
     ts = [threading.Thread(target=go, args=(x_,)) for x_ in ['approve', 'reject']]; [t.start() for t in ts]; [t.join() for t in ts]
     check('CONC1 exactly one concurrent decision wins', sum(1 for o in out if o.ok)==1, [o.status_code for o in out])
     check('CONC2 single audit entry for race', len([e for e in audit(cc) if e['action'] in ('approve','reject')])==1)
+    # bypass: new candidature without proposal cannot use older endpoints
+    bp = new_dc(); rest('hrbp','PATCH',f'demand_candidates?id=eq.{bp}',{'qualification_status':'qualified'})
+    rest('ops','POST','candidate_financials',{'demand_candidate_id':bp,'client_rate':650,'candidate_rate':500,'tjm_status':'approved'})
+    x = rest('ops','PATCH',f'demand_candidates?id=eq.{bp}',{'final_decision':'approved'}); check('BYP1 new candidature: approved TJM alone cannot bypass compensation', not x.ok, x.text)
+    x = rest('ops','PATCH',f'demand_candidates?id=eq.{bp}',{'stage':'placed'}); check('BYP2 new candidature: placement blocked without compensation', not x.ok, x.text)
+    x = rest('ops','PATCH',f'demand_candidates?id=eq.{bp}',{'requires_compensation':False}); d_ = rest('ops','GET',f'demand_candidates?id=eq.{bp}&select=requires_compensation').json()[0]
+    check('BYP3 compatibility flag cannot be switched off by users', d_['requires_compensation'] is True)
+    x = rest('ops','POST','demand_candidates',{'demand_id':ASSIGNED,'cv_id':CVS[0],'requires_compensation':False,'stage':'identified'})
+    check('BYP4 cannot insert a candidature flagged as legacy', (not x.ok) or x.json()[0]['requires_compensation'] is True, x.text)
+    if x.ok: DCS.append(x.json()[0]['id'])
+    lg = rest('ops','GET','demand_candidates?id=eq.55555555-0000-4000-8000-000000000002&select=requires_compensation').json()[0]
+    check('BYP5 pre-Stage 6 candidatures keep compatibility behaviour', lg['requires_compensation'] is False)
     # legacy placements untouched
     x = rest('ops', 'GET', 'demand_candidates?legacy_placement=eq.true&select=id'); check('LEG legacy query works', x.ok)
     x = rest('ops', 'GET', 'demand_candidates?id=eq.55555555-0000-4000-8000-000000000007&select=stage'); check('LEG existing placement unchanged', x.ok and x.json()[0]['stage']=='placed')

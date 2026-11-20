@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { ArrowLeft, Pencil, Save, X, Trash2, Upload, FileText, MapPin, Mail, Phone, ExternalLink, User, Briefcase, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+import { PreferredContractSelect, PreferredContractBadge, PreferredContractView } from "@/components/PreferredContractType";
 import { ActivityLog } from "@/components/ActivityLog";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/$cvId")({
@@ -113,7 +114,7 @@ function CandidateDetail() {
     full_name: "", email: "", phone: "", headline: "", summary: "",
     location: "", linkedin_url: "", seniority: "mid",
     years_experience: "", engagement_preference: "", availability: "available",
-    daily_rate: "", salary_expectation: "", remote_ok: true,
+    daily_rate: "", salary_expectation: "", remote_ok: true, preferred_contract_type: "",
   });
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
@@ -138,6 +139,7 @@ function CandidateDetail() {
       daily_rate: cv.daily_rate?.toString() ?? "",
       salary_expectation: cv.salary_expectation?.toString() ?? "",
       remote_ok: cv.remote_ok ?? true,
+      preferred_contract_type: cv.preferred_contract_type ?? "",
     });
     setSkills(cv.skills ?? []);
     setTags(cv.tags ?? []);
@@ -177,6 +179,7 @@ function CandidateDetail() {
         daily_rate: form.daily_rate ? Number(form.daily_rate) : null,
         salary_expectation: form.salary_expectation ? Number(form.salary_expectation) : null,
         remote_ok: form.remote_ok,
+        preferred_contract_type: (form.preferred_contract_type || null) as "cdi" | "cdd" | "freelance" | null,
         skills,
         tags,
         cv_url,
@@ -298,6 +301,7 @@ function CandidateDetail() {
                   </Badge>
                 )}
                 {!editing && cv.seniority && <Badge variant="outline" className="text-xs capitalize">{cv.seniority}</Badge>}
+                {!editing && <PreferredContractBadge value={cv.preferred_contract_type} />}
                 {!editing && cv.engagement_preference && <Badge variant="secondary" className="text-xs capitalize">{cv.engagement_preference}</Badge>}
               </div>
             </div>
@@ -363,7 +367,12 @@ function CandidateDetail() {
                 </Select>
               ) : <span className="text-sm capitalize">{cv.availability?.replace("_", " ") ?? "—"}</span>}
             </Field>
-            <Field label="Engagement preference">
+            <div className="sm:col-span-2">
+              {editing
+                ? <PreferredContractSelect id="pref-contract" value={form.preferred_contract_type} onChange={(v) => setForm({ ...form, preferred_contract_type: v })} />
+                : <PreferredContractView value={cv.preferred_contract_type} />}
+            </div>
+            <Field label="Engagement preference (legacy)">
               {editing ? (
                 <Select value={form.engagement_preference} onValueChange={(v) => setForm({ ...form, engagement_preference: v })}>
                   <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>

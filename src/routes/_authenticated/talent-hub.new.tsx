@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Upload, X, FileText, Sparkles } from "lucide-react";
+import { PreferredContractSelect } from "@/components/PreferredContractType";
 import { parseCvFile } from "@/lib/api/cv-parser.functions";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/new")({
@@ -48,6 +49,7 @@ function NewCandidate() {
   const [seniority, setSeniority] = useState<string>("mid");
   const [yearsExp, setYearsExp] = useState("");
   const [engagement, setEngagement] = useState<string>("");
+  const [preferredContract, setPreferredContract] = useState<string>("");
   const [availability, setAvailability] = useState("available");
   const [dailyRate, setDailyRate] = useState("");
   const [salary, setSalary] = useState("");
@@ -156,6 +158,7 @@ function NewCandidate() {
         daily_rate: dailyRate ? Number(dailyRate) : null,
         salary_expectation: salary ? Number(salary) : null,
         remote_ok: remoteOk,
+        preferred_contract_type: (preferredContract || null) as "cdi" | "cdd" | "freelance" | null,
         skills,
         tags,
         cv_url,
@@ -219,7 +222,8 @@ function NewCandidate() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Engagement preference">
+              <div className="sm:col-span-2"><PreferredContractSelect id="new-pref-contract" value={preferredContract} onChange={setPreferredContract} /></div>
+              <Field label="Engagement preference (legacy)">
                 <Select value={engagement} onValueChange={setEngagement}>
                   <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
                   <SelectContent>

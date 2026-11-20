@@ -30,3 +30,11 @@
 - [x] Run unit and mocked-role browser checks, including Operations creation flows (33 unit tests; 7 browser scenarios pass).
 - [x] Document future isolated demand UPDATE policy proposal and security sign-off blocker; no migration or data changes.
 - Stage 5 security sign-off blocker: assigned-Sourceur demand UPDATE discrepancy requires separately approved isolated policy verification; proposal only in docs/demand-update-policy-proposal.md.
+
+## Stage 6 — Contract & compensation (isolated draft)
+- [x] Data rules, workflow function, append-only history, approval gates (0014, 0015)
+- [x] Compensation panel, role queues, dashboard counts, preferred contract type, EN/FR
+- [x] Full regression (Stage 3, 5A, 5B, financials, unit) + Stage 6 API and browser acceptance
+- [x] Acceptance report: docs/stage6-acceptance-report.md
+- Waiting on business: HRBP-as-manager, return paths, multi-role self-approval policy, currencies (report §10)
+- Waiting on Stage 5C merge: its release workflow tests are not in this draft

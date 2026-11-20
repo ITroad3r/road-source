@@ -1,3 +1,4 @@
+import os
 """Source-only UI regression. All auth/data traffic is mocked; never contacts a database.
 
 Run from project root: python3 tests/browser/new_demand_access.py
@@ -28,7 +29,8 @@ async def main():
         if '=' in line:
             key, value = line.split('=', 1)
             config[key] = value.strip().strip('"').strip("'")
-    host = urlparse(config['VITE_SUPABASE_URL']).hostname
+    # Prefer the running environment (drafts point the client at their own backend), then .env.
+    host = urlparse(os.environ.get('VITE_SUPABASE_URL') or config['VITE_SUPABASE_URL']).hostname
     assert host
     storage_key = 'sb-' + host.split('.')[0] + '-auth-token'
     uid = '11111111-1111-4111-8111-111111111111'

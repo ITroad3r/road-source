@@ -81,3 +81,19 @@ export function inQueue(status: CompStatus, queue: "sourceur" | "hrbp" | "operat
     case "approved": return status === "approved";
   }
 }
+
+export type CompQueueRow = { requires_compensation: boolean; assigned_to: string | null; status: CompStatus | null };
+/** Dashboard counts of pending compensation work per role queue. */
+export function compQueueCounts(rows: readonly CompQueueRow[], userId: string) {
+  let sourceur = 0, returnedToSourceur = 0, hrbp = 0, returnedToManager = 0, operations = 0, approved = 0;
+  for (const r of rows) {
+    const s = r.status;
+    if (r.assigned_to === userId && (s === "draft" || s === "returned_to_sourceur" || (s === null && r.requires_compensation))) sourceur++;
+    if (r.assigned_to === userId && s === "returned_to_sourceur") returnedToSourceur++;
+    if (s && inQueue(s, "hrbp")) hrbp++;
+    if (s === "returned_to_manager") returnedToManager++;
+    if (s === "pending_operations_review") operations++;
+    if (s === "approved") approved++;
+  }
+  return { sourceur, returnedToSourceur, hrbp, returnedToManager, operations, approved };
+}

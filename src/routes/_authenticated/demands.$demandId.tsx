@@ -81,7 +81,7 @@ function DemandDetail() {
   const decisionRow = (dc: { id: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null; compensation_proposals?: unknown }): DecisionRow => {
     const fin = one(dc.candidate_financials);
     const comp = compOf(dc);
-    return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null, comp: comp ? { status: comp.status, final_contract_type: comp.final_contract_type } : null };
+    return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null, comp: comp ? { status: comp.status, final_contract_type: comp.final_contract_type } : (dc as { requires_compensation?: boolean }).requires_compensation ? { status: "none", final_contract_type: null } : null };
   };
   const refreshCandidates = () => qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
 
@@ -103,7 +103,7 @@ function DemandDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, notes, created_at, cv_id, qualification_status, final_decision, candidate_financials(tjm_status), compensation_proposals(id, status, version, currency, proposed_contract_type, proposed_amount, manager_contract_type, manager_amount, final_contract_type, final_amount), talent_hub_cvs(id, full_name, headline, email, skills, years_experience, seniority, location, daily_rate, salary_expectation, cv_url, linkedin_url)")
+        .select("id, stage, notes, created_at, cv_id, qualification_status, final_decision, requires_compensation, candidate_financials(tjm_status), compensation_proposals(id, status, version, currency, proposed_contract_type, proposed_amount, manager_contract_type, manager_amount, final_contract_type, final_amount), talent_hub_cvs(id, full_name, headline, email, skills, years_experience, seniority, location, daily_rate, salary_expectation, cv_url, linkedin_url)")
         .eq("demand_id", demandId)
         .order("created_at", { ascending: false });
       if (error) throw error;

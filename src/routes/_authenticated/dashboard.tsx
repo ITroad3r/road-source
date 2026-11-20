@@ -12,6 +12,7 @@ import { ManagerDashboard } from "@/components/dashboards/ManagerDashboard";
 import { DirectorDashboard } from "@/components/dashboards/DirectorDashboard";
 import { CeoDashboard } from "@/components/dashboards/CeoDashboard";
 import { AdminDashboard } from "@/components/dashboards/AdminDashboard";
+import { CompensationQueueCard } from "@/components/dashboards/CompensationQueueCard";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   ssr: false,
@@ -70,6 +71,7 @@ function Dashboard() {
           </div>
         </Tabs>
       )}
+      {(ws === "sourceur" || ws === "hrbp" || ws === "operations") && <CompensationQueueCard queue={ws} userId={user.id} />}
       {ws === "sourceur" && <SourcingDashboard userId={user.id} fullName={fullName} roles={r} />}
       {ws === "hrbp" && <ManagerDashboard fullName={fullName} roles={r} />}
       {ws === "operations" && <DirectorDashboard fullName={fullName} roles={r} />}

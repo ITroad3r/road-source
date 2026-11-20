@@ -3,3 +3,5 @@
 - Dashboards: one workspace per role (workspace.* in permissions.ts), KPI math lives in src/lib/dashboard-kpis.ts and shared cached reads in components/dashboards/data.ts; financial rows are fetched only when can(financials.view) so other roles never issue the request.
 - Demand creation and edit forms mount only after role loading succeeds and demands.manage is granted; creation handlers recheck it before requests, preventing unauthorized form flashes and reads while RLS remains the data boundary.
 - The demand detail parent renders Outlet for its edit child, so direct edit URLs reach the edit access gate rather than silently rendering the detail page.
+- Candidate compensation changes only through the `compensation_action` database function (role, state and expected-version checks; append-only audit); app users get no direct writes on compensation tables, and the shared rules mirror it in src/lib/compensation.ts.
+- Candidatures created after Stage 6 (`requires_compensation`) need an approved compensation proposal before final approval/placement; older rows keep the TJM rule so history is never reinterpreted.

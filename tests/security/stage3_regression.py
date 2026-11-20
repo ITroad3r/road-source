@@ -80,8 +80,8 @@ r=pdc("ops",NOQ,{"final_decision":"approved"})
 check("E4 final approval of qualified candidate with NO financial record rejected", not r.ok and dc(NOQ)["final_decision"]=="pending", r.text[:80])
 # --- F/G/H/I. placement gate, grandfathering, revocation (0009)
 import time
-DEM="aaaaaaaa-0000-4000-8000-000000000002"
-cv=requests.post(f"{U}/rest/v1/talent_hub_cvs",headers=H("sourceur"),json={"full_name":f"[SYNTH] New {int(time.time())}"}).json()[0]["id"]
+DEM="33333333-0000-4000-8000-000000000001"  # [TEST] Java Lead, assigned to sourceur
+cv=requests.post(f"{U}/rest/v1/talent_hub_cvs",headers=H("sourceur"),json={"full_name":f"[TEST] S3 fixture new {int(time.time())}"}).json()[0]["id"]
 r=requests.post(f"{U}/rest/v1/demand_candidates",headers=H("sourceur"),json={"demand_id":DEM,"cv_id":cv,"stage":"placed"})
 check("F1 new candidature cannot be inserted as placed", not r.ok, str(r.status_code))
 NEW=requests.post(f"{U}/rest/v1/demand_candidates",headers=H("sourceur"),json={"demand_id":DEM,"cv_id":cv,"stage":"identified"}).json()[0]["id"]
@@ -92,6 +92,13 @@ requests.post(f"{U}/rest/v1/candidate_financials",headers=H("ops"),json={"demand
 r=pdc("ops",NEW,{"stage":"placed"}); check("F3 qualified but TJM draft cannot be placed", not r.ok and st(NEW)["stage"]=="identified", r.text[:70])
 pfin("ops",NEW,{"tjm_status":"approved"})
 r=pdc("ops",NEW,{"stage":"placed"}); check("F4 TJM approved but no final approval cannot be placed", not r.ok and st(NEW)["stage"]=="identified", r.text[:70])
+# Stage 6: new candidatures also need approved compensation (Freelance keeps the TJM rule)
+def _ca(r,a,v=None,**k):
+    b={"_demand_candidate_id":NEW,"_action":a,**k}
+    if v is not None: b["_expected_version"]=v
+    x=requests.post(f"{U}/rest/v1/rpc/compensation_action",headers=H(r),json=b); return x.json()[0]["version"] if x.ok else None
+r=pdc("ops",NEW,{"final_decision":"approved"}); check("F4b Stage 6: final approval blocked until compensation approved", not r.ok, r.text[:70])
+_v=_ca("sourceur","submit",_contract_type="freelance",_amount=500); _v=_ca("hrbp","forward",_v); _ca("ops","approve",_v)
 pdc("ops",NEW,{"final_decision":"approved"})
 for role in ["ceo","admin"]:
     r=pdc(role,NEW,{"stage":"placed"}); check(f"I {role}: cannot move candidate to placed", st(NEW)["stage"]=="identified", str(r.status_code))
@@ -117,5 +124,6 @@ lg=requests.get(f"{U}/rest/v1/activity_log?demand_candidate_id=eq.{ACTIVE}&kind=
 check("H3 history keeps previous approval on revocation", lg.get("reason")=="qualification_revoked" and lg.get("previous_decided_by")==prev["decided_by"])
 r=pdc("ops",ACTIVE,{"final_decision":"approved"}); check("H4 cannot re-approve while qualification rejected", not r.ok)
 pdc("hrbp",ACTIVE,{"qualification_status":"qualified"}); pdc("ops",ACTIVE,{"final_decision":"approved"})
+requests.delete(f"{U}/rest/v1/demand_candidates?id=eq.{NEW}",headers=H("ops")); requests.delete(f"{U}/rest/v1/talent_hub_cvs?id=eq.{cv}",headers=H("ops"))
 for s,n,d in res: print(f"{s}\t{n}\t{d}")
 print("TOTAL",sum(1 for x in res if x[0]=="PASS"),"/",len(res))

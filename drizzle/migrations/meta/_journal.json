@@ -113,6 +113,13 @@
       "when": 1795167937895,
       "tag": "0015_stage6_require_compensation_for_new_candidatures",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795173964261,
+      "tag": "0016_stage6_business_alignment_rejection_followup",
+      "breakpoints": true
     }
   ]
 }

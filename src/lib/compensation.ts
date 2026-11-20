@@ -10,7 +10,7 @@ export const COMP_STATUSES = [
 export type CompStatus = (typeof COMP_STATUSES)[number];
 export type CompAction =
   | "save_draft" | "submit" | "manager_review" | "forward" | "return_to_sourceur"
-  | "approve" | "reject" | "return_to_manager" | "reopen" | "start_amendment";
+  | "approve" | "reject" | "return_to_manager" | "reopen" | "request_alternatives" | "start_amendment";
 
 export type Frequency = "monthly" | "daily";
 export function frequencyFor(t: ContractType | null | undefined): Frequency | null {
@@ -42,15 +42,17 @@ export function allowedActions(status: CompStatus | null, roles: readonly string
   if (canSubmit && (s === "draft" || s === "returned_to_sourceur")) out.push("save_draft", "submit");
   if (can(roles, "compensation.review") && ["pending_manager_review", "reviewed_by_manager", "returned_to_manager"].includes(s))
     out.push("manager_review", "forward", "return_to_sourceur");
+  // Rejected compensation is not candidate rejection: HRBP follows up (renegotiate or ask for alternatives).
+  if (can(roles, "compensation.review") && s === "rejected") out.push("reopen", "request_alternatives");
   if (can(roles, "compensation.finalize")) {
     if (s === "pending_operations_review") out.push("approve", "return_to_manager", "reject");
-    if (s === "rejected") out.push("reopen");
+    if (s === "rejected" && !out.includes("reopen")) out.push("reopen");
     if (s === "approved") out.push("start_amendment");
   }
   return out;
 }
 
-export const COMMENT_REQUIRED: readonly CompAction[] = ["return_to_sourceur", "return_to_manager", "reject", "reopen", "start_amendment"];
+export const COMMENT_REQUIRED: readonly CompAction[] = ["return_to_sourceur", "return_to_manager", "reject", "reopen", "request_alternatives", "start_amendment"];
 
 export type ValidationError = "typeRequired" | "amountRequired" | "amountInvalid";
 /** Client-side validation before submission (drafts may be incomplete). */
@@ -76,7 +78,7 @@ export function parseAmount(v: string): number | null {
 export function inQueue(status: CompStatus, queue: "sourceur" | "hrbp" | "operations" | "approved"): boolean {
   switch (queue) {
     case "sourceur": return status === "draft" || status === "returned_to_sourceur";
-    case "hrbp": return status === "pending_manager_review" || status === "reviewed_by_manager" || status === "returned_to_manager";
+    case "hrbp": return status === "pending_manager_review" || status === "reviewed_by_manager" || status === "returned_to_manager" || status === "rejected";
     case "operations": return status === "pending_operations_review";
     case "approved": return status === "approved";
   }

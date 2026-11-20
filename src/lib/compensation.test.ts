@@ -31,6 +31,8 @@ describe("compensation rules", () => {
     expect(allowedActions("pending_operations_review", ["operations"], false)).toEqual(["approve", "return_to_manager", "reject"]);
     expect(allowedActions("pending_operations_review", ["hrbp"], false)).toEqual([]);
     expect(allowedActions("rejected", ["operations"], false)).toEqual(["reopen"]);
+    expect(allowedActions("rejected", ["hrbp"], false)).toEqual(["reopen", "request_alternatives"]);
+    expect(allowedActions("rejected", ["sourceur"], true)).toEqual([]);
     expect(allowedActions("approved", ["operations"], false)).toEqual(["start_amendment"]);
     expect(allowedActions("approved", ["hrbp"], false)).toEqual([]);
   });

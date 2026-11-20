@@ -437,7 +437,8 @@
       "approve": "Approuver la rémunération",
       "reject": "Refuser",
       "return_to_manager": "Renvoyer au manager",
-      "reopen": "Rouvrir",
+      "reopen": "Rouvrir pour renégociation",
+      "request_alternatives": "Demander d’autres candidats",
       "start_amendment": "Lancer un avenant"
     },
     "confirm": {

@@ -437,7 +437,8 @@
       "approve": "Approve compensation",
       "reject": "Reject",
       "return_to_manager": "Return to manager",
-      "reopen": "Reopen",
+      "reopen": "Reopen for renegotiation",
+      "request_alternatives": "Request alternative candidates",
       "start_amendment": "Start amendment"
     },
     "confirm": {

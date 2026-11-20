@@ -23,7 +23,6 @@
 
 ## Deferred enhancements (not started)
 - Invitation acceptance tracking requires separate design and approval.
-- Stage 3 security scripts need reproducible isolated fixtures and isolation checks before future execution.
 
 ## New Demand source-only follow-up
 - [x] Guard form mounting, restricted queries and creation handlers.
@@ -38,3 +37,9 @@
 - [x] Acceptance report: docs/stage6-acceptance-report.md
 - Waiting on business: HRBP-as-manager, return paths, multi-role self-approval policy, currencies (report §10)
 - Waiting on Stage 5C merge: its release workflow tests are not in this draft
+
+## Stage 5C — Final release validation (isolated draft)
+- [x] Replace hardcoded Stage 3 fixtures with run-scoped synthetic fixtures + automatic cleanup (tests/release/).
+- [x] Full workflow + authorization suite (144/144), browser role/FR/mobile checks (14/14), prior suites re-run.
+- [x] Release report with GO/NO-GO (docs/stage5c-release-report.md).
+- Open, blocked on owner action in the live app: remove shared QA admin + [TEST] data, assign Operations/CEO users, verify one real invitation email.

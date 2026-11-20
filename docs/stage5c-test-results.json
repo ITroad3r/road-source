@@ -1,0 +1,866 @@
+[
+ {
+  "area": "auth",
+  "check": "all 7 synthetic accounts sign in with password",
+  "result": "PASS",
+  "detail": ""
+ },
+ {
+  "area": "auth",
+  "check": "wrong password rejected",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "auth",
+  "check": "public self-signup disabled",
+  "result": "PASS",
+  "detail": "422"
+ },
+ {
+  "area": "auth",
+  "check": "forged/expired JWT rejected",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "auth",
+  "check": "refresh token revoked after sign-out",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "demand",
+  "check": "sourceur: cannot create client",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "hrbp: cannot create client",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "ceo: cannot create client",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "admin: cannot create client",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "norole: cannot create client",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "multi: cannot create client",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "anon: cannot create client",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "demand",
+  "check": "sourceur: cannot create demand",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "hrbp: cannot create demand",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "ceo: cannot create demand",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "admin: cannot create demand",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "norole: cannot create demand",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "multi: cannot create demand",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "demand",
+  "check": "ops: creates demand",
+  "result": "PASS",
+  "detail": "201"
+ },
+ {
+  "area": "demand",
+  "check": "ops: dispatches demand to sourceur",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "sourceur notified of assignment",
+  "result": "PASS",
+  "detail": "1"
+ },
+ {
+  "area": "demand",
+  "check": "sourceur: cannot update demand (5A)",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "sourceur: cannot delete demand",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "hrbp: cannot update demand (5A)",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "hrbp: cannot delete demand",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "ceo: cannot update demand (5A)",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "ceo: cannot delete demand",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "admin: cannot update demand (5A)",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "admin: cannot delete demand",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "multi: cannot update demand (5A)",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "multi: cannot delete demand",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "sourceur: demand visibility = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "hrbp: demand visibility = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "ceo: demand visibility = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "admin: demand visibility = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "norole: demand visibility = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "demand",
+  "check": "anon: demand visibility = False",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "sourcing",
+  "check": "sourceur: adds Talent Hub candidate",
+  "result": "PASS",
+  "detail": "201"
+ },
+ {
+  "area": "storage",
+  "check": "sourceur: uploads CV",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "storage",
+  "check": "hrbp: CV download = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "storage",
+  "check": "ops: CV download = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "storage",
+  "check": "ceo: CV download = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "storage",
+  "check": "admin: CV download = False",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "norole: CV download = False",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "anon: CV download = False",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "ceo: cannot upload CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "ceo: cannot delete CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "admin: cannot upload CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "admin: cannot delete CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "norole: cannot upload CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "norole: cannot delete CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "anon: cannot upload CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "anon: cannot delete CV",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "storage",
+  "check": "admin: cannot mint signed CV URL",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "sourcing",
+  "check": "sourceur: adds candidate to assigned demand",
+  "result": "PASS",
+  "detail": "201"
+ },
+ {
+  "area": "qualif",
+  "check": "sourceur: cannot self-qualify",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "activity",
+  "check": "sourceur: adds note",
+  "result": "PASS",
+  "detail": "201"
+ },
+ {
+  "area": "activity",
+  "check": "hrbp: cannot edit others note",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "activity",
+  "check": "ceo: cannot edit others note",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "activity",
+  "check": "admin: cannot read activity history",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "activity",
+  "check": "norole: cannot read activity history",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "activity",
+  "check": "anon: cannot read activity history",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "qualif",
+  "check": "ceo: cannot qualify",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "qualif",
+  "check": "hrbp: qualifies candidate",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "sourceur: cannot create TJM",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "finance",
+  "check": "hrbp: cannot create TJM",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "finance",
+  "check": "ceo: cannot create TJM",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "finance",
+  "check": "admin: cannot create TJM",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "finance",
+  "check": "multi: cannot create TJM",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "finance",
+  "check": "norole: cannot create TJM",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "finance",
+  "check": "ops: enters TJM (draft)",
+  "result": "PASS",
+  "detail": "201"
+ },
+ {
+  "area": "decision",
+  "check": "ops: final approval blocked while TJM draft",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "finance",
+  "check": "sourceur: TJM/margin readable = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "sourceur: cannot approve TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "hrbp: TJM/margin readable = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "hrbp: cannot approve TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "ceo: TJM/margin readable = True",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "ceo: cannot approve TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "admin: TJM/margin readable = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "admin: cannot approve TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "multi: TJM/margin readable = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "multi: cannot approve TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "norole: TJM/margin readable = False",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "norole: cannot approve TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "finance",
+  "check": "anon: TJM/margin readable = False",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "finance",
+  "check": "anon: cannot approve TJM",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "finance",
+  "check": "ops: approves TJM",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "decision",
+  "check": "hrbp: cannot give final approval",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "decision",
+  "check": "ceo: cannot give final approval",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "decision",
+  "check": "sourceur: cannot give final approval",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "decision",
+  "check": "multi: cannot give final approval",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "concurrency",
+  "check": "race approval vs TJM amendment never leaves approved+draft",
+  "result": "PASS",
+  "detail": "pending/draft"
+ },
+ {
+  "area": "decision",
+  "check": "ops: final approval after qualified + TJM approved",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "placement",
+  "check": "candidate marked placed",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "placement",
+  "check": "demand auto-closed filled/won",
+  "result": "PASS",
+  "detail": "{'lifecycle': 'filled', 'commercial_outcome': 'won'}"
+ },
+ {
+  "area": "ceo",
+  "check": "ceo: reads placed revenue/margin",
+  "result": "PASS",
+  "detail": "[{\"client_rate\":660,\"candidate_rate\":480,\"margin\":170,\"tjm_status\":\"approved\"}]"
+ },
+ {
+  "area": "ceo",
+  "check": "ceo read-only: PATCH demands blocked",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "ceo",
+  "check": "ceo read-only: PATCH candidate_financials blocked",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "ceo",
+  "check": "ceo read-only: DELETE demand_candidates blocked",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "ceo",
+  "check": "ceo read-only: POST talent_hub_cvs blocked",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "roles",
+  "check": "sourceur: self-grant operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "sourceur: cannot grant admin to others",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "roles",
+  "check": "hrbp: self-grant operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "hrbp: cannot grant admin to others",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "roles",
+  "check": "ops: self-grant operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "ops: cannot grant admin to others",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "roles",
+  "check": "ceo: self-grant operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "ceo: cannot grant admin to others",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "roles",
+  "check": "multi: self-grant operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "multi: cannot grant admin to others",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "roles",
+  "check": "norole: self-grant operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "norole: cannot grant admin to others",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "admin: self-assign operations blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "admin: self-revoke blocked",
+  "result": "PASS",
+  "detail": "400"
+ },
+ {
+  "area": "roles",
+  "check": "admin: grants role to another user",
+  "result": "PASS",
+  "detail": "201"
+ },
+ {
+  "area": "roles",
+  "check": "role change takes effect on new session",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "roles",
+  "check": "revoked role loses access immediately (same token)",
+  "result": "PASS",
+  "detail": "0"
+ },
+ {
+  "area": "roles",
+  "check": "role changes recorded in audit log",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "roles",
+  "check": "sourceur: cannot read role audit log",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "invite",
+  "check": "end-user token cannot call auth admin API directly",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "invite",
+  "check": "sourceur cannot invite via auth API",
+  "result": "PASS",
+  "detail": "403"
+ },
+ {
+  "area": "anon",
+  "check": "anon: clients denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: demands denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: talent_hub_cvs denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: demand_candidates denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: candidate_financials denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: activity_log denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: notifications denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: profiles denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: user_roles denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: generated_cvs denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "anon",
+  "check": "anon: role_audit_log denied",
+  "result": "PASS",
+  "detail": "401"
+ },
+ {
+  "area": "isolation",
+  "check": "norole: no business rows in clients",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "admin: no business rows in clients",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "norole: no business rows in demands",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "admin: no business rows in demands",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "norole: no business rows in talent_hub_cvs",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "admin: no business rows in talent_hub_cvs",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "norole: no business rows in demand_candidates",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "admin: no business rows in demand_candidates",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "norole: no business rows in candidate_financials",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "admin: no business rows in candidate_financials",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "isolation",
+  "check": "multi (sourceur+hrbp): no financial rows",
+  "result": "PASS",
+  "detail": "200"
+ },
+ {
+  "area": "cleanup",
+  "check": "all run-scoped synthetic users removed",
+  "result": "PASS",
+  "detail": "[]"
+ }
+]

@@ -38,7 +38,8 @@
     "notifications": "Notifications",
     "profile": "Profil",
     "usersRoles": "Utilisateurs & rôles",
-    "poweredBy": "PROPULSÉ PAR IT ROAD"
+    "poweredBy": "PROPULSÉ PAR IT ROAD",
+    "compensation": "Rémunération"
   },
   "landing": {
     "navFeatures": "Fonctionnalités",
@@ -236,7 +237,9 @@
     "rejectFinal": "Refus final",
     "blocker": {
       "notQualified": "Qualification HRBP requise d'abord.",
-      "tjmNotApproved": "Validez d'abord le TJM sur la page Finances."
+      "tjmNotApproved": "Validez d'abord le TJM sur la page Finances.",
+      "compensationNotApproved": "La rémunération doit d'abord être approuvée par les Opérations",
+      "commercialTjmRequired": "Freelance : approuvez d'abord le TJM commercial dans Finances"
     },
     "awaitHrbp": "En attente de revue HRBP",
     "awaitOps": "En attente de décision des Opérations",
@@ -397,5 +400,91 @@
       "assignee_change": "Dispatch",
       "assignment": "Dispatch"
     }
+  },
+  "comp": {
+    "title": "Contrat & rémunération",
+    "navTitle": "Rémunération",
+    "section": "Informations contrat & rémunération",
+    "contractType": "Type de contrat",
+    "selectType": "Choisir le type de contrat",
+    "types": {
+      "cdi": "CDI",
+      "cdd": "CDD",
+      "freelance": "Freelance"
+    },
+    "monthlySalary": "Salaire mensuel demandé (DM Salary)",
+    "dailyRate": "Taux journalier demandé (TJM)",
+    "perMonth": "/ mois",
+    "perDay": "/ jour",
+    "currency": "Devise",
+    "status": {
+      "none": "Non commencé",
+      "draft": "Brouillon",
+      "pending_manager_review": "En attente du manager",
+      "returned_to_sourceur": "Renvoyé au sourceur",
+      "reviewed_by_manager": "Revu par le manager",
+      "pending_operations_review": "En attente des Opérations",
+      "returned_to_manager": "Renvoyé au manager",
+      "approved": "Approuvé par les Opérations",
+      "rejected": "Refusé par les Opérations"
+    },
+    "actions": {
+      "save_draft": "Enregistrer le brouillon",
+      "submit": "Soumettre au manager",
+      "manager_review": "Enregistrer la revue",
+      "forward": "Valider & transmettre aux Opérations",
+      "return_to_sourceur": "Renvoyer au sourceur",
+      "approve": "Approuver la rémunération",
+      "reject": "Refuser",
+      "return_to_manager": "Renvoyer au manager",
+      "reopen": "Rouvrir",
+      "start_amendment": "Lancer un avenant"
+    },
+    "confirm": {
+      "title": "Confirmer : {{action}}",
+      "body": "Ce changement est enregistré dans l'historique de rémunération.",
+      "comment": "Commentaire / justification",
+      "commentRequired": "Un motif est obligatoire pour cette action.",
+      "confirm": "Confirmer"
+    },
+    "original": "Initial (Sourceur)",
+    "amended": "Revue manager",
+    "final": "Final (Opérations)",
+    "returnReason": "Dernier motif de renvoi",
+    "managerComment": "Commentaire du manager",
+    "opsComment": "Commentaire des Opérations",
+    "history": "Historique de rémunération",
+    "noHistory": "Aucune activité de rémunération.",
+    "open": "Rémunération",
+    "manage": "Ouvrir la rémunération",
+    "readOnly": "Lecture seule",
+    "errors": {
+      "typeRequired": "Choisissez un type de contrat.",
+      "amountRequired": "Saisissez le montant de rémunération.",
+      "amountInvalid": "Saisissez un montant positif valide.",
+      "stale": "Quelqu'un d'autre a modifié cette proposition. Elle a été rechargée — vérifiez puis réessayez."
+    },
+    "saved": "Rémunération mise à jour",
+    "loading": "Chargement de la rémunération…",
+    "loadError": "Impossible de charger la rémunération.",
+    "queues": {
+      "sourceur": "Mes propositions à compléter",
+      "hrbp": "File de revue manager",
+      "operations": "File d'approbation finale",
+      "approved": "Rémunérations approuvées",
+      "all": "Toutes les propositions"
+    },
+    "queueEmpty": "Rien dans cette file.",
+    "candidate": "Candidat",
+    "demand": "Demande",
+    "amount": "Montant",
+    "updated": "Mis à jour",
+    "intro": "Sourceur → Sourcing Manager (HRBP) → Opérations. La rémunération du candidat est distincte du tarif client commercial.",
+    "noAccess": "Votre rôle n'inclut pas l'accès à la rémunération.",
+    "kpiPending": "Rémunérations à traiter",
+    "by": "par",
+    "preferred": "Type de contrat préféré",
+    "preferredHint": "Préférence du candidat uniquement — la proposition se fait par candidature.",
+    "noPreference": "Aucune préférence"
   }
 }

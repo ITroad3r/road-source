@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       activity_log: {
@@ -153,6 +148,208 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      compensation_audit: {
+        Row: {
+          action: string
+          actor_id: string
+          actor_role: Database["public"]["Enums"]["app_role"]
+          comment: string | null
+          created_at: string
+          currency: string
+          cv_id: string
+          demand_candidate_id: string
+          demand_id: string
+          frequency: string | null
+          from_status: Database["public"]["Enums"]["compensation_status"] | null
+          id: number
+          new_amount: number | null
+          new_contract_type: Database["public"]["Enums"]["contract_type"] | null
+          old_amount: number | null
+          old_contract_type: Database["public"]["Enums"]["contract_type"] | null
+          proposal_id: string
+          to_status: Database["public"]["Enums"]["compensation_status"]
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          actor_role: Database["public"]["Enums"]["app_role"]
+          comment?: string | null
+          created_at?: string
+          currency: string
+          cv_id: string
+          demand_candidate_id: string
+          demand_id: string
+          frequency?: string | null
+          from_status?:
+            | Database["public"]["Enums"]["compensation_status"]
+            | null
+          id?: never
+          new_amount?: number | null
+          new_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          old_amount?: number | null
+          old_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          proposal_id: string
+          to_status: Database["public"]["Enums"]["compensation_status"]
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          actor_role?: Database["public"]["Enums"]["app_role"]
+          comment?: string | null
+          created_at?: string
+          currency?: string
+          cv_id?: string
+          demand_candidate_id?: string
+          demand_id?: string
+          frequency?: string | null
+          from_status?:
+            | Database["public"]["Enums"]["compensation_status"]
+            | null
+          id?: never
+          new_amount?: number | null
+          new_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          old_amount?: number | null
+          old_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          proposal_id?: string
+          to_status?: Database["public"]["Enums"]["compensation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_audit_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "compensation_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compensation_proposals: {
+        Row: {
+          created_at: string
+          currency: string
+          demand_candidate_id: string
+          final_amount: number | null
+          final_at: string | null
+          final_by: string | null
+          final_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          id: string
+          last_return_reason: string | null
+          manager_amount: number | null
+          manager_at: string | null
+          manager_by: string | null
+          manager_comment: string | null
+          manager_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          operations_comment: string | null
+          original_amount: number | null
+          original_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          original_submitted_at: string | null
+          original_submitted_by: string | null
+          proposed_amount: number | null
+          proposed_at: string | null
+          proposed_by: string | null
+          proposed_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          status: Database["public"]["Enums"]["compensation_status"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          demand_candidate_id: string
+          final_amount?: number | null
+          final_at?: string | null
+          final_by?: string | null
+          final_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          id?: string
+          last_return_reason?: string | null
+          manager_amount?: number | null
+          manager_at?: string | null
+          manager_by?: string | null
+          manager_comment?: string | null
+          manager_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          operations_comment?: string | null
+          original_amount?: number | null
+          original_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          original_submitted_at?: string | null
+          original_submitted_by?: string | null
+          proposed_amount?: number | null
+          proposed_at?: string | null
+          proposed_by?: string | null
+          proposed_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          status?: Database["public"]["Enums"]["compensation_status"]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          demand_candidate_id?: string
+          final_amount?: number | null
+          final_at?: string | null
+          final_by?: string | null
+          final_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          id?: string
+          last_return_reason?: string | null
+          manager_amount?: number | null
+          manager_at?: string | null
+          manager_by?: string | null
+          manager_comment?: string | null
+          manager_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          operations_comment?: string | null
+          original_amount?: number | null
+          original_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          original_submitted_at?: string | null
+          original_submitted_by?: string | null
+          proposed_amount?: number | null
+          proposed_at?: string | null
+          proposed_by?: string | null
+          proposed_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          status?: Database["public"]["Enums"]["compensation_status"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_proposals_demand_candidate_id_fkey"
+            columns: ["demand_candidate_id"]
+            isOneToOne: true
+            referencedRelation: "demand_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       demand_candidates: {
         Row: {
@@ -471,6 +668,9 @@ export type Database = {
           linkedin_url: string | null
           location: string | null
           phone: string | null
+          preferred_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
           remote_ok: boolean | null
           salary_expectation: number | null
           seniority: Database["public"]["Enums"]["seniority_level"] | null
@@ -498,6 +698,9 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           phone?: string | null
+          preferred_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
           remote_ok?: boolean | null
           salary_expectation?: number | null
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
@@ -525,6 +728,9 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           phone?: string | null
+          preferred_contract_type?:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
           remote_ok?: boolean | null
           salary_expectation?: number | null
           seniority?: Database["public"]["Enums"]["seniority_level"] | null
@@ -586,6 +792,64 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      compensation_action: {
+        Args: {
+          _action: string
+          _amount?: number
+          _comment?: string
+          _contract_type?: Database["public"]["Enums"]["contract_type"]
+          _currency?: string
+          _demand_candidate_id: string
+          _expected_version?: number
+        }
+        Returns: {
+          created_at: string
+          currency: string
+          demand_candidate_id: string
+          final_amount: number | null
+          final_at: string | null
+          final_by: string | null
+          final_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          id: string
+          last_return_reason: string | null
+          manager_amount: number | null
+          manager_at: string | null
+          manager_by: string | null
+          manager_comment: string | null
+          manager_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          operations_comment: string | null
+          original_amount: number | null
+          original_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          original_submitted_at: string | null
+          original_submitted_by: string | null
+          proposed_amount: number | null
+          proposed_at: string | null
+          proposed_by: string | null
+          proposed_contract_type:
+            | Database["public"]["Enums"]["contract_type"]
+            | null
+          status: Database["public"]["Enums"]["compensation_status"]
+          updated_at: string
+          version: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "compensation_proposals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      compensation_frequency: {
+        Args: { _t: Database["public"]["Enums"]["contract_type"] }
+        Returns: string
+      }
+      compensation_gate_error: { Args: { _dc: string }; Returns: string }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]
@@ -630,6 +894,16 @@ export type Database = {
         | "rejected"
         | "withdrawn"
       commercial_outcome: "pending" | "won" | "lost"
+      compensation_status:
+        | "draft"
+        | "pending_manager_review"
+        | "returned_to_sourceur"
+        | "reviewed_by_manager"
+        | "pending_operations_review"
+        | "returned_to_manager"
+        | "approved"
+        | "rejected"
+      contract_type: "cdi" | "cdd" | "freelance"
       demand_lifecycle:
         | "open"
         | "in_progress"
@@ -804,6 +1078,17 @@ export const Constants = {
         "withdrawn",
       ],
       commercial_outcome: ["pending", "won", "lost"],
+      compensation_status: [
+        "draft",
+        "pending_manager_review",
+        "returned_to_sourceur",
+        "reviewed_by_manager",
+        "pending_operations_review",
+        "returned_to_manager",
+        "approved",
+        "rejected",
+      ],
+      contract_type: ["cdi", "cdd", "freelance"],
       demand_lifecycle: [
         "open",
         "in_progress",
@@ -834,3 +1119,4 @@ export const Constants = {
     },
   },
 } as const
+

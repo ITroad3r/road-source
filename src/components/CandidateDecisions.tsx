@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { can } from "@/lib/permissions";
-import { finalApprovalBlocker, type FinalDecision, type QualificationStatus, type TjmStatus } from "@/lib/decisions";
+import { finalApprovalBlocker, type CompGate, type FinalDecision, type QualificationStatus, type TjmStatus } from "@/lib/decisions";
 
 export type DecisionRow = {
   id: string;
   qualification_status: QualificationStatus;
   final_decision: FinalDecision;
   tjm_status: TjmStatus | null; // null = no rate row (or not visible to this role)
+  comp?: CompGate; // compensation proposal gate (null = legacy candidature)
 };
 
 const Q_COLORS: Record<QualificationStatus, string> = {
@@ -36,7 +37,7 @@ export function CandidateDecisions({ row, roles, onChanged, compact }: { row: De
   const [busy, setBusy] = useState(false);
   const canQualify = can(roles, "pipeline.qualify");
   const canDecide = can(roles, "pipeline.finalDecision");
-  const blocker = finalApprovalBlocker(row.qualification_status, row.tjm_status);
+  const blocker = finalApprovalBlocker(row.qualification_status, row.tjm_status, row.comp);
 
   async function submit() {
     if (!action) return;

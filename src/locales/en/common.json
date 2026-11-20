@@ -38,7 +38,8 @@
     "notifications": "Notifications",
     "profile": "Profile",
     "usersRoles": "Users & roles",
-    "poweredBy": "POWERED BY IT ROAD"
+    "poweredBy": "POWERED BY IT ROAD",
+    "compensation": "Compensation"
   },
   "landing": {
     "navFeatures": "Features",
@@ -236,7 +237,9 @@
     "rejectFinal": "Final reject",
     "blocker": {
       "notQualified": "Needs HRBP qualification first.",
-      "tjmNotApproved": "Approve the TJM on the Financials page first."
+      "tjmNotApproved": "Approve the TJM on the Financials page first.",
+      "compensationNotApproved": "Compensation must be approved by Operations first",
+      "commercialTjmRequired": "Freelance: approve the commercial TJM in Financials first"
     },
     "awaitHrbp": "Awaiting HRBP review",
     "awaitOps": "Awaiting Operations decision",
@@ -397,5 +400,91 @@
       "assignee_change": "Dispatch",
       "assignment": "Dispatch"
     }
+  },
+  "comp": {
+    "title": "Contract & compensation",
+    "navTitle": "Compensation",
+    "section": "Contract & Compensation Information",
+    "contractType": "Contract type",
+    "selectType": "Select contract type",
+    "types": {
+      "cdi": "CDI",
+      "cdd": "CDD",
+      "freelance": "Freelance"
+    },
+    "monthlySalary": "Requested monthly salary (DM Salary)",
+    "dailyRate": "Requested daily rate (TJM)",
+    "perMonth": "/ month",
+    "perDay": "/ day",
+    "currency": "Currency",
+    "status": {
+      "none": "Not started",
+      "draft": "Draft",
+      "pending_manager_review": "Pending manager review",
+      "returned_to_sourceur": "Returned to Sourceur",
+      "reviewed_by_manager": "Reviewed by manager",
+      "pending_operations_review": "Pending Operations review",
+      "returned_to_manager": "Returned to manager",
+      "approved": "Approved by Operations",
+      "rejected": "Rejected by Operations"
+    },
+    "actions": {
+      "save_draft": "Save draft",
+      "submit": "Submit to manager",
+      "manager_review": "Save review",
+      "forward": "Approve & forward to Operations",
+      "return_to_sourceur": "Return to Sourceur",
+      "approve": "Approve compensation",
+      "reject": "Reject",
+      "return_to_manager": "Return to manager",
+      "reopen": "Reopen",
+      "start_amendment": "Start amendment"
+    },
+    "confirm": {
+      "title": "Confirm: {{action}}",
+      "body": "This change is recorded in the compensation history.",
+      "comment": "Comment / justification",
+      "commentRequired": "A reason is required for this action.",
+      "confirm": "Confirm"
+    },
+    "original": "Original (Sourceur)",
+    "amended": "Manager review",
+    "final": "Final (Operations)",
+    "returnReason": "Last return reason",
+    "managerComment": "Manager comment",
+    "opsComment": "Operations comment",
+    "history": "Compensation history",
+    "noHistory": "No compensation activity yet.",
+    "open": "Compensation",
+    "manage": "Open compensation",
+    "readOnly": "Read-only view",
+    "errors": {
+      "typeRequired": "Select a contract type.",
+      "amountRequired": "Enter the compensation amount.",
+      "amountInvalid": "Enter a valid positive amount.",
+      "stale": "Someone else updated this proposal. It has been reloaded — please review and try again."
+    },
+    "saved": "Compensation updated",
+    "loading": "Loading compensation…",
+    "loadError": "Could not load compensation.",
+    "queues": {
+      "sourceur": "My proposals to complete",
+      "hrbp": "Manager review queue",
+      "operations": "Final approval queue",
+      "approved": "Approved compensation",
+      "all": "All proposals"
+    },
+    "queueEmpty": "Nothing in this queue.",
+    "candidate": "Candidate",
+    "demand": "Demand",
+    "amount": "Amount",
+    "updated": "Updated",
+    "intro": "Sourceur → Sourcing Manager (HRBP) → Operations. Candidate compensation is separate from the commercial client rate.",
+    "noAccess": "Your role does not include compensation access.",
+    "kpiPending": "Compensation to review",
+    "by": "by",
+    "preferred": "Preferred contract type",
+    "preferredHint": "Candidate preference only — the proposal is set per candidature.",
+    "noPreference": "No preference"
   }
 }

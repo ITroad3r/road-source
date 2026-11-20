@@ -99,6 +99,13 @@
       "when": 1795083813463,
       "tag": "0013_stage5b_global_default_function_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795167044837,
+      "tag": "0014_stage6_compensation_workflow",
+      "breakpoints": true
     }
   ]
 }

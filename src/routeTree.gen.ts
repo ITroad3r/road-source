@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as RootRouteImport } from './routes/root'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
+import { Route as AuthenticatedCompensationRouteImport } from './routes/_authenticated/compensation'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedFinancialsRouteImport } from './routes/_authenticated/financials'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
@@ -62,6 +63,12 @@ const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCompensationRoute =
+  AuthenticatedCompensationRouteImport.update({
+    id: '/compensation',
+    path: '/compensation',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -164,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/root': typeof RootRoute
   '/set-password': typeof SetPasswordRoute
   '/clients': typeof AuthenticatedClientsRouteWithChildren
+  '/compensation': typeof AuthenticatedCompensationRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -187,6 +195,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
   '/set-password': typeof SetPasswordRoute
+  '/compensation': typeof AuthenticatedCompensationRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -212,6 +221,7 @@ export interface FileRoutesById {
   '/root': typeof RootRoute
   '/set-password': typeof SetPasswordRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRouteWithChildren
+  '/_authenticated/compensation': typeof AuthenticatedCompensationRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/financials': typeof AuthenticatedFinancialsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/root'
     | '/set-password'
     | '/clients'
+    | '/compensation'
     | '/dashboard'
     | '/financials'
     | '/notifications'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/root'
     | '/set-password'
+    | '/compensation'
     | '/dashboard'
     | '/financials'
     | '/notifications'
@@ -285,6 +297,7 @@ export interface FileRouteTypes {
     | '/root'
     | '/set-password'
     | '/_authenticated/clients'
+    | '/_authenticated/compensation'
     | '/_authenticated/dashboard'
     | '/_authenticated/financials'
     | '/_authenticated/notifications'
@@ -354,6 +367,13 @@ declare module '@tanstack/react-router' {
       path: '/clients'
       fullPath: '/clients'
       preLoaderRoute: typeof AuthenticatedClientsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/compensation': {
+      id: '/_authenticated/compensation'
+      path: '/compensation'
+      fullPath: '/compensation'
+      preLoaderRoute: typeof AuthenticatedCompensationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -529,6 +549,7 @@ const AuthenticatedDemandsDemandIdRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRouteWithChildren
+  AuthenticatedCompensationRoute: typeof AuthenticatedCompensationRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFinancialsRoute: typeof AuthenticatedFinancialsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
@@ -543,6 +564,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientsRoute: AuthenticatedClientsRouteWithChildren,
+  AuthenticatedCompensationRoute: AuthenticatedCompensationRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFinancialsRoute: AuthenticatedFinancialsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,

@@ -16,6 +16,11 @@ export const CAPABILITIES = {
   "financials.view": ["operations", "ceo"],
   "financials.edit": ["operations"],
   "tjm.approve": ["operations"],
+  // Candidate compensation workflow (Sourcing Manager = HRBP, business assumption)
+  "compensation.view": ["sourceur", "hrbp", "operations", "ceo"],
+  "compensation.submit": ["sourceur", "hrbp", "operations"],
+  "compensation.review": ["hrbp"],
+  "compensation.finalize": ["operations"],
   "reports.view": ["hrbp", "operations", "ceo"],
   "users.manage": ["admin"],
   // Dashboard workspaces: one per role, never inherited (admin is not a business superuser).

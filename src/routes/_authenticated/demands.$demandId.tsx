@@ -17,6 +17,7 @@ import { LIFECYCLE_VALUES, LIFECYCLE_LABEL, LIFECYCLE_COLORS, OUTCOME_VALUES, OU
 import { PipelineKanban, type KanbanStage } from "@/components/PipelineKanban";
 import { SendPackageDialog } from "@/components/SendPackageDialog";
 import { CandidateDecisions, type DecisionRow } from "@/components/CandidateDecisions";
+import { CompensationSummary, type ProposalSummary } from "@/components/CompensationPanel";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { can } from "@/lib/permissions";
 
@@ -74,9 +75,13 @@ function DemandDetail() {
   const [packageOpen, setPackageOpen] = useState(false);
   const { data: myRoles } = useMyRoles(user.id);
   const canManageDemand = can(myRoles, "demands.manage");
-  const decisionRow = (dc: { id: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null }): DecisionRow => {
-    const fin = Array.isArray(dc.candidate_financials) ? dc.candidate_financials[0] : dc.candidate_financials;
-    return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null };
+  const canSeeComp = can(myRoles, "compensation.view");
+  const one = <T,>(v: T[] | T | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null);
+  const compOf = (dc: { compensation_proposals?: unknown }) => one(dc.compensation_proposals as ProposalSummary[] | ProposalSummary | null);
+  const decisionRow = (dc: { id: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null; compensation_proposals?: unknown }): DecisionRow => {
+    const fin = one(dc.candidate_financials);
+    const comp = compOf(dc);
+    return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null, comp: comp ? { status: comp.status, final_contract_type: comp.final_contract_type } : null };
   };
   const refreshCandidates = () => qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
 
@@ -98,7 +103,7 @@ function DemandDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, notes, created_at, cv_id, qualification_status, final_decision, candidate_financials(tjm_status), talent_hub_cvs(id, full_name, headline, email, skills, years_experience, seniority, location, daily_rate, salary_expectation, cv_url, linkedin_url)")
+        .select("id, stage, notes, created_at, cv_id, qualification_status, final_decision, candidate_financials(tjm_status), compensation_proposals(id, status, version, currency, proposed_contract_type, proposed_amount, manager_contract_type, manager_amount, final_contract_type, final_amount), talent_hub_cvs(id, full_name, headline, email, skills, years_experience, seniority, location, daily_rate, salary_expectation, cv_url, linkedin_url)")
         .eq("demand_id", demandId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -314,7 +319,12 @@ function DemandDetail() {
           onRemove={(id) => removeCandidate.mutate(id)}
           renderExtra={(id) => {
             const dc = candidates?.find((c) => c.id === id);
-            return dc ? <CandidateDecisions compact row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} /> : null;
+            return dc ? (
+              <div className="space-y-2">
+                <CandidateDecisions compact row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
+                {canSeeComp && <CompensationSummary compact dcId={dc.id} candidateName={dc.talent_hub_cvs?.full_name ?? ""} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}
+              </div>
+            ) : null;
           }}
         />
       ) : (
@@ -366,7 +376,10 @@ function DemandDetail() {
                         {cv.daily_rate != null && <span>TJM: €{cv.daily_rate}</span>}
                         {cv.salary_expectation != null && <span>Salary: €{cv.salary_expectation}</span>}
                       </div>
-                      <CandidateDecisions row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <CandidateDecisions row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
+                        {canSeeComp && <CompensationSummary dcId={dc.id} candidateName={cv.full_name} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

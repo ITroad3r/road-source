@@ -15,7 +15,7 @@ export const CAPABILITIES = {
   "chat.sourcing": ["sourceur", "hrbp"],
   "chat.sourcingAll": ["hrbp"],
   "chat.operations": ["hrbp", "operations"],
-  "pipeline.qualify": ["hrbp", "operations"],
+  "pipeline.qualify": ["hrbp"],
   "pipeline.finalDecision": ["operations"],
   "financials.view": ["operations", "ceo"],
   "financials.edit": ["operations"],

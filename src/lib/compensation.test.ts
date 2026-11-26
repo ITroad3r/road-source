@@ -53,11 +53,13 @@ describe("compensation rules", () => {
     expect(inQueue("pending_operations_review", "operations")).toBe(true);
     expect(inQueue("pending_operations_review", "hrbp")).toBe(false);
   });
-  it("CDI/CDD final approval does not need a commercial TJM; Freelance does", () => {
+  it("candidate approval precedes compensation; placement retains contract-specific financial gates", () => {
     expect(finalApprovalBlocker("qualified", null, { status: "approved", final_contract_type: "cdi" })).toBeNull();
-    expect(finalApprovalBlocker("qualified", null, { status: "approved", final_contract_type: "freelance" })).toBe("commercialTjmRequired");
+    expect(finalApprovalBlocker("qualified", null, { status: "approved", final_contract_type: "freelance" })).toBeNull();
+    expect(placementBlocker("qualified", null, "approved", false, { status: "approved", final_contract_type: "freelance" })).toBe("commercialTjmRequired");
     expect(finalApprovalBlocker("qualified", "approved", { status: "approved", final_contract_type: "freelance" })).toBeNull();
-    expect(finalApprovalBlocker("qualified", "approved", { status: "pending_operations_review", final_contract_type: null })).toBe("compensationNotApproved");
+    expect(finalApprovalBlocker("qualified", "approved", { status: "pending_operations_review", final_contract_type: null })).toBeNull();
+    expect(placementBlocker("qualified", "approved", "approved", false, { status: "pending_operations_review", final_contract_type: null })).toBe("compensationNotApproved");
     expect(placementBlocker("qualified", null, "approved", false, { status: "approved", final_contract_type: "cdd" })).toBeNull();
   });
 });

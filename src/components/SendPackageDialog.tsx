@@ -12,6 +12,8 @@ import { Send, Copy, Mail, Loader2 } from "lucide-react";
 type Candidate = {
   id: string;
   stage: string;
+  qualification_status: string;
+  final_decision: string;
   cv: {
     id: string;
     full_name: string;
@@ -40,7 +42,7 @@ export function SendPackageDialog({
   candidates: Candidate[];
 }) {
   const eligible = useMemo(
-    () => candidates.filter((c) => c.cv && ["submitted", "screened", "client_interview", "offer"].includes(c.stage)),
+    () => candidates.filter((c) => c.cv && c.qualification_status === "qualified" && c.final_decision === "approved" && ["submitted", "screened", "client_interview", "offer"].includes(c.stage)),
     [candidates]
   );
   const [selected, setSelected] = useState<Record<string, boolean>>(() =>

@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { can } from "@/lib/permissions";
+import { readyForHrbp } from "@/lib/pipeline-workflow";
 import { finalApprovalBlocker, type CompGate, type FinalDecision, type QualificationStatus, type TjmStatus } from "@/lib/decisions";
 
 export type DecisionRow = {
   id: string;
+  stage: string;
   qualification_status: QualificationStatus;
   final_decision: FinalDecision;
   tjm_status: TjmStatus | null; // null = no rate row (or not visible to this role)
@@ -40,7 +42,7 @@ export function CandidateDecisions({ row, roles, onChanged, compact }: { row: De
   const blocker = finalApprovalBlocker(row.qualification_status, row.tjm_status, row.comp);
 
   async function submit() {
-    if (!action) return;
+    if (!action || (action.field === "qualification" ? !canQualify || !readyForHrbp(row.stage) : !canDecide || !!blocker)) return;
     setBusy(true);
     const patch = action.field === "qualification"
       ? { qualification_status: action.value as QualificationStatus, qualification_notes: notes || null }
@@ -63,17 +65,17 @@ export function CandidateDecisions({ row, roles, onChanged, compact }: { row: De
           {t(`decisions.d.${row.final_decision}`)}
         </Badge>
       </div>
-      {canQualify && row.final_decision === "pending" && (
+      {canQualify && readyForHrbp(row.stage) && row.final_decision === "pending" && (
         <div className="flex flex-wrap gap-1">
           <Button size="sm" variant="outline" className={size} onClick={() => setAction({ field: "qualification", value: "qualified" })}>{t("decisions.qualify")}</Button>
           <Button size="sm" variant="outline" className={size} onClick={() => setAction({ field: "qualification", value: "rejected" })}>{t("decisions.reject")}</Button>
         </div>
       )}
-      {canDecide && row.final_decision === "pending" && (
+      {canDecide && row.qualification_status === "qualified" && row.final_decision === "pending" && (
         <div className="space-y-1">
           <div className="flex flex-wrap gap-1">
             <Button size="sm" className={size} disabled={!!blocker} onClick={() => setAction({ field: "decision", value: "approved" })}>{t("decisions.approve")}</Button>
-            <Button size="sm" variant="outline" className={size} onClick={() => setAction({ field: "decision", value: "rejected" })}>{t("decisions.rejectFinal")}</Button>
+            <Button size="sm" variant="outline" className={size} disabled={!!blocker} onClick={() => setAction({ field: "decision", value: "rejected" })}>{t("decisions.rejectFinal")}</Button>
           </div>
           {blocker && <p className="text-[11px] text-muted-foreground">{t(`decisions.blocker.${blocker}`)}</p>}
         </div>

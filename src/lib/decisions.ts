@@ -3,7 +3,7 @@ export type QualificationStatus = "pending" | "qualified" | "rejected";
 export type FinalDecision = "pending" | "approved" | "rejected";
 export type TjmStatus = "draft" | "approved";
 
-/** Returns why final approval is blocked, or null when allowed. tjm = null means no rate row. */
+/** Financial gates apply to placement, not the earlier Operations candidate review. */
 export type CompGate = { status: string; final_contract_type: string | null } | null | undefined;
 export type GateBlocker = "tjmNotApproved" | "compensationNotApproved" | "commercialTjmRequired";
 /** Mirrors public.compensation_gate_error: with a compensation proposal it must be approved
@@ -16,12 +16,12 @@ export function compensationGate(tjm: TjmStatus | null, comp?: CompGate): GateBl
 }
 export function finalApprovalBlocker(q: QualificationStatus, tjm: TjmStatus | null, comp?: CompGate): "notQualified" | GateBlocker | null {
   if (q !== "qualified") return "notQualified";
-  return compensationGate(tjm, comp);
+  return null;
 }
 
 /** TJM approval needs a qualified candidate; only grandfathered (pre-Stage 3) placements are exempt. */
-export function canApproveTjmFor(q: QualificationStatus, legacyPlacement: boolean): boolean {
-  return q === "qualified" || legacyPlacement;
+export function canApproveTjmFor(q: QualificationStatus, legacyPlacement: boolean, decision: FinalDecision): boolean {
+  return (q === "qualified" && decision === "approved") || legacyPlacement;
 }
 
 /** Why a new candidature cannot move to "placed", or null. Legacy placements are never re-checked. */

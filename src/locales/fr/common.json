@@ -1,4 +1,5 @@
 {
+  "workflow": { "stageBlocked": "Cette étape nécessite l'étape précédente et les approbations HRBP / Opérations." },
   "common": {
     "loading": "Chargement…",
     "save": "Enregistrer",
@@ -380,7 +381,7 @@
     "stage": {
       "identified": "Identifié",
       "contacted": "Contacté",
-      "screened": "Présélectionné",
+      "screened": "Pour évaluation/approbation",
       "submitted": "Soumis",
       "client_interview": "Entretien client",
       "offer": "Offre",

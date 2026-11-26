@@ -169,6 +169,13 @@
       "when": 1795726333866,
       "tag": "0023_tighten_candidate_chat_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795729495714,
+      "tag": "0024_candidate_review_before_tjm",
+      "breakpoints": true
     }
   ]
 }

@@ -22,7 +22,7 @@ export type KanbanStage = (typeof KANBAN_STAGES)[number];
 const STAGE_LABEL: Record<KanbanStage, string> = {
   identified: "Identified",
   contacted: "Contacted",
-  screened: "Screened",
+  screened: "For Screening/Approval",
   submitted: "Submitted",
   client_interview: "Client interview",
   offer: "Offer",
@@ -61,11 +61,15 @@ export function PipelineKanban({
   onStageChange,
   onRemove,
   renderExtra,
+  canMove,
+  canRemove,
 }: {
   renderExtra?: (id: string) => ReactNode;
   candidates: KanbanCandidate[];
   onStageChange: (id: string, stage: KanbanStage) => void;
   onRemove: (id: string) => void;
+  canMove: (id: string, stage: KanbanStage) => boolean;
+  canRemove: boolean;
 }) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const { t } = useTranslation();
@@ -86,10 +90,10 @@ export function PipelineKanban({
           return (
             <div
               key={stage}
-              onDragOver={(e) => { e.preventDefault(); setOverStage(stage); }}
+              onDragOver={(e) => { if (draggingId && canMove(draggingId, stage)) { e.preventDefault(); setOverStage(stage); } }}
               onDragLeave={() => setOverStage((s) => (s === stage ? null : s))}
               onDrop={() => {
-                if (draggingId) onStageChange(draggingId, stage);
+                if (draggingId && canMove(draggingId, stage)) onStageChange(draggingId, stage);
                 setDraggingId(null);
                 setOverStage(null);
               }}
@@ -103,7 +107,7 @@ export function PipelineKanban({
                 {items.map((dc) => (
                   <Card
                     key={dc.id}
-                    draggable
+                    draggable={KANBAN_STAGES.some((s) => s !== dc.stage && canMove(dc.id, s))}
                     onDragStart={() => setDraggingId(dc.id)}
                     onDragEnd={() => { setDraggingId(null); setOverStage(null); }}
                     className={`cursor-grab active:cursor-grabbing transition-opacity ${draggingId === dc.id ? "opacity-50" : ""}`}
@@ -121,9 +125,9 @@ export function PipelineKanban({
                           </Link>
                           <div className="text-xs text-muted-foreground truncate">{dc.cv?.headline ?? "—"}</div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 -mr-1" onClick={() => onRemove(dc.id)}>
+                        {canRemove && <Button variant="ghost" size="icon" className="h-6 w-6 -mr-1" onClick={() => onRemove(dc.id)}>
                           <Trash2 className="h-3 w-3" />
-                        </Button>
+                        </Button>}
                       </div>
                       <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
                         {dc.cv?.seniority && <span className="capitalize">{dc.cv.seniority}</span>}

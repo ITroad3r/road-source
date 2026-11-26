@@ -24,14 +24,14 @@ export function sourceurKpis(userId: string, demands: Dem[], cands: Cand[]) {
     activeDemands: demands.filter((d) => d.assigned_to === userId && ACTIVE_LIFECYCLES.includes(d.lifecycle)).length,
     sourced: mine.length,
     submitted: mine.filter((c) => SUBMITTED_STAGES.includes(c.stage)).length,
-    awaitingQualification: mine.filter((c) => c.qualification_status === "pending" && isActiveCand(c)).length,
+    awaitingQualification: qualificationQueue(mine).length,
     qualified: mine.filter((c) => c.qualification_status === "qualified").length,
     rejected: mine.filter((c) => c.qualification_status === "rejected").length,
   };
 }
 
 export function qualificationQueue<T extends Cand>(cands: T[]): T[] {
-  return cands.filter((c) => c.qualification_status === "pending" && isActiveCand(c));
+  return cands.filter((c) => c.qualification_status === "pending" && ["screened", "submitted", "client_interview", "offer"].includes(c.stage));
 }
 
 export function hrbpKpis(cands: Cand[]) {
@@ -55,10 +55,8 @@ export function opsQueues<T extends Cand>(cands: T[], fins: Fin[]) {
   const fin = new Map(fins.map((f) => [f.demand_candidate_id, f]));
   const live = cands.filter((c) => c.qualification_status === "qualified" && isActiveCand(c));
   return {
-    // Qualified + TJM approved + decision pending: the only state where final approval is possible.
-    awaitingFinal: live.filter((c) => c.final_decision === "pending" && c.stage !== "placed" && fin.get(c.id)?.tjm_status === "approved"),
-    // Qualified candidates with no rate yet or a draft rate (first approval or re-approval).
-    tjmAwaiting: live.filter((c) => (fin.get(c.id)?.tjm_status ?? "draft") === "draft"),
+    awaitingFinal: live.filter((c) => c.final_decision === "pending" && c.stage !== "placed"),
+    tjmAwaiting: live.filter((c) => c.final_decision === "approved" && (fin.get(c.id)?.tjm_status ?? "draft") === "draft"),
     amendments: fins.filter((f) => f.amendment_pending),
   };
 }

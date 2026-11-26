@@ -7,18 +7,20 @@ describe("qualification & TJM rules", () => {
     expect(finalApprovalBlocker("pending", null)).toBe("notQualified");
     expect(finalApprovalBlocker("rejected", "approved")).toBe("notQualified");
   });
-  it("final approval needs an approved TJM when a rate exists", () => {
-    expect(finalApprovalBlocker("qualified", "draft")).toBe("tjmNotApproved");
+  it("Operations candidate approval precedes TJM approval", () => {
+    expect(finalApprovalBlocker("qualified", "draft")).toBeNull();
     expect(finalApprovalBlocker("qualified", "approved")).toBeNull();
   });
-  it("final approval blocked when qualified but no rate row exists", () => {
-    expect(finalApprovalBlocker("qualified", null)).toBe("tjmNotApproved");
+  it("Operations can review qualified candidates before any rate exists", () => {
+    expect(finalApprovalBlocker("qualified", null)).toBeNull();
   });
-  it("TJM approval needs qualification, except grandfathered placements", () => {
-    expect(canApproveTjmFor("pending", false)).toBe(false);
-    expect(canApproveTjmFor("rejected", false)).toBe(false);
-    expect(canApproveTjmFor("qualified", false)).toBe(true);
-    expect(canApproveTjmFor("pending", true)).toBe(true);
+  it("TJM approval needs qualification AND Operations candidate approval, except grandfathered placements", () => {
+    expect(canApproveTjmFor("pending", false, "approved")).toBe(false);
+    expect(canApproveTjmFor("rejected", false, "approved")).toBe(false);
+    expect(canApproveTjmFor("qualified", false, "approved")).toBe(true);
+    expect(canApproveTjmFor("qualified", false, "pending")).toBe(false);
+    expect(canApproveTjmFor("qualified", false, "rejected")).toBe(false);
+    expect(canApproveTjmFor("pending", true, "pending")).toBe(true);
   });
   it("new placement needs qualification, approved TJM and final approval", () => {
     expect(placementBlocker("pending", "approved", "approved", false)).toBe("notQualified");

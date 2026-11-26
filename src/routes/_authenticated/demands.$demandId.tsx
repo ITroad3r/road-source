@@ -25,6 +25,7 @@ import { CandidateCreateForm } from "@/components/CandidateCreateForm";
 import { CandidateDossier } from "@/components/CandidateDossier";
 import { CandidateDocumentPreview } from "@/components/CandidateDocumentPreview";
 import { CandidateChat } from "@/components/CandidateChat";
+import { canMoveCandidate } from "@/lib/pipeline-workflow";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,
@@ -77,7 +78,7 @@ function DemandDetail() {
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const fr = i18n.language.startsWith("fr");
   const [view, setView] = useState<"list" | "kanban">("kanban");
   const [packageOpen, setPackageOpen] = useState(false);
@@ -87,12 +88,16 @@ function DemandDetail() {
   const canSeeComp = can(myRoles, "compensation.view");
   const one = <T,>(v: T[] | T | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null);
   const compOf = (dc: { compensation_proposals?: unknown }) => one(dc.compensation_proposals as ProposalSummary[] | ProposalSummary | null);
-  const decisionRow = (dc: { id: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null; compensation_proposals?: unknown }): DecisionRow => {
+  const decisionRow = (dc: { id: string; stage: string; qualification_status: DecisionRow["qualification_status"]; final_decision: DecisionRow["final_decision"]; candidate_financials: { tjm_status: "draft" | "approved" }[] | { tjm_status: "draft" | "approved" } | null; compensation_proposals?: unknown }): DecisionRow => {
     const fin = one(dc.candidate_financials);
     const comp = compOf(dc);
-    return { id: dc.id, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null, comp: comp ? { status: comp.status, final_contract_type: comp.final_contract_type } : (dc as { requires_compensation?: boolean }).requires_compensation ? { status: "none", final_contract_type: null } : null };
+    return { id: dc.id, stage: dc.stage, qualification_status: dc.qualification_status, final_decision: dc.final_decision, tjm_status: fin?.tjm_status ?? null, comp: comp ? { status: comp.status, final_contract_type: comp.final_contract_type } : (dc as { requires_compensation?: boolean }).requires_compensation ? { status: "none", final_contract_type: null } : null };
   };
-  const refreshCandidates = () => qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
+  const refreshCandidates = () => {
+    qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
+    qc.invalidateQueries({ queryKey: ["dash"] });
+    qc.invalidateQueries({ queryKey: ["financials-rows"] });
+  };
 
   const { data: demand, isLoading } = useQuery({
     queryKey: ["demand", demandId],
@@ -122,6 +127,8 @@ function DemandDetail() {
 
   const updateStage = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: Stage }) => {
+      const candidate = candidates?.find((c) => c.id === id);
+      if (!candidate || !canMoveCandidate(myRoles, candidate, stage)) throw new Error(t("workflow.stageBlocked"));
       const { error } = await supabase.from("demand_candidates").update({ stage }).eq("id", id);
       if (error) throw error;
     },
@@ -134,6 +141,7 @@ function DemandDetail() {
 
   const removeCandidate = useMutation({
     mutationFn: async (id: string) => {
+      if (!can(myRoles, "candidates.delete")) throw new Error(t("workflow.stageBlocked"));
       const { error } = await supabase.from("demand_candidates").delete().eq("id", id);
       if (error) throw error;
     },
@@ -339,6 +347,8 @@ function DemandDetail() {
               : null,
           }))}
           onStageChange={(id, stage) => updateStage.mutate({ id, stage: stage as Stage })}
+          canMove={(id, stage) => { const dc = candidates?.find((c) => c.id === id); return !!dc && canMoveCandidate(myRoles, dc, stage); }}
+          canRemove={can(myRoles, "candidates.delete")}
           onRemove={(id) => removeCandidate.mutate(id)}
           renderExtra={(id) => {
             const dc = candidates?.find((c) => c.id === id);
@@ -379,15 +389,15 @@ function DemandDetail() {
                         <div className="flex items-center gap-2">
                           <Select value={dc.stage} onValueChange={(v) => updateStage.mutate({ id: dc.id, stage: v as Stage })}>
                             <SelectTrigger className="w-44">
-                              <Badge variant="outline" className={stageColors[dc.stage]}>{dc.stage.replace("_", " ")}</Badge>
+                              <Badge variant="outline" className={stageColors[dc.stage]}>{t(`dash.stage.${dc.stage}`)}</Badge>
                             </SelectTrigger>
                             <SelectContent>
-                              {STAGES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s.replace("_", " ")}</SelectItem>)}
+                              {STAGES.map((s) => <SelectItem key={s} value={s} disabled={!canMoveCandidate(myRoles, dc, s)}>{t(`dash.stage.${s}`)}</SelectItem>)}
                             </SelectContent>
                           </Select>
-                          <Button variant="ghost" size="icon" onClick={() => removeCandidate.mutate(dc.id)}>
+                          {can(myRoles, "candidates.delete") && <Button variant="ghost" size="icon" onClick={() => removeCandidate.mutate(dc.id)}>
                             <Trash2 className="h-4 w-4" />
-                          </Button>
+                          </Button>}
                         </div>
                       </div>
                       {cv.skills && cv.skills.length > 0 && (
@@ -439,6 +449,8 @@ function DemandDetail() {
         candidates={(candidates ?? []).map((dc) => ({
           id: dc.id,
           stage: dc.stage,
+          qualification_status: dc.qualification_status,
+          final_decision: dc.final_decision,
           cv: dc.talent_hub_cvs
             ? {
                 id: dc.talent_hub_cvs.id,

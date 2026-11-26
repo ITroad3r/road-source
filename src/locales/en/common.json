@@ -1,4 +1,5 @@
 {
+  "workflow": { "stageBlocked": "This stage requires the previous step and HRBP / Operations approvals." },
   "common": {
     "loading": "Loading…",
     "save": "Save",
@@ -380,7 +381,7 @@
     "stage": {
       "identified": "Identified",
       "contacted": "Contacted",
-      "screened": "Screened",
+      "screened": "For Screening/Approval",
       "submitted": "Submitted",
       "client_interview": "Client interview",
       "offer": "Offer",

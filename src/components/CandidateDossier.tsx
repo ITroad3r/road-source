@@ -108,7 +108,7 @@ function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: s
   }
   const actions = (section: Section) => canEdit && <div className="flex justify-between gap-2 pt-3"><Button type="button" variant="outline" disabled={busy} onClick={() => { void persist(section, true); }}><Trash2 className="h-4 w-4 mr-1" />{text("Delete section", "Supprimer la section")}</Button><Button type="button" disabled={busy} onClick={() => { void persist(section); }}>{busy ? text("Saving…", "Enregistrement…") : text("Save", "Enregistrer")}</Button></div>;
   return <Tabs defaultValue={initialSection}>
-    <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="contact">{text("Contacted", "Contacté")}</TabsTrigger><TabsTrigger value="screening">{text("Screened", "Évalué")}</TabsTrigger></TabsList>
+    <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="contact">{text("Contacted", "Contacté")}</TabsTrigger><TabsTrigger value="screening">{text("For Screening/Approval", "Pour évaluation/approbation")}</TabsTrigger></TabsList>
     <TabsContent value="contact" className="space-y-4">
       <fieldset disabled={!canEdit || busy} className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">

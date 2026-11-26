@@ -17,6 +17,7 @@ import { ArrowLeft, Pencil, Save, X, Trash2, Upload, FileText, MapPin, Mail, Pho
 import { format } from "date-fns";
 import { PreferredContractSelect, PreferredContractBadge, PreferredContractView } from "@/components/PreferredContractType";
 import { ActivityLog } from "@/components/ActivityLog";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/$cvId")({
   ssr: false,
@@ -57,6 +58,7 @@ const stageColors: Record<string, string> = {
 };
 
 function CandidateDetail() {
+  const { t } = useTranslation();
   const { cvId } = Route.useParams();
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
@@ -528,7 +530,7 @@ function CandidateDetail() {
                     {a.demands?.clients?.name ?? "—"} · added {format(new Date(a.created_at), "MMM d, yyyy")}
                   </div>
                 </div>
-                <Badge variant="outline" className={stageColors[a.stage] ?? ""}>{a.stage.replace("_", " ")}</Badge>
+                <Badge variant="outline" className={stageColors[a.stage] ?? ""}>{t(`dash.stage.${a.stage}`)}</Badge>
               </Link>
             ))}
           </div>

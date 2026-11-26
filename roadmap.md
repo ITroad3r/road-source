@@ -1,4 +1,9 @@
 # Roadmap — Stage 3 draft
+## Revised candidate review order
+- [x] Gate Sourcer progression and rename screening across visible status labels.
+- [x] Require HRBP qualification before Operations review, then Operations approval before TJM.
+- [x] Update queues, database safeguards and regression tests; 66 unit and 46 authenticated API checks pass, full signed-in desktop/mobile UI flow verified (docs/candidate-review-order.md).
+
 ## Stage 5A isolated remediation
 - [x] Verify separate draft database and inspect active policies/grants/privileged paths.
 - [x] Restrict demand UPDATE with recorded migration; preserve pipeline policies (0011, isolated only).

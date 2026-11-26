@@ -19,18 +19,18 @@ const demands: Dem[] = [d("d1", "in_progress", S), d("d2", "open", S), d("d3", "
 
 describe("Sourceur KPIs", () => {
   it("counts only the sourceur's own work", () => {
-    expect(sourceurKpis(S, demands, cands)).toEqual({ activeDemands: 2, sourced: 4, submitted: 2, awaitingQualification: 2, qualified: 1, rejected: 1 });
+    expect(sourceurKpis(S, demands, cands)).toEqual({ activeDemands: 2, sourced: 4, submitted: 2, awaitingQualification: 1, qualified: 1, rejected: 1 });
   });
 });
 describe("HRBP KPIs", () => {
   it("queue = pending qualification on active candidatures", () => {
-    expect(hrbpKpis(cands)).toEqual({ queue: 3, qualified: 4, rejected: 1, qualificationRate: 80 });
+    expect(hrbpKpis(cands)).toEqual({ queue: 2, qualified: 4, rejected: 1, qualificationRate: 80 });
   });
 });
 describe("Operations queues", () => {
   const q = opsQueues(cands, fins);
-  it("final approval only when qualified and TJM approved", () => expect(q.awaitingFinal.map((x) => x.id)).toEqual(["dc5"]));
-  it("TJM awaiting includes missing/draft rates and re-approvals", () => expect(q.tjmAwaiting.map((x) => x.id)).toEqual(["dc2", "dc8"]));
+  it("qualified candidates await Operations review before TJM", () => expect(q.awaitingFinal.map((x) => x.id)).toEqual(["dc2", "dc5"]));
+  it("TJM awaiting includes missing/draft rates and re-approvals", () => expect(q.tjmAwaiting.map((x) => x.id)).toEqual(["dc8"]));
   it("amendments after placement", () => expect(q.amendments.map((x) => x.demand_candidate_id)).toEqual(["dc8"]));
   it("placements", () => expect(placementStats(cands).approvedPlacements).toBe(2));
 });

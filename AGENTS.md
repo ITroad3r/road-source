@@ -4,7 +4,8 @@
 - Demand creation and edit forms mount only after role loading succeeds and demands.manage is granted; creation handlers recheck it before requests, preventing unauthorized form flashes and reads while RLS remains the data boundary.
 - The demand detail parent renders Outlet for its edit child, so direct edit URLs reach the edit access gate rather than silently rendering the detail page.
 - Candidate compensation changes only through the `compensation_action` database function (role, state and expected-version checks; append-only audit); app users get no direct writes on compensation tables, and the shared rules mirror it in src/lib/compensation.ts.
-- Candidatures created after Stage 6 (`requires_compensation`) need an approved compensation proposal before final approval/placement; older rows keep the TJM rule so history is never reinterpreted.
+- Candidate review order is HRBP qualification → Operations candidate approval → TJM approval; compensation/TJM gates apply at placement, not candidate approval, to avoid circular approval queues. Rate edits keep candidate approval but require TJM re-approval.
+- Pipeline transition rules live in src/lib/pipeline-workflow.ts and mirror database triggers; all status columns stay visible while role-specific movements are gated to prevent skipping reviews.
 - Candidate creation uses one shared form; demand-linked creation calls the security-invoker create_candidate_for_demand RPC so the Hub record and candidature commit atomically under RLS.
 - Contact and screening dossiers are candidature-scoped with separate RLS and private test storage; editing is independent of stage, and changing a section preserves the other section's saved data.
 - Candidate test-file reads explicitly bind the caller to demand assignment or a business-review role, in addition to candidature RLS; uploader ownership must not bypass reassignment or prevent HRBP review.

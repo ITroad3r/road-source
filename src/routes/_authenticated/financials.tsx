@@ -37,6 +37,7 @@ type Row = {
   id: string;
   stage: string;
   qualification_status: "pending" | "qualified" | "rejected";
+  final_decision: "pending" | "approved" | "rejected";
   legacy_placement: boolean;
   demand_id: string;
   cv_id: string;
@@ -66,6 +67,8 @@ function Financials() {
   const canApproveTjm = can(roles, "tjm.approve");
   const qcFin = useQueryClient();
   async function approveTjm(id: string) {
+    const row = rows?.find((r) => r.candidate_financials.some((f) => f.id === id));
+    if (!canApproveTjm || !row || !canApproveTjmFor(row.qualification_status, row.legacy_placement, row.final_decision)) return;
     const { error } = await supabase.from("candidate_financials").update({ tjm_status: "approved" }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("decisions.saved"));
@@ -79,10 +82,8 @@ function Financials() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demand_candidates")
-        .select("id, stage, qualification_status, legacy_placement, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at, amendment_pending)")
-        // Qualified candidates appear as soon as HRBP/Operations qualifies them (any Kanban stage);
-        // historical offer/placed rows stay visible.
-        .or("qualification_status.eq.qualified,stage.in.(offer,placed)")
+        .select("id, stage, qualification_status, final_decision, legacy_placement, demand_id, cv_id, talent_hub_cvs(full_name, headline), demands(title, engagement, clients(name)), candidate_financials(id, client_rate, candidate_rate, margin, currency, placement_date, contract_duration_months, notes, tjm_status, tjm_approved_at, amendment_pending)")
+        .or("and(qualification_status.eq.qualified,final_decision.eq.approved),stage.eq.placed")
         .order("created_at", { ascending: false });
       if (error) throw error;
       // candidate_financials is one-to-one (unique FK), so the API returns an object, not an array.
@@ -258,7 +259,7 @@ function Financials() {
                       <div className="text-sm">{r.demands?.title ?? "—"}</div>
                       <div className="text-xs text-muted-foreground">{r.demands?.clients?.name ?? ""} · <span className="capitalize">{r.demands?.engagement}</span></div>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className="capitalize">{r.stage}</Badge></TableCell>
+                    <TableCell><Badge variant="outline">{t(`dash.stage.${r.stage}`)}</Badge></TableCell>
                     <TableCell className="text-right tabular-nums">{f?.client_rate != null ? `€${f.client_rate}` : "—"}</TableCell>
                     <TableCell className="text-right tabular-nums">{f?.candidate_rate != null ? `€${f.candidate_rate}` : "—"}</TableCell>
                     <TableCell className="text-right tabular-nums font-medium">{f?.margin != null ? `€${f.margin}` : "—"}</TableCell>
@@ -270,7 +271,7 @@ function Financials() {
                           </Badge>
                           {f.amendment_pending && <Badge variant="outline" className="bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20 text-[10px]">{t("decisions.tjm.amendmentPending")}</Badge>}
                           {f.tjm_status === "approved" && f.tjm_approved_at && <span className="text-[10px] text-muted-foreground">{t("decisions.tjm.by")} {format(new Date(f.tjm_approved_at), "dd/MM/yyyy")}</span>}
-                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && canApproveTjmFor(r.qualification_status, r.legacy_placement) && (
+                          {canApproveTjm && f.tjm_status === "draft" && f.client_rate != null && canApproveTjmFor(r.qualification_status, r.legacy_placement, r.final_decision) && (
                             <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" onClick={() => approveTjm(f.id)}>{t("decisions.tjm.approve")}</Button>
                           )}
                         </div>

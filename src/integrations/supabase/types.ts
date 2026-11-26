@@ -53,6 +53,73 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_chat_messages: {
+        Row: {
+          body: string
+          created_at: string
+          demand_candidate_id: string
+          id: string
+          room: string
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          demand_candidate_id: string
+          id?: string
+          room: string
+          sender_id: string
+          sender_name?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          demand_candidate_id?: string
+          id?: string
+          room?: string
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_chat_messages_demand_candidate_id_fkey"
+            columns: ["demand_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "demand_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_chat_reads: {
+        Row: {
+          demand_candidate_id: string
+          last_read_at: string
+          room: string
+          user_id: string
+        }
+        Insert: {
+          demand_candidate_id: string
+          last_read_at?: string
+          room: string
+          user_id: string
+        }
+        Update: {
+          demand_candidate_id?: string
+          last_read_at?: string
+          room?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_chat_reads_demand_candidate_id_fkey"
+            columns: ["demand_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "demand_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_dossiers: {
         Row: {
           availability_notes: string | null
@@ -874,6 +941,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_candidate_chat: {
+        Args: { _dc: string; _room: string }
+        Returns: boolean
+      }
+      candidate_chat_topic_allowed: {
+        Args: { _topic: string }
+        Returns: boolean
+      }
+      candidate_chat_unread: {
+        Args: { _dc: string }
+        Returns: {
+          room: string
+          unread: number
+        }[]
+      }
       compensation_action: {
         Args: {
           _action: string
@@ -956,6 +1038,10 @@ export type Database = {
           full_name: string
           id: string
         }[]
+      }
+      mark_candidate_chat_read: {
+        Args: { _dc: string; _room: string; _through: string }
+        Returns: undefined
       }
     }
     Enums: {

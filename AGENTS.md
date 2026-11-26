@@ -8,3 +8,4 @@
 - Candidate creation uses one shared form; demand-linked creation calls the security-invoker create_candidate_for_demand RPC so the Hub record and candidature commit atomically under RLS.
 - Contact and screening dossiers are candidature-scoped with separate RLS and private test storage; editing is independent of stage, and changing a section preserves the other section's saved data.
 - Candidate test-file reads explicitly bind the caller to demand assignment or a business-review role, in addition to candidature RLS; uploader ownership must not bypass reassignment or prevent HRBP review.
+- Candidate chat is candidature-scoped with separate audience rooms enforced by RLS; read receipts are caller-owned and live updates use content-free private broadcasts so neither conversation leaks to the other audience.

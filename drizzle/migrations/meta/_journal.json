@@ -155,6 +155,20 @@
       "when": 1795724207641,
       "tag": "0021_bind_candidate_test_reads_to_caller",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795726178468,
+      "tag": "0022_private_candidate_chats",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795726333866,
+      "tag": "0023_tighten_candidate_chat_grants",
+      "breakpoints": true
     }
   ]
 }

@@ -49,3 +49,8 @@
 - [x] Editable contact and screening records, private PDFs, Sourcer/HRBP access rules.
 - [x] CV preview in every pipeline stage, list and board; FR/EN and mobile checks (PDF/DOCX; legacy DOC download fallback).
 - [x] 53 unit tests; real-session HRBP/Sourcer workflows and CEO write denial; temporary fixtures cleaned; docs/candidate-workflow-verification.md.
+
+## Private candidate chat
+- [x] Add separate HRBP–Sourcer and HRBP–Operations messages with enforced access and read receipts.
+- [x] Add candidate chat buttons, unread colours, live updates and FR/EN conversation panels.
+- [x] Test role separation, real message exchange/readback and mobile; 46 real API checks and 60 unit tests pass; docs/candidate-chat-verification.md.

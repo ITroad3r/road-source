@@ -9,7 +9,7 @@ export const COMP_STATUSES = [
 ] as const;
 export type CompStatus = (typeof COMP_STATUSES)[number];
 export type CompAction =
-  | "save_draft" | "submit" | "manager_review" | "forward" | "return_to_sourceur"
+  | "save_draft" | "submit" | "save_renegotiation" | "manager_review" | "forward" | "return_to_sourceur"
   | "approve" | "reject" | "return_to_manager" | "reopen" | "request_alternatives" | "request_reconsideration" | "start_amendment";
 
 /** Allowed currencies (mirrors the database check); EUR is the default. */
@@ -49,14 +49,17 @@ export function allowedActions(status: CompStatus | null, roles: readonly string
   // Only the Sourceur assigned to the demand creates, submits and corrects the proposal.
   const canSubmit = isAssignedSourceur && can(roles, "compensation.submit");
   if (canSubmit && (s === "draft" || s === "returned_to_sourceur")) out.push("save_draft", "submit");
+  // During an Operations-requested renegotiation, the assigned Sourceur revises but never resubmits directly.
+  if (canSubmit && s === "returned_to_manager") out.push("save_renegotiation");
   if (can(roles, "compensation.review") && ["pending_manager_review", "reviewed_by_manager", "returned_to_manager"].includes(s))
     out.push("manager_review", "forward", "return_to_sourceur");
   // Rejected compensation is not candidate rejection: HRBP follows up (renegotiate or ask for alternatives).
   if (can(roles, "compensation.review") && s === "rejected") out.push("request_reconsideration", "request_alternatives");
   if (can(roles, "compensation.finalize")) {
     if (s === "pending_operations_review") out.push("approve", "return_to_manager", "reject");
-    // Operations may approve or reject a submitted proposal directly, without waiting for HRBP.
-    if (["pending_manager_review", "reviewed_by_manager", "returned_to_manager"].includes(s)) out.push("approve", "reject");
+    // Operations may approve, reject or request HRBP renegotiation without waiting for HRBP.
+    if (["pending_manager_review", "reviewed_by_manager"].includes(s)) out.push("approve", "return_to_manager", "reject");
+    if (s === "returned_to_manager") out.push("approve", "reject");
     if (s === "rejected") out.push("reopen"); // Operations alone reopens.
     if (s === "approved") out.push("start_amendment");
   }
@@ -88,7 +91,7 @@ export function parseAmount(v: string): number | null {
 /** Queue membership for each role workspace. */
 export function inQueue(status: CompStatus, queue: "sourceur" | "hrbp" | "operations" | "approved"): boolean {
   switch (queue) {
-    case "sourceur": return status === "draft" || status === "returned_to_sourceur";
+    case "sourceur": return status === "draft" || status === "returned_to_sourceur" || status === "returned_to_manager";
     case "hrbp": return status === "pending_manager_review" || status === "reviewed_by_manager" || status === "returned_to_manager" || status === "rejected";
     case "operations": return status === "pending_operations_review";
     case "approved": return status === "approved";
@@ -101,7 +104,7 @@ export function compQueueCounts(rows: readonly CompQueueRow[], userId: string) {
   let sourceur = 0, returnedToSourceur = 0, hrbp = 0, returnedToManager = 0, operations = 0, approved = 0;
   for (const r of rows) {
     const s = r.status;
-    if (r.assigned_to === userId && (s === "draft" || s === "returned_to_sourceur" || (s === null && r.requires_compensation))) sourceur++;
+    if (r.assigned_to === userId && (s === "draft" || s === "returned_to_sourceur" || s === "returned_to_manager" || (s === null && r.requires_compensation))) sourceur++;
     if (r.assigned_to === userId && s === "returned_to_sourceur") returnedToSourceur++;
     if (s && inQueue(s, "hrbp")) hrbp++;
     if (s === "returned_to_manager") returnedToManager++;

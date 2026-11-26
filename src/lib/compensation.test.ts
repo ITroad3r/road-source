@@ -25,7 +25,7 @@ describe("compensation rules", () => {
   it("HRBP and Operations review, forward and return to Sourceur", () => {
     expect(allowedActions("pending_manager_review", ["hrbp"], false)).toEqual(["manager_review", "forward", "return_to_sourceur"]);
     expect(allowedActions("returned_to_manager", ["hrbp"], false)).toContain("forward");
-    expect(allowedActions("pending_manager_review", ["operations"], false)).toEqual(["manager_review", "forward", "return_to_sourceur", "approve", "reject"]);
+    expect(allowedActions("pending_manager_review", ["operations"], false)).toEqual(["manager_review", "forward", "return_to_sourceur", "approve", "return_to_manager", "reject"]);
   });
   it("only Operations approves, rejects, returns, reopens and amends", () => {
     expect(allowedActions("pending_operations_review", ["operations"], false)).toEqual(["approve", "return_to_manager", "reject"]);
@@ -50,6 +50,7 @@ describe("compensation rules", () => {
   });
   it("queues", () => {
     expect(inQueue("returned_to_manager", "hrbp")).toBe(true);
+    expect(inQueue("returned_to_manager", "sourceur")).toBe(true);
     expect(inQueue("pending_operations_review", "operations")).toBe(true);
     expect(inQueue("pending_operations_review", "hrbp")).toBe(false);
   });
@@ -78,7 +79,7 @@ describe("compensation dashboard counts", () => {
       { requires_compensation: true, assigned_to: me, status: "pending_operations_review" as const },
       { requires_compensation: true, assigned_to: me, status: "approved" as const },
     ];
-    expect(compQueueCounts(rows, me)).toEqual({ sourceur: 2, returnedToSourceur: 1, hrbp: 2, returnedToManager: 1, operations: 1, approved: 1 });
+    expect(compQueueCounts(rows, me)).toEqual({ sourceur: 3, returnedToSourceur: 1, hrbp: 2, returnedToManager: 1, operations: 1, approved: 1 });
   });
   it("only the assigned Sourceur can submit the initial proposal", () => {
     expect(allowedActions(null, ["sourceur"], true)).toEqual(["save_draft", "submit"]);
@@ -109,5 +110,32 @@ describe("Operations has HRBP compensation powers", () => {
     expect(a).toContain("approve");
     expect(a).toContain("reject");
     expect(a).toContain("return_to_sourceur");
+  });
+});
+
+describe("Operations-requested compensation renegotiation", () => {
+  it("lets Operations request HRBP renegotiation from either review queue", () => {
+    expect(allowedActions("pending_manager_review", ["operations"], false)).toContain("return_to_manager");
+    expect(allowedActions("pending_operations_review", ["operations"], false)).toContain("return_to_manager");
+    expect(allowedActions("pending_operations_review", ["hrbp"], false)).not.toContain("return_to_manager");
+  });
+  it("lets the assigned Sourceur revise but never resubmit directly to Operations", () => {
+    const assigned = allowedActions("returned_to_manager", ["sourceur"], true);
+    expect(assigned).toEqual(["save_renegotiation"]);
+    expect(assigned).not.toContain("submit");
+    expect(assigned).not.toContain("forward");
+    expect(allowedActions("returned_to_manager", ["sourceur"], false)).toEqual([]);
+  });
+  it("lets HRBP revise, validate and resubmit the returned proposal", () => {
+    const actions = allowedActions("returned_to_manager", ["hrbp"], false);
+    expect(actions).toEqual(["manager_review", "forward", "return_to_sourceur"]);
+    expect(actions).not.toContain("save_renegotiation");
+  });
+  it("counts returned proposals as pending work for the assigned Sourceur", () => {
+    const result = compQueueCounts([{ requires_compensation: true, assigned_to: "me", status: "returned_to_manager" }], "me");
+    expect(result.sourceur).toBe(1);
+    expect(result.hrbp).toBe(1);
+    expect(result.returnedToManager).toBe(1);
+    expect(result.operations).toBe(0);
   });
 });

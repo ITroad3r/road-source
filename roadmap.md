@@ -59,3 +59,9 @@
 - [x] Add separate HRBP–Sourcer and HRBP–Operations messages with enforced access and read receipts.
 - [x] Add candidate chat buttons, unread colours, live updates and FR/EN conversation panels.
 - [x] Test role separation, real message exchange/readback and mobile; 46 real API checks and 60 unit tests pass; docs/candidate-chat-verification.md.
+
+## Compensation renegotiation loop
+- [x] Operations can request HRBP renegotiation with mandatory instructions; HRBP is notified.
+- [x] HRBP or the assigned Sourceur can revise contract type, salary/TJM and currency; only HRBP validates and resubmits.
+- [x] Verify role restrictions, notifications, revision history and the complete approval loop with real accounts (28 checks).
+- [x] Verify FR/EN desktop and mobile compensation screens (4 signed-in scenarios); 71 unit tests, typecheck and preview build pass.

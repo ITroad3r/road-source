@@ -122,7 +122,8 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
   const { data: me } = useQuery({ queryKey: ["auth-uid"], enabled: open, queryFn: async () => (await supabase.auth.getUser()).data.user?.id ?? null });
   const reviewers = [p?.manager_by, ...(data?.audit ?? []).filter((e) => e.action === "manager_review" || e.action === "forward").map((e) => e.actor_id)];
   const actions = allowedActions(p?.status ?? null, roles, isAssignedSourceur).filter((a) => !blockedBySeparationOfDuties(a, me, reviewers));
-  const editable = actions.some((a) => ["save_draft", "submit", "manager_review", "forward", "approve"].includes(a));
+  const editable = actions.some((a) => ["save_draft", "submit", "save_renegotiation", "manager_review", "forward", "approve"].includes(a));
+  const latestRevision = (data?.audit ?? []).filter((e) => ["save_renegotiation", "manager_review", "forward"].includes(e.action)).at(-1);
   const freq = frequencyFor(type || null);
 
   function changeType(v: ContractType) {
@@ -133,7 +134,7 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
 
   function request(a: CompAction) {
     const forSubmit = a === "submit" || a === "forward" || a === "approve" || a === "manager_review";
-    if (["save_draft", "submit", "manager_review", "forward", "approve"].includes(a)) {
+    if (["save_draft", "submit", "save_renegotiation", "manager_review", "forward", "approve"].includes(a)) {
       const err = validateProposal(type || null, amount, forSubmit);
       if (err) { setFormErr(t(`comp.errors.${err}`)); return; }
     }
@@ -144,7 +145,7 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
     if (!pending) return;
     if (COMMENT_REQUIRED.includes(pending) && !comment.trim()) { toast.error(t("comp.confirm.commentRequired")); return; }
     setBusy(true);
-    const withValues = ["save_draft", "submit", "manager_review", "forward", "approve"].includes(pending);
+    const withValues = ["save_draft", "submit", "save_renegotiation", "manager_review", "forward", "approve"].includes(pending);
     const amt = parseAmount(amount);
     const changed = withValues && (type !== (cur.type ?? "") || amt !== (cur.amount != null ? Number(cur.amount) : null) || currency !== (p?.currency ?? "EUR"));
     const args: {
@@ -189,13 +190,16 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
             {p && (
               <div className="grid gap-3 sm:grid-cols-3">
                 <ValueCard label={t("comp.original")} type={p.original_contract_type} amount={p.original_amount} currency={p.currency} meta={p.original_submitted_at ? `${who(p.original_submitted_by)} · ${when(p.original_submitted_at)}` : ""} money={money} />
-                <ValueCard label={t("comp.amended")} type={p.manager_contract_type} amount={p.manager_amount} currency={p.currency} meta={p.manager_at ? `${who(p.manager_by)} · ${when(p.manager_at)}` : ""} money={money}
-                  changed={!!p.manager_contract_type && (p.manager_contract_type !== p.proposed_contract_type || Number(p.manager_amount) !== Number(p.proposed_amount))} />
+                <ValueCard label={t("comp.currentProposal")} type={p.manager_contract_type ?? p.proposed_contract_type} amount={p.manager_amount ?? p.proposed_amount} currency={p.currency} meta={latestRevision ? `${who(latestRevision.actor_id)} · ${when(latestRevision.created_at)}` : ""} money={money}
+                  changed={!!p.manager_contract_type && (p.manager_contract_type !== p.original_contract_type || Number(p.manager_amount) !== Number(p.original_amount))} />
                 <ValueCard label={t("comp.final")} type={p.final_contract_type} amount={p.final_amount} currency={p.currency} meta={p.status === "approved" && p.final_at ? `${who(p.final_by)} · ${when(p.final_at)}` : ""} money={money} highlight={p.status === "approved"} />
               </div>
             )}
             {p?.last_return_reason && ["returned_to_sourceur", "returned_to_manager"].includes(p.status) && (
-              <p className="text-sm rounded-md border border-orange-500/30 bg-orange-500/5 p-3"><span className="font-medium">{t("comp.returnReason")}: </span>{p.last_return_reason}</p>
+              <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/5 p-3">
+                <p className="text-sm"><span className="font-medium">{t(p.status === "returned_to_manager" ? "comp.renegotiationInstructions" : "comp.returnReason")}: </span>{p.last_return_reason}</p>
+                {p.status === "returned_to_manager" && <p className="text-xs text-muted-foreground">{t("comp.renegotiationHelp")}</p>}
+              </div>
             )}
             {p?.manager_comment && <p className="text-sm"><span className="font-medium">{t("comp.managerComment")}: </span>{p.manager_comment}</p>}
             {p?.operations_comment && <p className="text-sm"><span className="font-medium">{t("comp.opsComment")}: </span>{p.operations_comment}</p>}
@@ -275,7 +279,7 @@ export function CompensationDialog({ open, onOpenChange, dcId, candidateName, ro
               <AlertDialogTitle>{t("comp.confirm.title", { action: pending ? t(`comp.actions.${pending}`) : "" })}</AlertDialogTitle>
               <AlertDialogDescription>
                 {t("comp.confirm.body")}
-                {pending && ["save_draft", "submit", "manager_review", "forward", "approve"].includes(pending) && type && (
+                {pending && ["save_draft", "submit", "save_renegotiation", "manager_review", "forward", "approve"].includes(pending) && type && (
                   <span className="block mt-2 font-medium text-foreground">{t(`comp.types.${type}`)} · {money(parseAmount(amount), type, currency)}</span>
                 )}
               </AlertDialogDescription>

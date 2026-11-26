@@ -10,6 +10,7 @@ export const CAPABILITIES = {
   "clients.manage": ["hrbp", "operations"],
   "candidates.view": ["sourceur", "hrbp", "operations", "ceo"],
   "candidates.edit": ["sourceur", "hrbp", "operations"],
+  "cv.align": ["sourceur", "hrbp"],
   "candidates.delete": ["operations"],
   "pipeline.dossier.edit": ["sourceur", "hrbp"],
   "interviews.view": ["sourceur", "hrbp", "operations"],

@@ -2,7 +2,7 @@ import { can } from "@/lib/permissions";
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield, Briefcase, Building2, User, Bell, BarChart3, Menu, Wallet } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, FilePlus, Euro, Shield, Briefcase, Building2, User, Bell, BarChart3, Menu, Wallet, Sparkles } from "lucide-react";
 import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
@@ -50,6 +50,7 @@ function AuthLayout() {
     ...(canCreateDemand ? [{ to: "/demands/new" as const, label: t("nav.newDemand"), icon: FilePlus }] : []),
     ...(can(roles, "clients.view") ? [{ to: "/clients" as const, label: t("nav.clients"), icon: Building2 }] : []),
     ...(can(roles, "candidates.view") ? [{ to: "/talent-hub" as const, label: t("nav.talentHub"), icon: Users }] : []),
+    ...(can(roles, "cv.align") ? [{ to: "/align-cv" as const, label: "Align CV", icon: Sparkles }] : []),
     ...(can(roles, "compensation.view") ? [{ to: "/compensation" as const, label: t("nav.compensation"), icon: Wallet }] : []),
     ...(canSeeFinancials ? [{ to: "/financials" as const, label: t("nav.financials"), icon: Euro }] : []),
     ...(canSeeReports ? [{ to: "/reports" as const, label: t("nav.reports"), icon: BarChart3 }] : []),

@@ -13,3 +13,5 @@
 - Operations holds every HRBP compensation action and may approve/reject a submitted proposal directly; contact/test dossiers are optional and never gate stage moves.
 - Operations compensation renegotiation returns to HRBP; HRBP or the assigned Sourceur may revise the terms, but only HRBP validates and resubmits them to Operations, with optimistic versioning and append-only history.
 - Client interviews are separate candidature-scoped records with assignment-bound RLS; timestamps are stored in UTC with the scheduling timezone, and daily lists use viewer-local day boundaries without changing pipeline stages.
+- Align CV uses an authenticated, capability-checked server function with a replaceable server-only AI adapter; uploaded PDFs are transient and never saved automatically, preserving privacy and keeping provider migration isolated.
+- Align CV has its own PDF renderer and document tokens; it must not alter the existing Hub CV template, and report gaps/submission constraints stay outside exported candidate facts.

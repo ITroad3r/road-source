@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as RootRouteImport } from './routes/root'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
+import { Route as AuthenticatedAlignCvRouteImport } from './routes/_authenticated/align-cv'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedCompensationRouteImport } from './routes/_authenticated/compensation'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -57,6 +58,11 @@ const SetPasswordRoute = SetPasswordRouteImport.update({
   id: '/set-password',
   path: '/set-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAlignCvRoute = AuthenticatedAlignCvRouteImport.update({
+  id: '/align-cv',
+  path: '/align-cv',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
   id: '/clients',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
   '/set-password': typeof SetPasswordRoute
+  '/align-cv': typeof AuthenticatedAlignCvRoute
   '/clients': typeof AuthenticatedClientsRouteWithChildren
   '/compensation': typeof AuthenticatedCompensationRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
   '/set-password': typeof SetPasswordRoute
+  '/align-cv': typeof AuthenticatedAlignCvRoute
   '/compensation': typeof AuthenticatedCompensationRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/financials': typeof AuthenticatedFinancialsRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/root': typeof RootRoute
   '/set-password': typeof SetPasswordRoute
+  '/_authenticated/align-cv': typeof AuthenticatedAlignCvRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRouteWithChildren
   '/_authenticated/compensation': typeof AuthenticatedCompensationRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/root'
     | '/set-password'
+    | '/align-cv'
     | '/clients'
     | '/compensation'
     | '/dashboard'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/root'
     | '/set-password'
+    | '/align-cv'
     | '/compensation'
     | '/dashboard'
     | '/financials'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/root'
     | '/set-password'
+    | '/_authenticated/align-cv'
     | '/_authenticated/clients'
     | '/_authenticated/compensation'
     | '/_authenticated/dashboard'
@@ -361,6 +373,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/set-password'
       preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/align-cv': {
+      id: '/_authenticated/align-cv'
+      path: '/align-cv'
+      fullPath: '/align-cv'
+      preLoaderRoute: typeof AuthenticatedAlignCvRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/clients': {
       id: '/_authenticated/clients'
@@ -548,6 +567,7 @@ const AuthenticatedDemandsDemandIdRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAlignCvRoute: typeof AuthenticatedAlignCvRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRouteWithChildren
   AuthenticatedCompensationRoute: typeof AuthenticatedCompensationRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -563,6 +583,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAlignCvRoute: AuthenticatedAlignCvRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRouteWithChildren,
   AuthenticatedCompensationRoute: AuthenticatedCompensationRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,

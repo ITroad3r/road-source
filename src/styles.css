@@ -62,6 +62,14 @@
 }
 
 :root {
+  /* Fixed document palette: matches the supplied ITROAD GROUP CV reference. */
+  --cv-header: #2c3e50;
+  --cv-accent: #2d9fdb;
+  --cv-paper: #ffffff;
+  --cv-sidebar: #edf0f1;
+  --cv-panel: #f7f8fa;
+  --cv-ink: #18212b;
+  --cv-muted: #75818a;
   --radius: 0.625rem;
   /* RoadSource brand palette */
   --background: oklch(0.984 0.005 247);          /* #F8FAFC */

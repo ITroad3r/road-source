@@ -1,4 +1,10 @@
 # Roadmap — Stage 3 draft
+## Align CV
+- [x] Add Sourcer/HRBP-only two-document AI alignment with factual review and branded PDF export.
+- [x] Match the supplied ITROAD GROUP layout and verify the uploaded examples end-to-end.
+- [x] Run permissions/input tests and desktop/mobile checks; document provider replacement boundary (85 tests; real HRBP/Sourceur AI flows; Operations direct-call denial; PDF visual QA).
+- [ ] Step-by-step full migration guide: deferred until the user returns to migration (no timed reminder configured).
+
 ## Client interview scheduling
 - [x] Add private candidature-scoped interview dates, onsite/visio details, and role access rules.
 - [x] Add candidate-ticket scheduling dialogs and today's interviews on Sourcer, HRBP and Operations dashboards.

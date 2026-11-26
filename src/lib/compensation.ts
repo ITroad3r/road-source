@@ -55,6 +55,8 @@ export function allowedActions(status: CompStatus | null, roles: readonly string
   if (can(roles, "compensation.review") && s === "rejected") out.push("request_reconsideration", "request_alternatives");
   if (can(roles, "compensation.finalize")) {
     if (s === "pending_operations_review") out.push("approve", "return_to_manager", "reject");
+    // Operations may approve or reject a submitted proposal directly, without waiting for HRBP.
+    if (["pending_manager_review", "reviewed_by_manager", "returned_to_manager"].includes(s)) out.push("approve", "reject");
     if (s === "rejected") out.push("reopen"); // Operations alone reopens.
     if (s === "approved") out.push("start_amendment");
   }

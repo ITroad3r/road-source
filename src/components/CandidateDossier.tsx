@@ -26,7 +26,7 @@ export function CandidateDossier({ dcId, name, stage, roles }: { dcId: string; n
   return <Dialog open={open} onOpenChange={setOpen}>
     <Button type="button" variant="secondary" size="sm" className="h-7 gap-1 text-xs" onClick={() => setOpen(true)}>
       {stage === "screened" ? <ClipboardCheck className="h-3 w-3" /> : <Phone className="h-3 w-3" />}
-      {fr ? "Contact / Évaluation" : "Contact / Screening"}
+      {fr ? "Contact / Tests" : "Contact / Tests"}
     </Button>
     <DialogContent className="w-[calc(100%-1rem)] max-w-3xl max-h-[90dvh] overflow-y-auto">
       <DialogHeader><DialogTitle>{name}</DialogTitle></DialogHeader>
@@ -108,7 +108,7 @@ function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: s
   }
   const actions = (section: Section) => canEdit && <div className="flex justify-between gap-2 pt-3"><Button type="button" variant="outline" disabled={busy} onClick={() => { void persist(section, true); }}><Trash2 className="h-4 w-4 mr-1" />{text("Delete section", "Supprimer la section")}</Button><Button type="button" disabled={busy} onClick={() => { void persist(section); }}>{busy ? text("Saving…", "Enregistrement…") : text("Save", "Enregistrer")}</Button></div>;
   return <Tabs defaultValue={initialSection}>
-    <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="contact">{text("Contacted", "Contacté")}</TabsTrigger><TabsTrigger value="screening">{text("For Screening/Approval", "Pour évaluation/approbation")}</TabsTrigger></TabsList>
+    <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="contact">{text("Contacted", "Contacté")}</TabsTrigger><TabsTrigger value="screening">{text("Tests", "Tests")}</TabsTrigger></TabsList>
     <TabsContent value="contact" className="space-y-4">
       <fieldset disabled={!canEdit || busy} className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">

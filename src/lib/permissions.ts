@@ -23,7 +23,7 @@ export const CAPABILITIES = {
   // Candidate compensation workflow (Sourcing Manager = HRBP, business assumption)
   "compensation.view": ["sourceur", "hrbp", "operations", "ceo"],
   "compensation.submit": ["sourceur", "hrbp", "operations"],
-  "compensation.review": ["hrbp"],
+  "compensation.review": ["hrbp", "operations"],
   "compensation.finalize": ["operations"],
   "reports.view": ["hrbp", "operations", "ceo"],
   "users.manage": ["admin"],

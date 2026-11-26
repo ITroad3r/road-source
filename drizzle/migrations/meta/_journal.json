@@ -176,6 +176,13 @@
       "when": 1795729495714,
       "tag": "0024_candidate_review_before_tjm",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795730762918,
+      "tag": "0025_ops_compensation_and_optional_contact",
+      "breakpoints": true
     }
   ]
 }

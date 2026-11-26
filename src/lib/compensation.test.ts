@@ -22,15 +22,15 @@ describe("compensation rules", () => {
     expect(allowedActions("pending_manager_review", ["sourceur"], true)).toEqual([]);
     expect(allowedActions("returned_to_sourceur", ["sourceur"], true)).toContain("submit");
   });
-  it("only HRBP reviews, forwards and returns to Sourceur", () => {
+  it("HRBP and Operations review, forward and return to Sourceur", () => {
     expect(allowedActions("pending_manager_review", ["hrbp"], false)).toEqual(["manager_review", "forward", "return_to_sourceur"]);
     expect(allowedActions("returned_to_manager", ["hrbp"], false)).toContain("forward");
-    expect(allowedActions("pending_manager_review", ["operations"], false)).toEqual([]);
+    expect(allowedActions("pending_manager_review", ["operations"], false)).toEqual(["manager_review", "forward", "return_to_sourceur", "approve", "reject"]);
   });
   it("only Operations approves, rejects, returns, reopens and amends", () => {
     expect(allowedActions("pending_operations_review", ["operations"], false)).toEqual(["approve", "return_to_manager", "reject"]);
     expect(allowedActions("pending_operations_review", ["hrbp"], false)).toEqual([]);
-    expect(allowedActions("rejected", ["operations"], false)).toEqual(["reopen"]);
+    expect(allowedActions("rejected", ["operations"], false)).toEqual(["request_reconsideration", "request_alternatives", "reopen"]);
     expect(allowedActions("rejected", ["hrbp"], false)).toEqual(["request_reconsideration", "request_alternatives"]);
     expect(allowedActions("rejected", ["sourceur"], true)).toEqual([]);
     expect(allowedActions("approved", ["operations"], false)).toEqual(["start_amendment"]);
@@ -100,5 +100,14 @@ describe("compensation dashboard counts", () => {
     for (const c of ["EUR", "MAD", "USD", "GBP", "CHF"]) expect(isAllowedCurrency(c)).toBe(true);
     for (const c of ["JPY", "eur", "", null]) expect(isAllowedCurrency(c)).toBe(false);
     expect(DEFAULT_CURRENCY).toBe("EUR");
+  });
+});
+
+describe("Operations has HRBP compensation powers", () => {
+  it("lets Operations approve a submitted proposal without waiting for HRBP", () => {
+    const a = allowedActions("pending_manager_review", ["operations"], false);
+    expect(a).toContain("approve");
+    expect(a).toContain("reject");
+    expect(a).toContain("return_to_sourceur");
   });
 });

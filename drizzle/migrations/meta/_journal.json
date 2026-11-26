@@ -141,6 +141,13 @@
       "when": 1795719724339,
       "tag": "0019_hrbp_manage_demands_clients",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1795722507157,
+      "tag": "0020_candidate_contact_screening",
+      "breakpoints": true
     }
   ]
 }

@@ -43,3 +43,9 @@
 - [x] Full workflow + authorization suite (144/144), browser role/FR/mobile checks (14/14), prior suites re-run.
 - [x] Release report with GO/NO-GO (docs/stage5c-release-report.md).
 - Open, blocked on owner action in the live app: remove shared QA admin + [TEST] data, assign Operations/CEO users, verify one real invitation email.
+
+## Candidate contact and screening workflow
+- [ ] Shared manual candidate creation on demand; save to Hub and pipeline atomically.
+- [ ] Editable contact and screening records, private PDFs, Sourcer/HRBP access rules.
+- [ ] CV preview in every pipeline stage, list and board; FR/EN and mobile checks.
+- [ ] Unit, authenticated workflow and access verification; record results.

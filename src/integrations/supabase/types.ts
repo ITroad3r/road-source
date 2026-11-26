@@ -53,6 +53,80 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_dossiers: {
+        Row: {
+          availability_notes: string | null
+          city: string | null
+          communicated_at: string | null
+          communication_method: string | null
+          contact_observations: string | null
+          country: string | null
+          currency: string
+          current_contract_type: string | null
+          current_pay: number | null
+          current_pay_type: string | null
+          demand_candidate_id: string
+          employment_status: string | null
+          expected_joining_date: string | null
+          psychological_pdf: string | null
+          psychological_score: number | null
+          screening_observations: string | null
+          technical_pdf: string | null
+          technical_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          availability_notes?: string | null
+          city?: string | null
+          communicated_at?: string | null
+          communication_method?: string | null
+          contact_observations?: string | null
+          country?: string | null
+          currency?: string
+          current_contract_type?: string | null
+          current_pay?: number | null
+          current_pay_type?: string | null
+          demand_candidate_id: string
+          employment_status?: string | null
+          expected_joining_date?: string | null
+          psychological_pdf?: string | null
+          psychological_score?: number | null
+          screening_observations?: string | null
+          technical_pdf?: string | null
+          technical_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          availability_notes?: string | null
+          city?: string | null
+          communicated_at?: string | null
+          communication_method?: string | null
+          contact_observations?: string | null
+          country?: string | null
+          currency?: string
+          current_contract_type?: string | null
+          current_pay?: number | null
+          current_pay_type?: string | null
+          demand_candidate_id?: string
+          employment_status?: string | null
+          expected_joining_date?: string | null
+          psychological_pdf?: string | null
+          psychological_score?: number | null
+          screening_observations?: string | null
+          technical_pdf?: string | null
+          technical_score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_dossiers_demand_candidate_id_fkey"
+            columns: ["demand_candidate_id"]
+            isOneToOne: true
+            referencedRelation: "demand_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_financials: {
         Row: {
           amendment_pending: boolean
@@ -858,6 +932,10 @@ export type Database = {
         Returns: string
       }
       compensation_gate_error: { Args: { _dc: string }; Returns: string }
+      create_candidate_for_demand: {
+        Args: { _candidate: Json; _demand_id: string }
+        Returns: string
+      }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]

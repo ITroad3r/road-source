@@ -20,6 +20,10 @@ import { CandidateDecisions, type DecisionRow } from "@/components/CandidateDeci
 import { CompensationSummary, type ProposalSummary } from "@/components/CompensationPanel";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { can } from "@/lib/permissions";
+import { useTranslation } from "react-i18next";
+import { CandidateCreateForm } from "@/components/CandidateCreateForm";
+import { CandidateDossier } from "@/components/CandidateDossier";
+import { CandidateDocumentPreview } from "@/components/CandidateDocumentPreview";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
   ssr: false,
@@ -71,10 +75,14 @@ function DemandDetail() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
+  const { i18n } = useTranslation();
+  const fr = i18n.language.startsWith("fr");
   const [view, setView] = useState<"list" | "kanban">("kanban");
   const [packageOpen, setPackageOpen] = useState(false);
   const { data: myRoles } = useMyRoles(user.id);
   const canManageDemand = can(myRoles, "demands.manage");
+  const canAddCandidate = can(myRoles, "candidates.edit");
   const canSeeComp = can(myRoles, "compensation.view");
   const one = <T,>(v: T[] | T | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null);
   const compOf = (dc: { compensation_proposals?: unknown }) => one(dc.compensation_proposals as ProposalSummary[] | ProposalSummary | null);
@@ -280,22 +288,36 @@ function DemandDetail() {
           <Button variant="outline" onClick={() => setPackageOpen(true)} disabled={!candidates?.length}>
             <Send className="h-4 w-4 mr-1" /> Send Package
           </Button>
+          {canAddCandidate && <>
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-1" /> Add candidate</Button>
+              <Button><Plus className="h-4 w-4 mr-1" />{fr ? "Ajouter depuis le CV Hub" : "Add from CV Hub"}</Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader><DialogTitle>Add candidate from Talent Hub</DialogTitle></DialogHeader>
-              <AddCandidatePicker
+              {addOpen && <AddCandidatePicker
                 demandId={demandId}
                 existingCvIds={new Set((candidates ?? []).map((c) => c.cv_id))}
                 onAdded={() => {
                   qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
                   setAddOpen(false);
                 }}
-              />
+              />}
             </DialogContent>
           </Dialog>
+          <Dialog open={manualOpen} onOpenChange={setManualOpen}>
+            <DialogTrigger asChild><Button variant="outline"><Plus className="h-4 w-4 mr-1" />{fr ? "Ajouter manuellement" : "Add manually"}</Button></DialogTrigger>
+            <DialogContent className="w-[calc(100%-1rem)] max-w-3xl max-h-[90dvh] overflow-y-auto">
+              <DialogHeader><DialogTitle>{fr ? "Nouveau candidat" : "New candidate"}</DialogTitle></DialogHeader>
+              {manualOpen && <CandidateCreateForm userId={user.id} demandId={demandId} onCancel={() => setManualOpen(false)} onSaved={() => {
+                void refreshCandidates();
+                void qc.invalidateQueries({ queryKey: ["talent-hub"] });
+                void qc.invalidateQueries({ queryKey: ["talent-hub-picker"] });
+                setManualOpen(false);
+              }} />}
+            </DialogContent>
+          </Dialog>
+          </>}
         </div>
       </div>
 
@@ -321,6 +343,10 @@ function DemandDetail() {
             const dc = candidates?.find((c) => c.id === id);
             return dc ? (
               <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <CandidateDocumentPreview path={dc.talent_hub_cvs?.cv_url ?? null} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} />
+                  <CandidateDossier dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} stage={dc.stage} roles={myRoles} />
+                </div>
                 <CandidateDecisions compact row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
                 {canSeeComp && <CompensationSummary compact dcId={dc.id} candidateName={dc.talent_hub_cvs?.full_name ?? ""} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}
               </div>
@@ -377,6 +403,10 @@ function DemandDetail() {
                         {cv.salary_expectation != null && <span>Salary: €{cv.salary_expectation}</span>}
                       </div>
                       <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="flex flex-wrap gap-2 sm:col-span-2">
+                          <CandidateDocumentPreview path={cv.cv_url} name={cv.full_name} />
+                          <CandidateDossier dcId={dc.id} name={cv.full_name} stage={dc.stage} roles={myRoles} />
+                        </div>
                         <CandidateDecisions row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
                         {canSeeComp && <CompensationSummary dcId={dc.id} candidateName={cv.full_name} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}
                       </div>

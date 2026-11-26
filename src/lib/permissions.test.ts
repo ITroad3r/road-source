@@ -2,6 +2,12 @@ import { describe, it, expect } from "vitest";
 import { can, pickPrimaryRole } from "./permissions";
 
 describe("RBAC rules", () => {
+  it("Sourcers and HRBP can edit and delete contact and screening information", () => {
+    expect(can(["sourceur"], "pipeline.dossier.edit")).toBe(true);
+    expect(can(["hrbp"], "pipeline.dossier.edit")).toBe(true);
+    for (const role of ["operations", "ceo", "admin"]) expect(can([role], "pipeline.dossier.edit")).toBe(false);
+    expect(can(undefined, "pipeline.dossier.edit")).toBe(false);
+  });
   it("HRBP (Sourcing Manager) and Operations create and dispatch demands and clients", () => {
     for (const r of ["hrbp", "operations"]) {
       expect(can([r], "demands.manage")).toBe(true);

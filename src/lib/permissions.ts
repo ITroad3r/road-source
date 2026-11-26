@@ -11,6 +11,7 @@ export const CAPABILITIES = {
   "candidates.view": ["sourceur", "hrbp", "operations", "ceo"],
   "candidates.edit": ["sourceur", "hrbp", "operations"],
   "candidates.delete": ["operations"],
+  "pipeline.dossier.edit": ["sourceur", "hrbp"],
   "pipeline.qualify": ["hrbp", "operations"],
   "pipeline.finalDecision": ["operations"],
   "financials.view": ["operations", "ceo"],

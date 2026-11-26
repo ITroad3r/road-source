@@ -5,9 +5,9 @@ export type AppRole = (typeof APP_ROLES)[number];
 
 export const CAPABILITIES = {
   "demands.viewAll": ["hrbp", "operations", "ceo"],
-  "demands.manage": ["operations"], // create, edit, dispatch, delete
+  "demands.manage": ["hrbp", "operations"], // create, edit, dispatch, delete
   "clients.view": ["sourceur", "hrbp", "operations", "ceo"],
-  "clients.manage": ["operations"],
+  "clients.manage": ["hrbp", "operations"],
   "candidates.view": ["sourceur", "hrbp", "operations", "ceo"],
   "candidates.edit": ["sourceur", "hrbp", "operations"],
   "candidates.delete": ["operations"],

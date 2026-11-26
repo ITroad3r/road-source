@@ -134,6 +134,13 @@
       "when": 1795175574919,
       "tag": "0018_stage6_reconsideration_notification_type_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795719724339,
+      "tag": "0019_hrbp_manage_demands_clients",
+      "breakpoints": true
     }
   ]
 }

@@ -2,13 +2,12 @@ import { describe, it, expect } from "vitest";
 import { can, pickPrimaryRole } from "./permissions";
 
 describe("RBAC rules", () => {
-  it("only Operations creates and dispatches demands", () => {
-    expect(can(["operations"], "demands.manage")).toBe(true);
-    for (const r of ["sourceur", "hrbp", "ceo", "admin"]) expect(can([r], "demands.manage")).toBe(false);
-  });
-  it("HRBP reads all demands but cannot manage them", () => {
-    expect(can(["hrbp"], "demands.viewAll")).toBe(true);
-    expect(can(["hrbp"], "demands.manage")).toBe(false);
+  it("HRBP (Sourcing Manager) and Operations create and dispatch demands and clients", () => {
+    for (const r of ["hrbp", "operations"]) {
+      expect(can([r], "demands.manage")).toBe(true);
+      expect(can([r], "clients.manage")).toBe(true);
+    }
+    for (const r of ["sourceur", "ceo", "admin"]) expect(can([r], "demands.manage")).toBe(false);
   });
   it("admin has no business permissions", () => {
     for (const c of ["demands.viewAll", "candidates.view", "financials.view", "tjm.approve", "pipeline.finalDecision"] as const)
@@ -43,8 +42,8 @@ describe("RBAC rules", () => {
     expect(can([], "demands.manage")).toBe(false);
     expect(can(["unknown"], "clients.manage")).toBe(false);
   });
-  it("HRBP plus Admin cannot edit demands but keeps qualification", () => {
-    expect(can(["hrbp", "admin"], "demands.manage")).toBe(false);
+  it("HRBP plus Admin manages demands and keeps qualification", () => {
+    expect(can(["hrbp", "admin"], "demands.manage")).toBe(true);
     expect(can(["hrbp", "admin"], "pipeline.qualify")).toBe(true);
   });
   it("Operations retains management even alongside another role", () => {

@@ -1,0 +1,13 @@
+DROP POLICY IF EXISTS "Clients: operations insert" ON public.clients;
+DROP POLICY IF EXISTS "Clients: operations update" ON public.clients;
+DROP POLICY IF EXISTS "Clients: operations delete" ON public.clients;
+DROP POLICY IF EXISTS "Demands: operations insert" ON public.demands;
+DROP POLICY IF EXISTS "Demands: operations delete" ON public.demands;
+DROP POLICY IF EXISTS "Demands: operations update guard" ON public.demands;
+DROP POLICY IF EXISTS "Demands: update" ON public.demands;
+CREATE POLICY "Clients: manager insert" ON public.clients FOR INSERT TO authenticated WITH CHECK (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[]));
+CREATE POLICY "Clients: manager update" ON public.clients FOR UPDATE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[])) WITH CHECK (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[]));
+CREATE POLICY "Clients: manager delete" ON public.clients FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[]));
+CREATE POLICY "Demands: manager insert" ON public.demands FOR INSERT TO authenticated WITH CHECK (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[]));
+CREATE POLICY "Demands: manager update" ON public.demands FOR UPDATE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[])) WITH CHECK (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[]));
+CREATE POLICY "Demands: manager delete" ON public.demands FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['hrbp','operations']::public.app_role[]));

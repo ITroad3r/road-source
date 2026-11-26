@@ -25,6 +25,7 @@ import { CandidateCreateForm } from "@/components/CandidateCreateForm";
 import { CandidateDossier } from "@/components/CandidateDossier";
 import { CandidateDocumentPreview } from "@/components/CandidateDocumentPreview";
 import { CandidateChat } from "@/components/CandidateChat";
+import { CandidateInterview } from "@/components/CandidateInterview";
 import { canMoveCandidate } from "@/lib/pipeline-workflow";
 
 export const Route = createFileRoute("/_authenticated/demands/$demandId")({
@@ -358,6 +359,7 @@ function DemandDetail() {
                   <CandidateDocumentPreview path={dc.talent_hub_cvs?.cv_url ?? null} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} />
                   <CandidateDossier dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} stage={dc.stage} roles={myRoles} />
                   <CandidateChat dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} roles={myRoles} userId={user.id} assigned={demand.assigned_to === user.id} />
+                  <CandidateInterview dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} roles={myRoles} assigned={demand.assigned_to === user.id} />
                 </div>
                 <CandidateDecisions compact row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
                 {canSeeComp && <CompensationSummary compact dcId={dc.id} candidateName={dc.talent_hub_cvs?.full_name ?? ""} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}
@@ -419,6 +421,7 @@ function DemandDetail() {
                           <CandidateDocumentPreview path={cv.cv_url} name={cv.full_name} />
                           <CandidateDossier dcId={dc.id} name={cv.full_name} stage={dc.stage} roles={myRoles} />
                           <CandidateChat dcId={dc.id} name={cv.full_name} roles={myRoles} userId={user.id} assigned={demand.assigned_to === user.id} />
+                          <CandidateInterview dcId={dc.id} name={cv.full_name} roles={myRoles} assigned={demand.assigned_to === user.id} />
                         </div>
                         <CandidateDecisions row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
                         {canSeeComp && <CompensationSummary dcId={dc.id} candidateName={cv.full_name} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}

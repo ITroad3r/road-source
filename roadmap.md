@@ -1,4 +1,9 @@
 # Roadmap — Stage 3 draft
+## Client interview scheduling
+- [x] Add private candidature-scoped interview dates, onsite/visio details, and role access rules.
+- [x] Add candidate-ticket scheduling dialogs and today's interviews on Sourcer, HRBP and Operations dashboards.
+- [x] Verify scheduling, rescheduling, contacts, same-day filtering and read-only Operations access (38 authenticated checks, 80 unit tests, four signed-in EN/FR desktop/mobile scenarios).
+
 ## Revised candidate review order
 - [x] Gate Sourcer progression and rename screening across visible status labels.
 - [x] Require HRBP qualification before Operations review, then Operations approval before TJM.

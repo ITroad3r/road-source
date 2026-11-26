@@ -256,6 +256,53 @@ export type Database = {
           },
         ]
       }
+      candidate_interviews: {
+        Row: {
+          created_at: string
+          demand_candidate_id: string
+          id: string
+          location: string
+          meeting_url: string
+          mode: string
+          notes: string
+          starts_at: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          demand_candidate_id: string
+          id?: string
+          location?: string
+          meeting_url?: string
+          mode: string
+          notes?: string
+          starts_at: string
+          timezone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          demand_candidate_id?: string
+          id?: string
+          location?: string
+          meeting_url?: string
+          mode?: string
+          notes?: string
+          starts_at?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_interviews_demand_candidate_id_fkey"
+            columns: ["demand_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "demand_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           contact_email: string | null

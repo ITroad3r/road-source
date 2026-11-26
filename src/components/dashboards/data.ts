@@ -52,6 +52,22 @@ export function useDashFinancials(roles: readonly string[]) {
 }
 
 export type ActivityRow = { id: string; kind: string; body: string | null; created_at: string; author_id: string | null; demand_id: string | null; metadata: Record<string, unknown> | null };
+export function useDashInterviews(roles: readonly string[], start: string, end: string) {
+  return useQuery({
+    queryKey: ["dash", "interviews", start, end],
+    enabled: can(roles, "interviews.view"),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("candidate_interviews")
+        .select("id,demand_candidate_id,starts_at,mode,timezone,demand_candidates(demand_id,talent_hub_cvs(full_name),demands(title,clients(name)))")
+        .gte("starts_at", start).lt("starts_at", end).order("starts_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useDashActivity(kinds?: string[], authorId?: string) {
   return useQuery({
     queryKey: ["dash", "activity", kinds?.join(",") ?? "all", authorId ?? ""],

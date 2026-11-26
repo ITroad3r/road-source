@@ -12,6 +12,8 @@ export const CAPABILITIES = {
   "candidates.edit": ["sourceur", "hrbp", "operations"],
   "candidates.delete": ["operations"],
   "pipeline.dossier.edit": ["sourceur", "hrbp"],
+  "interviews.view": ["sourceur", "hrbp", "operations"],
+  "interviews.manage": ["sourceur", "hrbp"],
   "chat.sourcing": ["sourceur", "hrbp"],
   "chat.sourcingAll": ["hrbp"],
   "chat.operations": ["hrbp", "operations"],

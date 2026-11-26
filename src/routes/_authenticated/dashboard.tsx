@@ -13,6 +13,7 @@ import { DirectorDashboard } from "@/components/dashboards/DirectorDashboard";
 import { CeoDashboard } from "@/components/dashboards/CeoDashboard";
 import { AdminDashboard } from "@/components/dashboards/AdminDashboard";
 import { CompensationQueueCard } from "@/components/dashboards/CompensationQueueCard";
+import { TodayInterviews } from "@/components/dashboards/TodayInterviews";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   ssr: false,
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { name: "description", content: "Your RoadSource workspace: demands, candidates and decisions for your role." },
       { property: "og:title", content: "Dashboard — RoadSource" },
       { property: "og:description", content: "Your RoadSource workspace for your role." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Dashboard,
@@ -71,6 +74,7 @@ function Dashboard() {
           </div>
         </Tabs>
       )}
+      {(ws === "sourceur" || ws === "hrbp" || ws === "operations") && <TodayInterviews roles={r} assigned={ws === "sourceur"} />}
       {(ws === "sourceur" || ws === "hrbp" || ws === "operations") && <CompensationQueueCard queue={ws} userId={user.id} />}
       {ws === "sourceur" && <SourcingDashboard userId={user.id} fullName={fullName} roles={r} />}
       {ws === "hrbp" && <ManagerDashboard fullName={fullName} roles={r} />}

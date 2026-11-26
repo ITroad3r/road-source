@@ -12,3 +12,4 @@
 - Candidate chat is candidature-scoped with separate audience rooms enforced by RLS; read receipts are caller-owned and live updates use content-free private broadcasts so neither conversation leaks to the other audience.
 - Operations holds every HRBP compensation action and may approve/reject a submitted proposal directly; contact/test dossiers are optional and never gate stage moves.
 - Operations compensation renegotiation returns to HRBP; HRBP or the assigned Sourceur may revise the terms, but only HRBP validates and resubmits them to Operations, with optimistic versioning and append-only history.
+- Client interviews are separate candidature-scoped records with assignment-bound RLS; timestamps are stored in UTC with the scheduling timezone, and daily lists use viewer-local day boundaries without changing pipeline stages.

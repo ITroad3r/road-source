@@ -22,7 +22,14 @@ import { useMyRoles } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated/financials")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Financials — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Financials \u2014 RoadSource" },
+    { name: "description", content: "Review RoadSource approved daily rates, revenue and margins according to your role." },
+    { property: "og:title", content: "Financials \u2014 RoadSource" },
+    { property: "og:description", content: "Review RoadSource approved daily rates, revenue and margins according to your role." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: Financials,
 });
 

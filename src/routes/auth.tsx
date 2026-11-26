@@ -12,7 +12,14 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign in — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Sign in \u2014 RoadSource" },
+    { name: "description", content: "Sign in to your invitation-only RoadSource workspace." },
+    { property: "og:title", content: "Sign in \u2014 RoadSource" },
+    { property: "og:description", content: "Sign in to your invitation-only RoadSource workspace." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AuthPage,
 });
 

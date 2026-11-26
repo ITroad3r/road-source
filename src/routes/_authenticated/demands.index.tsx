@@ -25,7 +25,14 @@ import {
 
 export const Route = createFileRoute("/_authenticated/demands/")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Demands — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Demands \u2014 RoadSource" },
+    { name: "description", content: "Browse, filter and assign RoadSource client demands." },
+    { property: "og:title", content: "Demands \u2014 RoadSource" },
+    { property: "og:description", content: "Browse, filter and assign RoadSource client demands." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: DemandsList,
 });
 

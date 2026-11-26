@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { Trash2, GripVertical, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const KANBAN_STAGES = [
   "identified",
@@ -67,6 +68,7 @@ export function PipelineKanban({
   onRemove: (id: string) => void;
 }) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const { t } = useTranslation();
   const [overStage, setOverStage] = useState<KanbanStage | null>(null);
 
   const byStage: Record<KanbanStage, KanbanCandidate[]> = {
@@ -94,7 +96,7 @@ export function PipelineKanban({
               className={`w-64 shrink-0 rounded-md bg-muted/40 border-t-4 ${STAGE_BORDER[stage]} ${isOver ? "ring-2 ring-primary" : ""}`}
             >
               <div className="flex items-center justify-between px-3 py-2 border-b">
-                <span className="text-xs font-semibold uppercase tracking-wide">{STAGE_LABEL[stage]}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide">{t(`dash.stage.${stage}`, STAGE_LABEL[stage])}</span>
                 <Badge variant="secondary" className="h-5 text-[10px]">{items.length}</Badge>
               </div>
               <div className="p-2 space-y-2 min-h-[80px]">
@@ -112,28 +114,28 @@ export function PipelineKanban({
                         <div className="flex-1 min-w-0">
                           <Link
                             to="/talent-hub/$cvId"
-                            params={{ cvId: dc.cv!.id }}
+                            params={{ cvId: dc.cv?.id ?? "" }}
                             className="block font-medium text-sm hover:text-primary truncate"
                           >
-                            {dc.cv!.full_name}
+                            {dc.cv?.full_name}
                           </Link>
-                          <div className="text-xs text-muted-foreground truncate">{dc.cv!.headline ?? "—"}</div>
+                          <div className="text-xs text-muted-foreground truncate">{dc.cv?.headline ?? "—"}</div>
                         </div>
                         <Button variant="ghost" size="icon" className="h-6 w-6 -mr-1" onClick={() => onRemove(dc.id)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                       <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
-                        {dc.cv!.seniority && <span className="capitalize">{dc.cv!.seniority}</span>}
-                        {dc.cv!.daily_rate != null && <span>· €{dc.cv!.daily_rate}/d</span>}
+                        {dc.cv?.seniority && <span className="capitalize">{dc.cv.seniority}</span>}
+                        {dc.cv?.daily_rate != null && <span>· €{dc.cv.daily_rate}/d</span>}
                       </div>
-                      {dc.cv!.skills && dc.cv!.skills.length > 0 && (
+                      {dc.cv?.skills && dc.cv.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {dc.cv!.skills.slice(0, 4).map((s) => (
+                          {dc.cv.skills.slice(0, 4).map((s) => (
                             <Badge key={s} variant="outline" className="text-[10px] font-normal h-4 px-1">{s}</Badge>
                           ))}
-                          {dc.cv!.skills.length > 4 && (
-                            <Badge variant="outline" className="text-[10px] font-normal h-4 px-1">+{dc.cv!.skills.length - 4}</Badge>
+                          {dc.cv.skills.length > 4 && (
+                            <Badge variant="outline" className="text-[10px] font-normal h-4 px-1">+{dc.cv.skills.length - 4}</Badge>
                           )}
                         </div>
                       )}

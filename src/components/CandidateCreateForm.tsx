@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useMyRoles } from "@/hooks/useMyRoles";
+import { can } from "@/lib/permissions";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +33,8 @@ const ALLOWED = ["application/pdf", "application/msword", "application/vnd.openx
 
 export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { userId: string; demandId?: string; onSaved: () => void; onCancel: () => void }) {
 
+  const { t } = useTranslation();
+  const { data: roles } = useMyRoles(userId);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -55,7 +60,8 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
   const parseCv = useServerFn(parseCvFile);
 
   async function autofillFromCv() {
-    if (!file) return toast.error("Choose a CV file first");
+    if (!can(roles, "candidates.edit")) return;
+    if (!file) return toast.error(t("candidateCreate.chooseFile", "Choose a CV file first"));
     setParsing(true);
     let tempPath: string | null = null;
     try {
@@ -85,7 +91,7 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
         const merged = Array.from(new Set([...tags, ...candidate.tags]));
         setTags(merged.slice(0, 20));
       }
-      toast.success("CV parsed — review the pre-filled fields");
+      toast.success(t("candidateCreate.parsed", "CV parsed — review the pre-filled fields"));
     } catch (err) {
       toast.error((err as Error).message ?? "Failed to parse CV");
     } finally {
@@ -110,13 +116,14 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
     if (!f) return setFile(null);
-    if (f.size > MAX_FILE) return toast.error("File too large (max 10 MB)");
-    if (!ALLOWED.includes(f.type)) return toast.error("Only PDF, DOC or DOCX allowed");
+    if (f.size > MAX_FILE) return toast.error(t("candidateCreate.fileTooLarge", "File too large (max 10 MB)"));
+    if (!ALLOWED.includes(f.type)) return toast.error(t("candidateCreate.fileType", "Only PDF, DOC or DOCX allowed"));
     setFile(f);
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving || !can(roles, "candidates.edit")) return;
     const parsed = schema.safeParse({ full_name: fullName, email, phone, headline, summary, location, linkedin_url: linkedin });
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Invalid candidate details");
 
@@ -162,7 +169,7 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
         : await supabase.from("talent_hub_cvs").insert(candidate);
       if (error) throw error;
 
-      toast.success("Candidate added to Talent Hub");
+      toast.success(t("candidateCreate.saved", "Candidate added to Talent Hub"));
       onSaved();
     } catch (err) {
       if (uploadedPath) await supabase.storage.from("cvs").remove([uploadedPath]);
@@ -175,31 +182,30 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
   return (
     <div className="max-w-3xl">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Add candidate</h1>
-        <p className="text-muted-foreground mt-1">Create a new CV in the Talent Hub. Upload a PDF or DOCX if you have one.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("candidateCreate.addCandidate", "Add candidate")}</h1>
       </header>
 
       <form onSubmit={submit} className="space-y-5">
         <Card>
-          <CardHeader><CardTitle>Identity</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("candidateCreate.identity", "Identity")}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Full name *"><Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={200} /></Field>
-              <Field label="Headline"><Input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={200} placeholder="Senior React Engineer" /></Field>
-              <Field label="Email"><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} /></Field>
-              <Field label="Phone"><Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={50} /></Field>
-              <Field label="Location"><Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} /></Field>
-              <Field label="LinkedIn URL"><Input type="url" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} maxLength={500} /></Field>
+              <Field label={t("candidateCreate.fullName", "Full name *")}><Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={200} /></Field>
+              <Field label={t("candidateCreate.headline", "Headline")}><Input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={200} placeholder="Senior React Engineer" /></Field>
+              <Field label={t("candidateCreate.email", "Email")}><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} /></Field>
+              <Field label={t("candidateCreate.phone", "Phone")}><Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={50} /></Field>
+              <Field label={t("candidateCreate.location", "Location")}><Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} /></Field>
+              <Field label={t("candidateCreate.linkedin", "LinkedIn URL")}><Input type="url" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} maxLength={500} /></Field>
             </div>
-            <Field label="Summary"><Textarea rows={4} value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={5000} /></Field>
+            <Field label={t("candidateCreate.summary", "Summary")}><Textarea rows={4} value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={5000} /></Field>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("candidateCreate.profile", "Profile")}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Field label="Seniority">
+              <Field label={t("candidateCreate.seniority", "Seniority")}>
                 <Select value={seniority} onValueChange={setSeniority}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -207,50 +213,50 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Years of experience"><Input type="number" min={0} max={60} value={yearsExp} onChange={(e) => setYearsExp(e.target.value)} /></Field>
-              <Field label="Availability">
+              <Field label={t("candidateCreate.yearsExperience", "Years of experience")}><Input type="number" min={0} max={60} value={yearsExp} onChange={(e) => setYearsExp(e.target.value)} /></Field>
+              <Field label={t("candidateCreate.availability", "Availability")}>
                 <Select value={availability} onValueChange={setAvailability}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="available">Available</SelectItem>
-                    <SelectItem value="available_soon">Available soon</SelectItem>
-                    <SelectItem value="unavailable">Unavailable</SelectItem>
+                    <SelectItem value="available">{t("candidateCreate.available", "Available")}</SelectItem>
+                    <SelectItem value="available_soon">{t("candidateCreate.availableSoon", "Available soon")}</SelectItem>
+                    <SelectItem value="unavailable">{t("candidateCreate.unavailable", "Unavailable")}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
               <div className="sm:col-span-2"><PreferredContractSelect id="new-pref-contract" value={preferredContract} onChange={setPreferredContract} /></div>
-              <Field label="Engagement preference (legacy)">
+              <Field label={t("candidateCreate.engagement", "Engagement preference (legacy)")}>
                 <Select value={engagement} onValueChange={setEngagement}>
                   <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="freelance">Freelance</SelectItem>
-                    <SelectItem value="permanent">Permanent</SelectItem>
+                    <SelectItem value="freelance">{t("candidateCreate.freelance", "Freelance")}</SelectItem>
+                    <SelectItem value="permanent">{t("candidateCreate.permanent", "Permanent")}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Daily rate (€)"><Input type="number" min={0} value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} /></Field>
-              <Field label="Salary expectation (€)"><Input type="number" min={0} value={salary} onChange={(e) => setSalary(e.target.value)} /></Field>
+              <Field label={t("candidateCreate.dailyRate", "Daily rate (€)")}><Input type="number" min={0} value={dailyRate} onChange={(e) => setDailyRate(e.target.value)} /></Field>
+              <Field label={t("candidateCreate.salary", "Salary expectation (€)")}><Input type="number" min={0} value={salary} onChange={(e) => setSalary(e.target.value)} /></Field>
             </div>
             <div className="flex items-center gap-3">
               <Switch checked={remoteOk} onCheckedChange={setRemoteOk} id="remote" />
-              <Label htmlFor="remote">Open to remote work</Label>
+              <Label htmlFor="remote">{t("candidateCreate.remote", "Open to remote work")}</Label>
             </div>
 
-            <Field label="Skills">
+            <Field label={t("candidateCreate.skills", "Skills")}>
               <TagInput value={skillInput} setValue={setSkillInput} onAdd={addSkill} items={skills} onRemove={(s) => setSkills(skills.filter((x) => x !== s))} placeholder="Type a skill and press Enter" />
             </Field>
-            <Field label="Tags">
+            <Field label={t("candidateCreate.tags", "Tags")}>
               <TagInput value={tagInput} setValue={setTagInput} onAdd={addTag} items={tags} onRemove={(t) => setTags(tags.filter((x) => x !== t))} placeholder="e.g. fintech, gov, ex-Google" />
             </Field>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>CV file</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("candidateCreate.cvFile", "CV file")}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <label className="flex items-center justify-center gap-2 border-2 border-dashed rounded-md p-6 cursor-pointer hover:bg-accent/40 transition">
               <Upload className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{file ? "Change file" : "Click to upload PDF / DOC / DOCX (max 10 MB)"}</span>
+              <span className="text-sm text-muted-foreground">{file ? t("candidateCreate.changeFile", "Change file") : t("candidateCreate.uploadFile", "Click to upload PDF / DOC / DOCX (max 10 MB)")}</span>
               <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={onFileChange} />
             </label>
             {file && (
@@ -262,15 +268,15 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
             {file && (
               <Button type="button" variant="secondary" onClick={autofillFromCv} disabled={parsing} className="w-full">
                 <Sparkles className="h-4 w-4 mr-2" />
-                {parsing ? "Parsing CV with AI…" : "Auto-fill form from CV (AI)"}
+                {parsing ? t("candidateCreate.parsing", "Parsing CV with AI…") : t("candidateCreate.autofill", "Auto-fill form from CV (AI)")}
               </Button>
             )}
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add candidate"}</Button>
+          <Button type="button" variant="outline" onClick={onCancel}>{t("candidateCreate.cancel", "Cancel")}</Button>
+          <Button type="submit" disabled={saving}>{saving ? t("candidateCreate.saving", "Saving…") : t("candidateCreate.addCandidate", "Add candidate")}</Button>
         </div>
       </form>
     </div>
@@ -285,19 +291,20 @@ function TagInput({ value, setValue, onAdd, items, onRemove, placeholder }: {
   value: string; setValue: (v: string) => void; onAdd: () => void;
   items: string[]; onRemove: (v: string) => void; placeholder: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2">
       <div className="flex gap-2">
         <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} maxLength={50}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onAdd(); } }} />
-        <Button type="button" variant="outline" onClick={onAdd}>Add</Button>
+        <Button type="button" variant="outline" onClick={onAdd}>{t("candidateCreate.add", "Add")}</Button>
       </div>
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {items.map((s) => (
             <Badge key={s} variant="secondary" className="gap-1">
               {s}
-              <button type="button" onClick={() => onRemove(s)}><X className="h-3 w-3" /></button>
+              <Button type="button" variant="ghost" size="icon" className="h-4 w-4" aria-label={`Remove ${s}`} onClick={() => onRemove(s)}><X className="h-3 w-3" /></Button>
             </Badge>
           ))}
         </div>

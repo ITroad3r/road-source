@@ -9,7 +9,14 @@ import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/clients/$clientId")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Client — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Client \u2014 RoadSource" },
+    { name: "description", content: "Review client contact information and demand history in RoadSource." },
+    { property: "og:title", content: "Client \u2014 RoadSource" },
+    { property: "og:description", content: "Review client contact information and demand history in RoadSource." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ClientDetail,
 });
 

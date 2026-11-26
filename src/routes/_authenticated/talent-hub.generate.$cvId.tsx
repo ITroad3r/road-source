@@ -23,7 +23,14 @@ import type { CvData, CvExperience, CvEducation } from "@/components/cv-template
 
 export const Route = createFileRoute("/_authenticated/talent-hub/generate/$cvId")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Generate ITROAD CV — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Generate ITROAD CV \u2014 RoadSource" },
+    { name: "description", content: "Prepare branded ITROAD candidate CV documents from RoadSource profiles." },
+    { property: "og:title", content: "Generate ITROAD CV \u2014 RoadSource" },
+    { property: "og:description", content: "Prepare branded ITROAD candidate CV documents from RoadSource profiles." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: GenerateCvPage,
 });
 

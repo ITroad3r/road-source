@@ -11,7 +11,14 @@ import { BarChart3, Trophy, Clock, Users, TrendingUp, Target } from "lucide-reac
 
 export const Route = createFileRoute("/_authenticated/reports")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Reports & Analytics — Sourcing Hub" }] }),
+  head: () => ({ meta: [
+    { title: "Reports & Analytics \u2014 RoadSource" },
+    { name: "description", content: "Analyze RoadSource sourcing performance, client outcomes and placement timelines." },
+    { property: "og:title", content: "Reports & Analytics \u2014 RoadSource" },
+    { property: "og:description", content: "Analyze RoadSource sourcing performance, client outcomes and placement timelines." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ReportsPage,
 });
 

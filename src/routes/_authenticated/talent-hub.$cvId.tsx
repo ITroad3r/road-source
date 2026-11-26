@@ -20,7 +20,14 @@ import { ActivityLog } from "@/components/ActivityLog";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/$cvId")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Candidate — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Candidate \u2014 RoadSource" },
+    { name: "description", content: "Review candidate profiles, CV documents and demand participation in RoadSource." },
+    { property: "og:title", content: "Candidate \u2014 RoadSource" },
+    { property: "og:description", content: "Review candidate profiles, CV documents and demand participation in RoadSource." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: CandidateDetail,
 });
 

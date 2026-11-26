@@ -4,6 +4,7 @@ import { FileText, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PdfDocumentView } from "./PdfDocumentView";
 
 export function CandidateDocumentPreview({ path, name, bucket = "cvs", label = "CV" }: { path: string | null; name: string; bucket?: string; label?: string }) {
   const { i18n } = useTranslation();
@@ -44,11 +45,11 @@ export function CandidateDocumentPreview({ path, name, bucket = "cvs", label = "
   return <Dialog open={open} onOpenChange={setOpen}>
     <Button type="button" variant="outline" size="sm" className="h-7 gap-1 text-xs" disabled={!path} title={!path ? (fr ? "Aucun CV joint" : "No CV attached") : label} onClick={() => setOpen(true)}><FileText className="h-3 w-3" />{label}</Button>
     <DialogContent className="w-[calc(100%-1rem)] max-w-5xl max-h-[90dvh] overflow-auto">
-      <DialogHeader><DialogTitle>{name} · {label}</DialogTitle></DialogHeader>
+      <DialogHeader className="pr-7"><DialogTitle className="break-words">{name} · {label}</DialogTitle></DialogHeader>
       {loading && <p className="text-muted-foreground">{fr ? "Chargement…" : "Loading…"}</p>}
       {error && <p role="alert" className="text-destructive">{error}</p>}
       {isWord && <div ref={wordRef} className="overflow-auto max-h-[65dvh]" />}
-      {url && !isWord && !legacyWord && <iframe title={`${name} ${label}`} src={url} className="w-full h-[65dvh] border rounded-md" />}
+      {url && !isWord && !legacyWord && <PdfDocumentView url={url} />}
       {url && legacyWord && <p>{fr ? "Le format Word ancien (.doc) nécessite un téléchargement. Utilisez PDF ou DOCX pour l’aperçu." : "Legacy Word (.doc) requires downloading. Use PDF or DOCX for on-screen preview."}</p>}
       {url && <Button asChild variant="outline" className="justify-self-start"><a href={url} target="_blank" rel="noopener noreferrer"><Download className="h-4 w-4 mr-2" />{fr ? "Ouvrir / télécharger" : "Open / download"}</a></Button>}
     </DialogContent>

@@ -17,7 +17,14 @@ import { useMyRoles } from "@/hooks/useMyRoles";
 
 export const Route = createFileRoute("/_authenticated/clients/")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Clients — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Clients \u2014 RoadSource" },
+    { name: "description", content: "Browse RoadSource clients and manage their contact details." },
+    { property: "og:title", content: "Clients \u2014 RoadSource" },
+    { property: "og:description", content: "Browse RoadSource clients and manage their contact details." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ClientsPage,
 });
 

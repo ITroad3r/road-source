@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CandidateDocumentPreview } from "./CandidateDocumentPreview";
 type Dossier = Database["public"]["Tables"]["candidate_dossiers"]["Insert"];
 type Section = "contact" | "screening";
@@ -49,12 +50,13 @@ function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: s
   const text = (en: string, french: string) => fr ? french : en;
   const qc = useQueryClient();
   const [draft, setDraft] = useState<Dossier>(initial);
+  const [savedRecord, setSavedRecord] = useState<Dossier>(initial);
   const [files, setFiles] = useState<{ technical?: File; psychological?: File }>({});
   const [busy, setBusy] = useState(false);
   const [fileKey, setFileKey] = useState(0);
   const set = (key: keyof Dossier, value: string | number | null) => setDraft(d => ({ ...d, [key]: value }));
   const field = (key: keyof Dossier, label: string, type = "text") => <div className="space-y-1.5"><Label htmlFor={`${dcId}-${key}`}>{label}</Label><Input id={`${dcId}-${key}`} type={type} value={String(draft[key] ?? "")} min={type === "number" ? 0 : undefined} onChange={e => set(key, type === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value || null)} /></div>;
-  const select = (key: keyof Dossier, label: string, options: [string, string][]) => <div className="space-y-1.5"><Label htmlFor={`${dcId}-${key}`}>{label}</Label><select id={`${dcId}-${key}`} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={String(draft[key] ?? "")} onChange={e => set(key, e.target.value || null)}><option value="">—</option>{options.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>;
+  const select = (key: keyof Dossier, label: string, options: [string, string][]) => <div className="space-y-1.5"><Label htmlFor={`${dcId}-${key}`}>{label}</Label><Select disabled={!canEdit || busy} value={String(draft[key] ?? "none")} onValueChange={value => set(key, value === "none" ? null : value)}><SelectTrigger id={`${dcId}-${key}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">—</SelectItem>{options.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></div>;
   const observations = (key: "contact_observations" | "screening_observations") => <div className="space-y-1.5"><Label htmlFor={`${dcId}-${key}`}>Observations</Label><Textarea id={`${dcId}-${key}`} rows={4} value={draft[key] ?? ""} onChange={e => set(key, e.target.value || null)} /></div>;
   async function persist(section: Section, clear = false) {
     if (!canEdit || busy) return;
@@ -80,7 +82,7 @@ function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: s
             if (error) throw error;
             uploaded.push(path); payload[key] = path;
           }
-          if (initial[key] && initial[key] !== payload[key]) obsolete.push(initial[key]);
+          if (savedRecord[key] && savedRecord[key] !== payload[key]) obsolete.push(savedRecord[key]);
         }
       }
       // Preserve the other section's saved data rather than saving unsaved fields from another tab.
@@ -95,7 +97,7 @@ function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: s
       }
       const saved = await supabase.from("candidate_dossiers").select("*").eq("demand_candidate_id", dcId).single();
       if (saved.error) throw saved.error;
-      Object.assign(initial, saved.data);
+      setSavedRecord(saved.data);
       setDraft(saved.data); setFiles({}); setFileKey(k => k + 1);
       void qc.invalidateQueries({ queryKey: ["candidate-dossier", dcId] });
       toast.success(clear ? text("Section deleted", "Section supprimée") : text("Saved", "Enregistré"));

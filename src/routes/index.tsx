@@ -21,6 +21,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "RoadSource — IT Sourcing & Talent CRM" },
+      { property: "og:title", content: "RoadSource — IT Sourcing & Talent CRM" },
+      { property: "og:description", content: "Manage client demands, source IT talent and track placements with RoadSource." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       {
         name: "description",
         content:

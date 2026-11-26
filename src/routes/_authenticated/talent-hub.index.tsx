@@ -12,7 +12,14 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/talent-hub/")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Talent Hub — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Talent Hub \u2014 RoadSource" },
+    { name: "description", content: "Search the RoadSource CV Hub by skills, experience and availability." },
+    { property: "og:title", content: "Talent Hub \u2014 RoadSource" },
+    { property: "og:description", content: "Search the RoadSource CV Hub by skills, experience and availability." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: TalentHub,
 });
 

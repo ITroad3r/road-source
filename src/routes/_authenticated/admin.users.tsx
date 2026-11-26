@@ -22,7 +22,14 @@ import { inviteUser, resendInvite, deleteUser } from "@/lib/admin-users.function
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Users & roles — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Users & roles \u2014 RoadSource" },
+    { name: "description", content: "Manage RoadSource invitations, user roles and effective access permissions." },
+    { property: "og:title", content: "Users & roles \u2014 RoadSource" },
+    { property: "og:description", content: "Manage RoadSource invitations, user roles and effective access permissions." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdminUsers,
 });
 

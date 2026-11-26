@@ -10,7 +10,14 @@ import { RoadSourceLogo } from "@/components/RoadSourceLogo";
 
 export const Route = createFileRoute("/set-password")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Set your password — RoadSource" }] }),
+  head: () => ({ meta: [
+    { title: "Set your password \u2014 RoadSource" },
+    { name: "description", content: "Complete your RoadSource invitation or securely reset your account password." },
+    { property: "og:title", content: "Set your password \u2014 RoadSource" },
+    { property: "og:description", content: "Complete your RoadSource invitation or securely reset your account password." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: SetPasswordPage,
 });
 

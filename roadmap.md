@@ -45,7 +45,7 @@
 - Open, blocked on owner action in the live app: remove shared QA admin + [TEST] data, assign Operations/CEO users, verify one real invitation email.
 
 ## Candidate contact and screening workflow
-- [ ] Shared manual candidate creation on demand; save to Hub and pipeline atomically.
-- [ ] Editable contact and screening records, private PDFs, Sourcer/HRBP access rules.
-- [ ] CV preview in every pipeline stage, list and board; FR/EN and mobile checks.
-- [ ] Unit, authenticated workflow and access verification; record results.
+- [x] Shared manual candidate creation on demand; save to Hub and pipeline atomically.
+- [x] Editable contact and screening records, private PDFs, Sourcer/HRBP access rules.
+- [x] CV preview in every pipeline stage, list and board; FR/EN and mobile checks (PDF/DOCX; legacy DOC download fallback).
+- [x] 53 unit tests; real-session HRBP/Sourcer workflows and CEO write denial; temporary fixtures cleaned; docs/candidate-workflow-verification.md.

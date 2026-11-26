@@ -9,6 +9,14 @@ import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
+  head: () => ({ meta: [
+    { title: "Notifications \u2014 RoadSource" },
+    { name: "description", content: "Review demand assignments and candidate workflow updates in RoadSource." },
+    { property: "og:title", content: "Notifications \u2014 RoadSource" },
+    { property: "og:description", content: "Review demand assignments and candidate workflow updates in RoadSource." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: NotificationsPage,
 });
 

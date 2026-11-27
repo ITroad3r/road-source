@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTx } from "@/hooks/use-tx";
 import { useTranslation } from "react-i18next";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { can } from "@/lib/permissions";
@@ -32,6 +33,7 @@ const MAX_FILE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 
 export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { userId: string; demandId?: string; onSaved: () => void; onCancel: () => void }) {
+  const { tx } = useTx();
 
   const { t } = useTranslation();
   const { data: roles } = useMyRoles(userId);
@@ -93,7 +95,7 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
       }
       toast.success(t("candidateCreate.parsed", "CV parsed — review the pre-filled fields"));
     } catch (err) {
-      toast.error((err as Error).message ?? "Failed to parse CV");
+      toast.error((err as Error).message ?? tx("Failed to parse CV", "Impossible d'analyser le CV"));
     } finally {
       if (tempPath) {
         await supabase.storage.from("cvs").remove([tempPath]).catch(() => {});
@@ -125,7 +127,7 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
     e.preventDefault();
     if (saving || !can(roles, "candidates.edit")) return;
     const parsed = schema.safeParse({ full_name: fullName, email, phone, headline, summary, location, linkedin_url: linkedin });
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Invalid candidate details");
+    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? tx("Invalid candidate details", "Informations candidat invalides"));
 
     setSaving(true);
     let uploadedPath: string | null = null;
@@ -191,7 +193,7 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label={t("candidateCreate.fullName", "Full name *")}><Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={200} /></Field>
-              <Field label={t("candidateCreate.headline", "Headline")}><Input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={200} placeholder="Senior React Engineer" /></Field>
+              <Field label={t("candidateCreate.headline", "Headline")}><Input value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={200} placeholder={tx("Senior React Engineer", "Ingénieur React senior")} /></Field>
               <Field label={t("candidateCreate.email", "Email")}><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} /></Field>
               <Field label={t("candidateCreate.phone", "Phone")}><Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={50} /></Field>
               <Field label={t("candidateCreate.location", "Location")}><Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} /></Field>
@@ -227,7 +229,7 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
               <div className="sm:col-span-2"><PreferredContractSelect id="new-pref-contract" value={preferredContract} onChange={setPreferredContract} /></div>
               <Field label={t("candidateCreate.engagement", "Engagement preference (legacy)")}>
                 <Select value={engagement} onValueChange={setEngagement}>
-                  <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={tx("Any", "Indifférent")} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="freelance">{t("candidateCreate.freelance", "Freelance")}</SelectItem>
                     <SelectItem value="permanent">{t("candidateCreate.permanent", "Permanent")}</SelectItem>
@@ -243,10 +245,10 @@ export function CandidateCreateForm({ userId, demandId, onSaved, onCancel }: { u
             </div>
 
             <Field label={t("candidateCreate.skills", "Skills")}>
-              <TagInput value={skillInput} setValue={setSkillInput} onAdd={addSkill} items={skills} onRemove={(s) => setSkills(skills.filter((x) => x !== s))} placeholder="Type a skill and press Enter" />
+              <TagInput value={skillInput} setValue={setSkillInput} onAdd={addSkill} items={skills} onRemove={(s) => setSkills(skills.filter((x) => x !== s))} placeholder={tx("Type a skill and press Enter", "Saisissez une compétence puis Entrée")} />
             </Field>
             <Field label={t("candidateCreate.tags", "Tags")}>
-              <TagInput value={tagInput} setValue={setTagInput} onAdd={addTag} items={tags} onRemove={(t) => setTags(tags.filter((x) => x !== t))} placeholder="e.g. fintech, gov, ex-Google" />
+              <TagInput value={tagInput} setValue={setTagInput} onAdd={addTag} items={tags} onRemove={(t) => setTags(tags.filter((x) => x !== t))} placeholder={tx("e.g. fintech, gov, ex-Google", "ex. fintech, secteur public, ex-Google")} />
             </Field>
           </CardContent>
         </Card>

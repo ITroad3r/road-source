@@ -1,4 +1,5 @@
 import { can } from "@/lib/permissions";
+import { useTx } from "@/hooks/use-tx";
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthLayout() {
+  const { tx } = useTx();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = Route.useRouteContext();
@@ -117,7 +119,7 @@ function AuthLayout() {
           {/* Mobile menu trigger */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden -ml-1" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="md:hidden -ml-1" aria-label={tx("Open menu", "Ouvrir le menu")}>
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>

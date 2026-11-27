@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { txNow } from "@/hooks/use-tx";
 import { useServerFn } from "@tanstack/react-start";
 import { useTranslation } from "react-i18next";
 import { FileText, Upload, Sparkles, Loader2, Download, Eye, Pencil, AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react";
@@ -16,8 +17,8 @@ import { toast } from "sonner";
 async function fileData(file: File) {
   const base64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result.split(",")[1] ?? "") : reject(new Error("Invalid file"));
-    reader.onerror = () => reject(new Error("Cannot read file")); reader.readAsDataURL(file);
+    reader.onload = () => typeof reader.result === "string" ? resolve(reader.result.split(",")[1] ?? "") : reject(new Error(txNow("Invalid file", "Fichier invalide")));
+    reader.onerror = () => reject(new Error(txNow("Cannot read file", "Impossible de lire le fichier"))); reader.readAsDataURL(file);
   });
   return { name: file.name, base64 };
 }

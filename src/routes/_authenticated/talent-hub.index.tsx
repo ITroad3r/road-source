@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +43,7 @@ type CV = {
 };
 
 function TalentHub() {
+  const { tx } = useTx();
   const [q, setQ] = useState("");
   const [engagement, setEngagement] = useState<string>("all");
   const [availability, setAvailability] = useState<string>("all");
@@ -95,7 +97,7 @@ function TalentHub() {
   async function openCv(cvUrl: string) {
     if (/^https?:\/\//i.test(cvUrl)) { window.open(cvUrl, "_blank"); return; }
     const { data, error } = await supabase.storage.from("cvs").createSignedUrl(cvUrl, 60);
-    if (error || !data) return toast.error(error?.message ?? "Could not open CV");
+    if (error || !data) return toast.error(error?.message ?? tx("Could not open CV", "Impossible d'ouvrir le CV"));
     window.open(data.signedUrl, "_blank");
   }
 
@@ -104,10 +106,10 @@ function TalentHub() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Talent Hub</h1>
-          <p className="text-muted-foreground mt-1">Search the candidate database by skill, role, location or availability.</p>
+          <p className="text-muted-foreground mt-1">{tx("Search the candidate database by skill, role, location or availability.", "Recherchez dans la base candidats par compétence, poste, localisation ou disponibilité.")}</p>
         </div>
         <Button asChild>
-          <Link to="/talent-hub/new"><Plus className="h-4 w-4 mr-1" /> Add candidate</Link>
+          <Link to="/talent-hub/new"><Plus className="h-4 w-4 mr-1" /> {tx("Add candidate", "Ajouter un candidat")}</Link>
         </Button>
       </header>
 
@@ -116,7 +118,7 @@ function TalentHub() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name, skill, headline, location…"
+              placeholder={tx("Search by name, skill, headline, location…", "Rechercher par nom, compétence, titre, localisation…")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="pl-9"
@@ -125,26 +127,26 @@ function TalentHub() {
           <Select value={engagement} onValueChange={setEngagement}>
             <SelectTrigger className="md:w-44"><SelectValue placeholder="Engagement" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All engagements</SelectItem>
+              <SelectItem value="all">{tx("All engagements", "Tous types d'engagement")}</SelectItem>
               <SelectItem value="freelance">Freelance</SelectItem>
-              <SelectItem value="permanent">Permanent</SelectItem>
+              <SelectItem value="permanent">{tx("Permanent", "CDI")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={availability} onValueChange={setAvailability}>
-            <SelectTrigger className="md:w-44"><SelectValue placeholder="Availability" /></SelectTrigger>
+            <SelectTrigger className="md:w-44"><SelectValue placeholder={tx("Availability", "Disponibilité")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Any availability</SelectItem>
-              <SelectItem value="available">Available</SelectItem>
-              <SelectItem value="available_soon">Available soon</SelectItem>
-              <SelectItem value="unavailable">Unavailable</SelectItem>
+              <SelectItem value="all">{tx("Any availability", "Toute disponibilité")}</SelectItem>
+              <SelectItem value="available">{tx("Available", "Disponible")}</SelectItem>
+              <SelectItem value="available_soon">{tx("Available soon", "Bientôt disponible")}</SelectItem>
+              <SelectItem value="unavailable">{tx("Unavailable", "Indisponible")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={seniority} onValueChange={setSeniority}>
-            <SelectTrigger className="md:w-40"><SelectValue placeholder="Seniority" /></SelectTrigger>
+            <SelectTrigger className="md:w-40"><SelectValue placeholder={tx("Seniority", "Séniorité")} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All levels</SelectItem>
+              <SelectItem value="all">{tx("All levels", "Tous niveaux")}</SelectItem>
               <SelectItem value="junior">Junior</SelectItem>
-              <SelectItem value="mid">Mid</SelectItem>
+              <SelectItem value="mid">{tx("Mid", "Confirmé")}</SelectItem>
               <SelectItem value="senior">Senior</SelectItem>
               <SelectItem value="lead">Lead</SelectItem>
               <SelectItem value="principal">Principal</SelectItem>
@@ -154,7 +156,7 @@ function TalentHub() {
       </Card>
 
       <div className="text-sm text-muted-foreground">
-        {isLoading ? "Loading…" : `${filtered.length} candidate${filtered.length === 1 ? "" : "s"}`}
+        {isLoading ? tx("Loading…", "Chargement…") : `${filtered.length} candidate${filtered.length === 1 ? "" : "s"}`}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -192,7 +194,7 @@ function TalentHub() {
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 {c.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.location}</span>}
-                {c.years_experience != null && <span>{c.years_experience} yrs exp</span>}
+                {c.years_experience != null && <span>{c.years_experience} {tx("yrs exp", "ans d'exp.")}</span>}
                 {c.daily_rate != null && <span>TJM: €{c.daily_rate}</span>}
                 {c.salary_expectation != null && <span>Salary: €{c.salary_expectation}</span>}
               </div>
@@ -200,7 +202,7 @@ function TalentHub() {
               <div className="flex items-center gap-3 pt-1 text-sm">
                 {c.email && (
                   <a href={`mailto:${c.email}`} className="flex items-center gap-1 text-primary hover:underline">
-                    <Mail className="h-3.5 w-3.5" /> Email
+                    <Mail className="h-3.5 w-3.5" /> {tx("Email", "E-mail")}
                   </a>
                 )}
                 {c.linkedin_url && (
@@ -220,7 +222,7 @@ function TalentHub() {
         {!isLoading && filtered.length === 0 && (
           <Card className="lg:col-span-2">
             <CardContent className="p-10 text-center text-muted-foreground">
-              No candidates match the current filters.
+              {tx("No candidates match the current filters.", "Aucun candidat ne correspond aux filtres.")}
             </CardContent>
           </Card>
         )}

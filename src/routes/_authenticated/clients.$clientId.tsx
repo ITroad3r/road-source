@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +33,7 @@ const statusColors: Record<string, string> = {
 };
 
 function ClientDetail() {
+  const { tx } = useTx();
   const { clientId } = Route.useParams();
 
   const { data: client, isLoading: clientLoading } = useQuery({
@@ -79,14 +81,14 @@ function ClientDetail() {
     enabled: (demands ?? []).length > 0,
   });
 
-  if (clientLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!client) return <div className="p-4 md:p-8">Client not found.</div>;
+  if (clientLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</div>;
+  if (!client) return <div className="p-4 md:p-8">{tx("Client not found.", "Client introuvable.")}</div>;
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-6xl">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-3">
-          <Link to="/clients"><ArrowLeft className="h-4 w-4 mr-1" /> Back to Clients</Link>
+          <Link to="/clients"><ArrowLeft className="h-4 w-4 mr-1" /> {tx("Back to Clients", "Retour aux clients")}</Link>
         </Button>
       </div>
 
@@ -136,11 +138,11 @@ function ClientDetail() {
       </div>
 
       {demandsLoading ? (
-        <div className="text-sm text-muted-foreground">Loading demands…</div>
+        <div className="text-sm text-muted-foreground">{tx("Loading demands…", "Chargement des demandes…")}</div>
       ) : demands?.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No demands yet for this client.
+            {tx("No demands yet for this client.", "Aucune demande pour ce client.")}
           </CardContent>
         </Card>
       ) : (

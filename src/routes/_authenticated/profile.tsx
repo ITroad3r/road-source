@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { z } from "zod";
@@ -52,6 +53,7 @@ const seniorityLabels: Record<string, string> = {
 };
 
 function ProfilePage() {
+  const { tx } = useTx();
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const { data: roles } = useMyRoles(user.id);
@@ -90,7 +92,7 @@ function ProfilePage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Profile updated");
+      toast.success(tx("Profile updated", "Profil mis à jour"));
       qc.invalidateQueries({ queryKey: ["profile"] });
       setIsEditing(false);
     },
@@ -125,12 +127,12 @@ function ProfilePage() {
   return (
     <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
-        <p className="text-muted-foreground mt-1">View and manage your account details.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{tx("My Profile", "Mon profil")}</h1>
+        <p className="text-muted-foreground mt-1">{tx("View and manage your account details.", "Consultez et gérez les informations de votre compte.")}</p>
       </header>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading profile…</p>
+        <p className="text-sm text-muted-foreground">{tx("Loading profile…", "Chargement du profil…")}</p>
       ) : (
         <>
           <Card>
@@ -142,7 +144,7 @@ function ProfilePage() {
                     <AvatarFallback className="text-lg bg-primary/10 text-primary">{initials}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-xl">{profile?.full_name || "No name set"}</CardTitle>
+                    <CardTitle className="text-xl">{profile?.full_name || tx("No name set", "Aucun nom défini")}</CardTitle>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       <Mail className="h-3.5 w-3.5" />
                       {user.email}
@@ -158,7 +160,7 @@ function ProfilePage() {
                 </div>
                 {!isEditing && (
                   <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                    <Pencil className="h-4 w-4 mr-2" /> Edit
+                    <Pencil className="h-4 w-4 mr-2" /> {tx("Edit", "Modifier")}
                   </Button>
                 )}
               </div>
@@ -168,17 +170,17 @@ function ProfilePage() {
               {!isEditing ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">Full name</div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">{tx("Full name", "Nom complet")}</div>
                     <div className="text-sm font-medium mt-1">{profile?.full_name || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">Seniority</div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">{tx("Seniority", "Séniorité")}</div>
                     <div className="text-sm font-medium mt-1">
-                      {profile?.seniority ? seniorityLabels[profile.seniority] ?? profile.seniority : "—"}
+                      {profile?.seniority ? (profile.seniority === "mid" ? tx("Mid-level", "Confirmé") : seniorityLabels[profile.seniority] ?? profile.seniority) : "—"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">Member since</div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">{tx("Member since", "Membre depuis")}</div>
                     <div className="text-sm font-medium mt-1">
                       {profile?.created_at
                         ? new Date(profile.created_at).toLocaleDateString("en-US", {
@@ -190,7 +192,7 @@ function ProfilePage() {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground">Last updated</div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">{tx("Last updated", "Dernière mise à jour")}</div>
                     <div className="text-sm font-medium mt-1">
                       {profile?.updated_at
                         ? new Date(profile.updated_at).toLocaleDateString("en-US", {
@@ -205,33 +207,33 @@ function ProfilePage() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="full_name">Full name</Label>
+                    <Label htmlFor="full_name">{tx("Full name", "Nom complet")}</Label>
                     <Input
                       id="full_name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Your full name"
+                      placeholder={tx("Your full name", "Votre nom complet")}
                       maxLength={200}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="seniority">Seniority</Label>
+                    <Label htmlFor="seniority">{tx("Seniority", "Séniorité")}</Label>
                     <select
                       id="seniority"
                       value={seniority}
                       onChange={(e) => setSeniority(e.target.value)}
                       className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
-                      <option value="">Select seniority…</option>
+                      <option value="">{tx("Select seniority…", "Choisir la séniorité…")}</option>
                       <option value="junior">Junior</option>
-                      <option value="mid">Mid-level</option>
+                      <option value="mid">{tx("Mid-level", "Confirmé")}</option>
                       <option value="senior">Senior</option>
                       <option value="lead">Lead</option>
                       <option value="principal">Principal</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="avatar_url">Avatar URL</Label>
+                    <Label htmlFor="avatar_url">{tx("Avatar URL", "URL de l'avatar")}</Label>
                     <Input
                       id="avatar_url"
                       value={avatarUrl}
@@ -243,10 +245,10 @@ function ProfilePage() {
                   <div className="flex gap-2 pt-2">
                     <Button type="submit" disabled={submitting}>
                       <Save className="h-4 w-4 mr-2" />
-                      {submitting ? "Saving…" : "Save changes"}
+                      {submitting ? tx("Saving…", "Enregistrement…") : tx("Save changes", "Enregistrer")}
                     </Button>
                     <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                      <X className="h-4 w-4 mr-2" /> Cancel
+                      <X className="h-4 w-4 mr-2" /> {tx("Cancel", "Annuler")}
                     </Button>
                   </div>
                 </form>

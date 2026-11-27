@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -21,6 +22,7 @@ export function DispatchDemandDialog({
   currentAssignee?: string | null;
   trigger?: React.ReactNode;
 }) {
+  const { tx } = useTx();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [assignee, setAssignee] = useState<string>(currentAssignee ?? "");
@@ -37,7 +39,7 @@ export function DispatchDemandDialog({
 
   const dispatch = useMutation({
     mutationFn: async () => {
-      if (!assignee) throw new Error("Pick a sourcer first");
+      if (!assignee) throw new Error(tx("Pick a sourcer first", "Choisissez d'abord un sourceur"));
       const { error } = await supabase
         .from("demands")
         .update({ assigned_to: assignee, lifecycle: "in_progress" })
@@ -48,7 +50,7 @@ export function DispatchDemandDialog({
       qc.invalidateQueries({ queryKey: ["dash", "demands"] });
       qc.invalidateQueries({ queryKey: ["demand", demandId] });
       qc.invalidateQueries({ queryKey: ["demands"] });
-      toast.success("Demand dispatched");
+      toast.success(tx("Demand dispatched", "Demande dispatchée"));
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -59,7 +61,7 @@ export function DispatchDemandDialog({
       <DialogTrigger asChild>
         {trigger ?? (
           <Button size="sm" variant="default">
-            <Send className="h-3.5 w-3.5 mr-1" /> Dispatch
+            <Send className="h-3.5 w-3.5 mr-1" /> {tx("Dispatch", "Dispatcher")}
           </Button>
         )}
       </DialogTrigger>
@@ -69,10 +71,10 @@ export function DispatchDemandDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Assign to sourcer</Label>
+            <Label>{tx("Assign to sourcer", "Assigner à un sourceur")}</Label>
             <Select value={assignee} onValueChange={setAssignee}>
               <SelectTrigger>
-                <SelectValue placeholder={isLoading ? "Loading…" : "Select a teammate"} />
+                <SelectValue placeholder={isLoading ? tx("Loading…", "Chargement…") : tx("Select a teammate", "Choisir un membre")} />
               </SelectTrigger>
               <SelectContent>
                 {(sourcers ?? []).map((s) => (
@@ -81,18 +83,18 @@ export function DispatchDemandDialog({
                   </SelectItem>
                 ))}
                 {!isLoading && (sourcers ?? []).length === 0 && (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">No teammates with sourcing access yet.</div>
+                  <div className="px-3 py-2 text-sm text-muted-foreground">{tx("No teammates with sourcing access yet.", "Aucun membre avec accès sourcing pour le moment.")}</div>
                 )}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              The assignee will be notified and the demand moves to <span className="font-medium">In progress</span>.
+              {tx("The assignee will be notified and the demand moves to", "La personne assignée sera notifiée et la demande passera à")} <span className="font-medium">{tx("In progress", "En cours")}</span>.
             </p>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>{tx("Cancel", "Annuler")}</Button>
             <Button onClick={() => dispatch.mutate()} disabled={!assignee || dispatch.isPending}>
-              {dispatch.isPending ? "Dispatching…" : "Dispatch"}
+              {dispatch.isPending ? tx("Dispatching…", "Dispatch en cours…") : tx("Dispatch", "Dispatcher")}
             </Button>
           </div>
         </div>

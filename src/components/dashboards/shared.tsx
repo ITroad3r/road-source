@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, Calendar, AlertTriangle, Loader2 } from "lucide-react";
@@ -119,6 +120,7 @@ export function useAgo() {
 }
 
 export function DemandCard({ d, compact = false }: { d: DemandRow; compact?: boolean }) {
+  const { tx } = useTx();
   return (
     <Link to="/demands/$demandId" params={{ demandId: d.id }} className="block">
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -150,7 +152,7 @@ export function DemandCard({ d, compact = false }: { d: DemandRow; compact?: boo
               {d.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{d.location}</span>}
               {(d.budget_min || d.budget_max) && (
                 <span>
-                  {d.engagement === "freelance" ? "TJM" : "Salary"}: {d.budget_min ?? "?"} – {d.budget_max ?? "?"}
+                  {d.engagement === "freelance" ? "TJM" : tx("Salary", "Salaire")}: {d.budget_min ?? "?"} – {d.budget_max ?? "?"}
                 </span>
               )}
               {d.start_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(d.start_date), "MMM d, yyyy")}</span>}

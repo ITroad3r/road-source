@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useTx } from "@/hooks/use-tx";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ export function PipelineKanban({
   canMove: (id: string, stage: KanbanStage) => boolean;
   canRemove: boolean;
 }) {
+  const { tx } = useTx();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const { t } = useTranslation();
   const [overStage, setOverStage] = useState<KanbanStage | null>(null);
@@ -149,7 +151,7 @@ export function PipelineKanban({
                 ))}
                 {items.length === 0 && (
                   <div className="flex items-center justify-center h-16 text-xs text-muted-foreground/60">
-                    <User className="h-3 w-3 mr-1" /> Empty
+                    <User className="h-3 w-3 mr-1" /> {tx("Empty", "Vide")}
                   </div>
                 )}
               </div>

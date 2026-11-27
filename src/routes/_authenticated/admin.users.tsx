@@ -1,4 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -44,6 +45,7 @@ const roleColors: Record<AppRole, string> = {
 };
 
 function AdminUsers() {
+  const { tx } = useTx();
   const { t } = useTranslation();
   const ROLE_LABEL = Object.fromEntries(ROLES.map((r) => [r, t(`roles.${r}`)])) as Record<AppRole, string>;
   const { user } = Route.useRouteContext();
@@ -98,7 +100,7 @@ function AdminUsers() {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); qc.invalidateQueries({ queryKey: ["admin-role-audit"] }); toast.success("Role added"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); qc.invalidateQueries({ queryKey: ["admin-role-audit"] }); toast.success(tx("Role added", "Rôle ajouté")); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -107,7 +109,7 @@ function AdminUsers() {
       const { error } = await supabase.from("user_roles").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); qc.invalidateQueries({ queryKey: ["admin-role-audit"] }); toast.success("Role removed"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-all-roles"] }); qc.invalidateQueries({ queryKey: ["admin-role-audit"] }); toast.success(tx("Role removed", "Rôle retiré")); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -117,14 +119,14 @@ function AdminUsers() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-profiles"] });
       qc.invalidateQueries({ queryKey: ["admin-all-roles"] });
-      toast.success("Invitation sent");
+      toast.success(tx("Invitation sent", "Invitation envoyée"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const resendMut = useMutation({
     mutationFn: async (email: string) => resend({ data: { email } }),
-    onSuccess: () => toast.success("Invitation re-sent"),
+    onSuccess: () => toast.success(tx("Invitation re-sent", "Invitation renvoyée")),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -133,12 +135,12 @@ function AdminUsers() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-profiles"] });
       qc.invalidateQueries({ queryKey: ["admin-all-roles"] });
-      toast.success("User deleted");
+      toast.success(tx("User deleted", "Utilisateur supprimé"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</div>;
   if (!myRoles?.includes("admin")) return <Navigate to="/dashboard" />;
 
   const rolesByUser = new Map<string, { id: string; role: AppRole }[]>();
@@ -158,8 +160,8 @@ function AdminUsers() {
     <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-7 w-7" /> Users &amp; roles</h1>
-          <p className="text-muted-foreground mt-1">Invite teammates, assign their role, and manage access. Invitees receive an email to complete their profile.</p>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><Shield className="h-7 w-7" /> {tx("Users & roles", "Utilisateurs et rôles")}</h1>
+          <p className="text-muted-foreground mt-1">{tx("Invite teammates, assign their role, and manage access. Invitees receive an email to complete their profile.", "Invitez des collègues, attribuez leur rôle et gérez les accès. Les invités reçoivent un e-mail pour compléter leur profil.")}</p>
         </div>
         <InviteUserDialog labels={ROLE_LABEL} onSubmit={(v) => inviteMut.mutateAsync(v)} loading={inviteMut.isPending} />
       </header>
@@ -168,7 +170,7 @@ function AdminUsers() {
         <CardContent className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search by name or email…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+            <Input placeholder={tx("Search by name or email…", "Rechercher par nom ou e-mail…")} value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
           </div>
         </CardContent>
       </Card>
@@ -179,18 +181,18 @@ function AdminUsers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Effective permissions</TableHead>
-                <TableHead className="w-48">Add role</TableHead>
+                <TableHead>{tx("User", "Utilisateur")}</TableHead>
+                <TableHead>{tx("Email", "E-mail")}</TableHead>
+                <TableHead>{tx("Roles", "Rôles")}</TableHead>
+                <TableHead>{tx("Effective permissions", "Permissions effectives")}</TableHead>
+                <TableHead className="w-48">{tx("Add role", "Ajouter un rôle")}</TableHead>
                 <TableHead className="w-32">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">{tx("Loading…", "Chargement…")}</TableCell></TableRow>}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No users match.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">{tx("No users match.", "Aucun utilisateur trouvé.")}</TableCell></TableRow>
               )}
               {filtered.map((p) => {
                 const userRoles = rolesByUser.get(p.id) ?? [];
@@ -205,7 +207,7 @@ function AdminUsers() {
                           <UserIcon className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <div className="font-medium">{p.full_name ?? "—"} {isSelf && <span className="text-xs text-muted-foreground">(you)</span>}</div>
+                          <div className="font-medium">{p.full_name ?? "—"} {isSelf && <span className="text-xs text-muted-foreground">{tx("(you)", "(vous)")}</span>}</div>
                           {p.seniority && <div className="text-xs text-muted-foreground capitalize">{p.seniority}</div>}
                         </div>
                       </div>
@@ -213,7 +215,7 @@ function AdminUsers() {
                     <TableCell className="text-sm text-muted-foreground">{p.email}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1.5">
-                        {userRoles.length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
+                        {userRoles.length === 0 && <span className="text-xs text-muted-foreground">{tx("No roles", "Aucun rôle")}</span>}
                         {userRoles.map((r) => (
                           <Badge key={r.id} variant="outline" className={`gap-1 ${roleColors[r.role]}`}>
                             {ROLE_LABEL[r.role]}
@@ -222,7 +224,7 @@ function AdminUsers() {
                               onClick={() => {
                                 if (isSelf && r.role === "admin") {
                                   const adminCount = (allRoles ?? []).filter((x) => x.role === "admin").length;
-                                  if (adminCount <= 1) return toast.error("Cannot remove the last admin");
+                                  if (adminCount <= 1) return toast.error(tx("Cannot remove the last admin", "Impossible de retirer le dernier administrateur"));
                                 }
                                 removeRole.mutate(r.id);
                               }}
@@ -239,33 +241,33 @@ function AdminUsers() {
                       {capabilitiesFor(userRoles.map((r) => r.role)).join(", ") || "—"}
                     </TableCell>
                     <TableCell>
-                      {isSelf ? <span className="text-xs text-muted-foreground">Another admin must change your roles</span> :
+                      {isSelf ? <span className="text-xs text-muted-foreground">{tx("Another admin must change your roles", "Un autre administrateur doit modifier vos rôles")}</span> :
                       <AddRoleControl labels={ROLE_LABEL} available={available} onAdd={(role) => addRole.mutate({ userId: p.id, role })} />}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" title="Resend invitation"
+                        <Button size="sm" variant="ghost" title={tx("Resend invitation", "Renvoyer l'invitation")}
                           onClick={() => resendMut.mutate(p.email)} disabled={resendMut.isPending}>
                           <Mail className="h-3.5 w-3.5" />
                         </Button>
                         {!isSelf && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" title="Delete user">
+                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" title={tx("Delete user", "Supprimer l'utilisateur")}>
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete {p.full_name ?? p.email}?</AlertDialogTitle>
+                                <AlertDialogTitle>{tx("Delete", "Supprimer")} {p.full_name ?? p.email} ?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This permanently removes the user account and their access. Data they created stays.
+                                  {tx("This permanently removes the user account and their access. Data they created stays.", "Le compte et ses accès seront définitivement supprimés. Les données créées sont conservées.")}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{tx("Cancel", "Annuler")}</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => deleteMut.mutate(p.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                  Delete user
+                                  {tx("Delete user", "Supprimer l'utilisateur")}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -282,25 +284,25 @@ function AdminUsers() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Role change history</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{tx("Role change history", "Historique des changements de rôle")}</CardTitle></CardHeader>
         <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>When</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Change</TableHead>
-                <TableHead>By</TableHead>
+                <TableHead>{tx("When", "Quand")}</TableHead>
+                <TableHead>{tx("Account", "Compte")}</TableHead>
+                <TableHead>{tx("Change", "Changement")}</TableHead>
+                <TableHead>{tx("By", "Par")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(audit ?? []).length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">No role changes recorded yet.</TableCell></TableRow>}
+              {(audit ?? []).length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">{tx("No role changes recorded yet.", "Aucun changement de rôle enregistré.")}</TableCell></TableRow>}
               {(audit ?? []).map((a) => (
                 <TableRow key={a.id}>
                   <TableCell className="text-xs whitespace-nowrap">{format(new Date(a.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
                   <TableCell className="text-sm">{nameOf(a.target_user_id)}</TableCell>
                   <TableCell className="text-sm">{a.action === "granted" ? "+ " : "− "}{ROLE_LABEL[a.role as AppRole] ?? a.role}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{a.actor_id ? nameOf(a.actor_id) : "System"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{a.actor_id ? nameOf(a.actor_id) : tx("System", "Système")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -312,12 +314,13 @@ function AdminUsers() {
 }
 
 function AddRoleControl({ available, onAdd, labels }: { available: AppRole[]; onAdd: (role: AppRole) => void; labels: Record<AppRole, string> }) {
+  const { tx } = useTx();
   const [val, setVal] = useState<string>("");
-  if (available.length === 0) return <span className="text-xs text-muted-foreground">All assigned</span>;
+  if (available.length === 0) return <span className="text-xs text-muted-foreground">{tx("All assigned", "Tous attribués")}</span>;
   return (
     <div className="flex gap-1">
       <Select value={val} onValueChange={setVal}>
-        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select role" /></SelectTrigger>
+        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={tx("Select role", "Choisir un rôle")} /></SelectTrigger>
         <SelectContent>
           {available.map((r) => <SelectItem key={r} value={r}>{labels[r]}</SelectItem>)}
         </SelectContent>
@@ -330,6 +333,7 @@ function AddRoleControl({ available, onAdd, labels }: { available: AppRole[]; on
 }
 
 function InviteUserDialog({ onSubmit, loading, labels }: { labels: Record<AppRole, string>; onSubmit: (v: { email: string; fullName: string; role: AppRole }) => Promise<unknown>; loading: boolean }) {
+  const { tx } = useTx();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -337,12 +341,12 @@ function InviteUserDialog({ onSubmit, loading, labels }: { labels: Record<AppRol
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button><UserPlus className="h-4 w-4 mr-2" /> Invite user</Button>
+        <Button><UserPlus className="h-4 w-4 mr-2" /> {tx("Invite user", "Inviter un utilisateur")}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite a new user</DialogTitle>
-          <DialogDescription>They'll receive an email invitation to set their password and complete their profile.</DialogDescription>
+          <DialogTitle>{tx("Invite a new user", "Inviter un nouvel utilisateur")}</DialogTitle>
+          <DialogDescription>{tx("They'll receive an email invitation to set their password and complete their profile.", "Il recevra une invitation par e-mail pour définir son mot de passe et compléter son profil.")}</DialogDescription>
         </DialogHeader>
         <form
           onSubmit={async (e) => {
@@ -353,15 +357,15 @@ function InviteUserDialog({ onSubmit, loading, labels }: { labels: Record<AppRol
           className="space-y-3"
         >
           <div className="space-y-1.5">
-            <Label htmlFor="iv-name">Full name</Label>
+            <Label htmlFor="iv-name">{tx("Full name", "Nom complet")}</Label>
             <Input id="iv-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="iv-email">Email</Label>
+            <Label htmlFor="iv-email">{tx("Email", "E-mail")}</Label>
             <Input id="iv-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>Role</Label>
+            <Label>{tx("Role", "Rôle")}</Label>
             <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -370,7 +374,7 @@ function InviteUserDialog({ onSubmit, loading, labels }: { labels: Record<AppRol
             </Select>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={loading}>{loading ? "Sending…" : "Send invitation"}</Button>
+            <Button type="submit" disabled={loading}>{loading ? tx("Sending…", "Envoi…") : tx("Send invitation", "Envoyer l'invitation")}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

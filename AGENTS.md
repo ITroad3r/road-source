@@ -15,3 +15,4 @@
 - Client interviews are separate candidature-scoped records with assignment-bound RLS; timestamps are stored in UTC with the scheduling timezone, and daily lists use viewer-local day boundaries without changing pipeline stages.
 - Align CV uses an authenticated, capability-checked server function with a replaceable server-only AI adapter; uploaded PDFs are transient and never saved automatically, preserving privacy and keeping provider migration isolated.
 - Align CV has its own PDF renderer and document tokens; it must not alter the existing Hub CV template, and report gaps/submission constraints stay outside exported candidate facts.
+- Screen copy is bilingual: shared strings use locales/*/common.json via t(); page-local copy uses useTx().tx(en, fr) and module-level label maps use txNow via getters, so EN and FR stay feature-identical.

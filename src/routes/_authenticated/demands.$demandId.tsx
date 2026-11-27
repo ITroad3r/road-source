@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,6 +75,7 @@ const stageColors: Record<string, string> = {
 };
 
 function DemandDetail() {
+  const { tx } = useTx();
   const { demandId } = Route.useParams();
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
@@ -135,7 +137,7 @@ function DemandDetail() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
-      toast.success("Stage updated");
+      toast.success(tx("Stage updated", "Étape mise à jour"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -148,27 +150,27 @@ function DemandDetail() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demand-candidates", demandId] });
-      toast.success("Candidate removed");
+      toast.success(tx("Candidate removed", "Candidat retiré"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const updateLifecycle = useMutation({
     mutationFn: async (lifecycle: Lifecycle) => {
-      if (!canManageDemand) throw new Error("Demand management access required");
+      if (!canManageDemand) throw new Error(tx("Demand management access required", "Accès à la gestion des demandes requis"));
       const { error } = await supabase.from("demands").update({ lifecycle }).eq("id", demandId);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demand", demandId] });
-      toast.success("Lifecycle updated");
+      toast.success(tx("Lifecycle updated", "Cycle de vie mis à jour"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const updateOutcome = useMutation({
     mutationFn: async ({ outcome, lost_reason }: { outcome: Outcome; lost_reason?: string | null }) => {
-      if (!canManageDemand) throw new Error("Demand management access required");
+      if (!canManageDemand) throw new Error(tx("Demand management access required", "Accès à la gestion des demandes requis"));
       const { error } = await supabase
         .from("demands")
         .update({
@@ -180,19 +182,19 @@ function DemandDetail() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demand", demandId] });
-      toast.success("Outcome updated");
+      toast.success(tx("Outcome updated", "Résultat mis à jour"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!demand) return <div className="p-4 md:p-8">Demand not found.</div>;
+  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</div>;
+  if (!demand) return <div className="p-4 md:p-8">{tx("Demand not found.", "Demande introuvable.")}</div>;
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-6xl">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-3">
-          <Link to="/dashboard"><ArrowLeft className="h-4 w-4 mr-1" /> Back to My Demands</Link>
+          <Link to="/dashboard"><ArrowLeft className="h-4 w-4 mr-1" /> {tx("Back to My Demands", "Retour à mes demandes")}</Link>
         </Button>
       </div>
 
@@ -211,7 +213,7 @@ function DemandDetail() {
               {canManageDemand && <>
               <Button asChild variant="outline" size="sm">
                 <Link to="/demands/$demandId/edit" params={{ demandId }}>
-                  <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                  <Pencil className="h-3.5 w-3.5 mr-1" /> {tx("Edit", "Modifier")}
                 </Link>
               </Button>
               <Select value={demand.lifecycle} onValueChange={(v) => updateLifecycle.mutate(v as Lifecycle)}>
@@ -247,14 +249,14 @@ function DemandDetail() {
                 </Badge>
               )}
               <Badge variant="secondary" className="capitalize">{demand.engagement}</Badge>
-              {demand.positions_count > 1 && <Badge variant="outline">{demand.positions_count} positions</Badge>}
+              {demand.positions_count > 1 && <Badge variant="outline">{demand.positions_count} {tx("positions", "postes")}</Badge>}
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {demand.commercial_outcome === "lost" && demand.lost_reason && (
             <div className="rounded-md bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm">
-              <span className="font-medium text-red-700 dark:text-red-300">Lost reason: </span>
+              <span className="font-medium text-red-700 dark:text-red-300">{tx("Lost reason:", "Motif de perte :")} </span>
               <span className="text-red-700 dark:text-red-300">{demand.lost_reason}</span>
             </div>
           )}
@@ -267,9 +269,9 @@ function DemandDetail() {
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground pt-1">
             {demand.location && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{demand.location}</span>}
             {(demand.budget_min || demand.budget_max) && (
-              <span>{demand.engagement === "freelance" ? "TJM" : "Salary"}: {demand.budget_min ?? "?"} – {demand.budget_max ?? "?"}</span>
+              <span>{demand.engagement === "freelance" ? "TJM" : tx("Salary", "Salaire")} : {demand.budget_min ?? "?"} – {demand.budget_max ?? "?"}</span>
             )}
-            {demand.start_date && <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />Start {format(new Date(demand.start_date), "MMM d, yyyy")}</span>}
+            {demand.start_date && <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{tx("Start", "Début")} {format(new Date(demand.start_date), "dd/MM/yyyy")}</span>}
           </div>
         </CardContent>
       </Card>
@@ -292,11 +294,11 @@ function DemandDetail() {
               className="rounded-l-none"
               onClick={() => setView("list")}
             >
-              <List className="h-3.5 w-3.5 mr-1" /> List
+              <List className="h-3.5 w-3.5 mr-1" /> {tx("List", "Liste")}
             </Button>
           </div>
           <Button variant="outline" onClick={() => setPackageOpen(true)} disabled={!candidates?.length}>
-            <Send className="h-4 w-4 mr-1" /> Send Package
+            <Send className="h-4 w-4 mr-1" /> {tx("Send Package", "Envoyer le dossier")}
           </Button>
           {canAddCandidate && <>
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -304,7 +306,7 @@ function DemandDetail() {
               <Button><Plus className="h-4 w-4 mr-1" />{fr ? "Ajouter depuis le CV Hub" : "Add from CV Hub"}</Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
-              <DialogHeader><DialogTitle>Add candidate from Talent Hub</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{tx("Add candidate from Talent Hub", "Ajouter un candidat depuis le Talent Hub")}</DialogTitle></DialogHeader>
               {addOpen && <AddCandidatePicker
                 demandId={demandId}
                 existingCvIds={new Set((candidates ?? []).map((c) => c.cv_id))}
@@ -356,10 +358,10 @@ function DemandDetail() {
             return dc ? (
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
-                  <CandidateDocumentPreview path={dc.talent_hub_cvs?.cv_url ?? null} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} />
-                  <CandidateDossier dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} stage={dc.stage} roles={myRoles} />
-                  <CandidateChat dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} roles={myRoles} userId={user.id} assigned={demand.assigned_to === user.id} />
-                  <CandidateInterview dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? "Candidate"} roles={myRoles} assigned={demand.assigned_to === user.id} />
+                  <CandidateDocumentPreview path={dc.talent_hub_cvs?.cv_url ?? null} name={dc.talent_hub_cvs?.full_name ?? tx("Candidate", "Candidat")} />
+                  <CandidateDossier dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? tx("Candidate", "Candidat")} stage={dc.stage} roles={myRoles} />
+                  <CandidateChat dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? tx("Candidate", "Candidat")} roles={myRoles} userId={user.id} assigned={demand.assigned_to === user.id} />
+                  <CandidateInterview dcId={dc.id} name={dc.talent_hub_cvs?.full_name ?? tx("Candidate", "Candidat")} roles={myRoles} assigned={demand.assigned_to === user.id} />
                 </div>
                 <CandidateDecisions compact row={decisionRow(dc)} roles={myRoles} onChanged={refreshCandidates} />
                 {canSeeComp && <CompensationSummary compact dcId={dc.id} candidateName={dc.talent_hub_cvs?.full_name ?? ""} proposal={compOf(dc)} roles={myRoles} isAssignedSourceur={demand?.assigned_to === user.id} />}
@@ -370,7 +372,7 @@ function DemandDetail() {
       ) : (
         <div className="space-y-3">
           {candidates?.length === 0 && (
-            <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">No candidates yet. Add one from the Talent Hub.</CardContent></Card>
+            <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">{tx("No candidates yet. Add one from the Talent Hub.", "Aucun candidat pour le moment. Ajoutez-en un depuis le Talent Hub.")}</CardContent></Card>
           )}
           {candidates?.map((dc) => {
             const cv = dc.talent_hub_cvs;
@@ -485,6 +487,7 @@ function AddCandidatePicker({
   existingCvIds: Set<string>;
   onAdded: () => void;
 }) {
+  const { tx } = useTx();
   const [q, setQ] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -523,7 +526,7 @@ function AddCandidatePicker({
       submitted_by: u.user?.id,
     });
     if (error) return toast.error(error.message);
-    toast.success("Candidate added to pipeline");
+    toast.success(tx("Candidate added to pipeline", "Candidat ajouté au pipeline"));
     onAdded();
   }
 
@@ -531,10 +534,10 @@ function AddCandidatePicker({
     <div className="space-y-3">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search Talent Hub…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
+        <Input placeholder={tx("Search Talent Hub…", "Rechercher dans le Talent Hub…")} value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
       </div>
       <div className="max-h-72 overflow-auto border rounded-md divide-y">
-        {filtered.length === 0 && <div className="p-4 text-sm text-muted-foreground text-center">No matches</div>}
+        {filtered.length === 0 && <div className="p-4 text-sm text-muted-foreground text-center">{tx("No matches", "Aucun résultat")}</div>}
         {filtered.map((c) => (
           <button
             key={c.id}
@@ -547,8 +550,8 @@ function AddCandidatePicker({
           </button>
         ))}
       </div>
-      <Textarea placeholder="Optional notes…" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
-      <Button onClick={attach} disabled={!selectedId} className="w-full">Add to pipeline</Button>
+      <Textarea placeholder={tx("Optional notes…", "Notes (facultatif)…")} value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+      <Button onClick={attach} disabled={!selectedId} className="w-full">{tx("Add to pipeline", "Ajouter au pipeline")}</Button>
     </div>
   );
 }

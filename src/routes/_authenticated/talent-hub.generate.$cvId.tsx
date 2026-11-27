@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -41,6 +42,7 @@ const emptyExp = (): CvExperience => ({ title: "", company: "", location: "", pe
 const emptyEdu = (): CvEducation => ({ title: "", school: "", location: "", period: "", notes: [] });
 
 function GenerateCvPage() {
+  const { tx } = useTx();
   const { cvId } = Route.useParams();
   const parseFn = useServerFn(parseFullCv);
 
@@ -62,13 +64,13 @@ function GenerateCvPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   async function parseFromStored() {
-    if (!candidate?.cv_url) return toast.error("This candidate has no CV file. Upload one first or upload a file below.");
-    if (/^https?:\/\//i.test(candidate.cv_url)) return toast.error("Stored CV is an external link. Upload a file below.");
+    if (!candidate?.cv_url) return toast.error(tx("This candidate has no CV file. Upload one first or upload a file below.", "Ce candidat n'a pas de fichier CV. Importez-en un ci-dessous."));
+    if (/^https?:\/\//i.test(candidate.cv_url)) return toast.error(tx("Stored CV is an external link. Upload a file below.", "Le CV enregistré est un lien externe. Importez un fichier ci-dessous."));
     setParsing(true);
     try {
       const { cv } = await parseFn({ data: { storage_path: candidate.cv_url } });
       seedFromParsed(cv);
-      toast.success("CV parsed — review and edit before generating");
+      toast.success(tx("CV parsed — review and edit before generating", "CV analysé — relisez et modifiez avant de générer"));
     } catch (err) {
       toast.error((err as Error).message);
     } finally { setParsing(false); }
@@ -76,8 +78,8 @@ function GenerateCvPage() {
 
   async function parseFromUpload() {
     if (!uploadFile) return;
-    if (!ALLOWED.includes(uploadFile.type)) return toast.error("PDF / DOC / DOCX only");
-    if (uploadFile.size > MAX) return toast.error("Max 10 MB");
+    if (!ALLOWED.includes(uploadFile.type)) return toast.error(tx("PDF / DOC / DOCX only", "PDF / DOC / DOCX uniquement"));
+    if (uploadFile.size > MAX) return toast.error(tx("Max 10 MB", "10 Mo maximum"));
     setParsing(true);
     try {
       const path = `tmp/${cvId}/${Date.now()}-${uploadFile.name.replace(/[^\w.\-]/g, "_")}`;
@@ -85,7 +87,7 @@ function GenerateCvPage() {
       if (upErr) throw upErr;
       const { cv } = await parseFn({ data: { storage_path: path } });
       seedFromParsed(cv);
-      toast.success("CV parsed — review and edit before generating");
+      toast.success(tx("CV parsed — review and edit before generating", "CV analysé — relisez et modifiez avant de générer"));
     } catch (err) {
       toast.error((err as Error).message);
     } finally { setParsing(false); }
@@ -132,11 +134,11 @@ function GenerateCvPage() {
   }
 
   async function buildPdfBlob() {
-    if (!cv) throw new Error("No CV");
+    if (!cv) throw new Error(tx("No CV", "Aucun CV"));
     return await pdf(<ItroadCvPdf cv={cv} anonymize={anonymize} />).toBlob();
   }
   async function buildDocxBlob() {
-    if (!cv) throw new Error("No CV");
+    if (!cv) throw new Error(tx("No CV", "Aucun CV"));
     const bytes = await fetchLogoBytes();
     return await buildItroadDocx(cv, anonymize, bytes);
   }
@@ -178,7 +180,7 @@ function GenerateCvPage() {
       ];
       const ins = await supabase.from("generated_cvs").insert(rows);
       if (ins.error) throw ins.error;
-      toast.success("Saved to candidate profile");
+      toast.success(tx("Saved to candidate profile", "Enregistré dans le profil du candidat"));
     } catch (e) {
       toast.error((e as Error).message);
     } finally { setSaving(false); }
@@ -188,17 +190,17 @@ function GenerateCvPage() {
     <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4">
       <div className="flex items-center justify-between gap-2">
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/talent-hub/$cvId" params={{ cvId }}><ArrowLeft className="h-4 w-4 mr-1" /> Back to candidate</Link>
+          <Link to="/talent-hub/$cvId" params={{ cvId }}><ArrowLeft className="h-4 w-4 mr-1" /> {tx("Back to candidate", "Retour au candidat")}</Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Generate ITROAD-branded CV</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {tx("Generate ITROAD-branded CV", "Générer un CV aux couleurs ITROAD")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload any CV (or use this candidate's stored CV). AI extracts the data, you review &amp; edit, then export as PDF or DOCX in the ITROAD template.
+            {tx("Upload any CV (or use this candidate's stored CV). AI extracts the data, you review & edit, then export as PDF or DOCX in the ITROAD template.", "Importez un CV (ou utilisez celui enregistré pour ce candidat). L'IA extrait les données, vous relisez et modifiez, puis exportez en PDF ou DOCX au modèle ITROAD.")}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -208,7 +210,7 @@ function GenerateCvPage() {
             </Button>
             <label className="flex items-center justify-center gap-2 border-2 border-dashed rounded-md px-3 py-2 cursor-pointer hover:bg-accent/40 transition text-sm">
               <Upload className="h-4 w-4 text-muted-foreground" />
-              <span className="truncate">{uploadFile ? uploadFile.name : "Upload any CV (PDF/DOC/DOCX)"}</span>
+              <span className="truncate">{uploadFile ? uploadFile.name : tx("Upload any CV (PDF/DOC/DOCX)", "Importer un CV (PDF/DOC/DOCX)")}</span>
               <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 className="hidden" onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)} />
             </label>
@@ -217,7 +219,7 @@ function GenerateCvPage() {
               Parse uploaded file
             </Button>
           </div>
-          <button onClick={blank} className="text-xs text-muted-foreground hover:underline">or start from a blank form</button>
+          <button onClick={blank} className="text-xs text-muted-foreground hover:underline">{tx("or start from a blank form", "ou partir d'un formulaire vierge")}</button>
         </CardContent>
       </Card>
 
@@ -225,26 +227,26 @@ function GenerateCvPage() {
         <>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">Header</CardTitle>
+              <CardTitle className="text-base">{tx("Header", "En-tête")}</CardTitle>
               <label className="flex items-center gap-2 text-sm">
                 <Switch checked={anonymize} onCheckedChange={setAnonymize} />
-                Anonymize (hide contact, abbreviate surname)
+                {tx("Anonymize (hide contact, abbreviate surname)", "Anonymiser (masquer les coordonnées, abréger le nom)")}
               </label>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Field label="Full name"><Input value={cv.full_name} onChange={(e) => setCv({ ...cv, full_name: e.target.value })} /></Field>
-              <Field label="Role / headline"><Input value={cv.role_title} onChange={(e) => setCv({ ...cv, role_title: e.target.value })} placeholder="e.g. DEVELOPPEUR JAVA" /></Field>
-              <Field label="Email"><Input value={cv.email ?? ""} onChange={(e) => setCv({ ...cv, email: e.target.value })} /></Field>
-              <Field label="Phone"><Input value={cv.phone ?? ""} onChange={(e) => setCv({ ...cv, phone: e.target.value })} /></Field>
-              <Field label="Location"><Input value={cv.location ?? ""} onChange={(e) => setCv({ ...cv, location: e.target.value })} /></Field>
+              <Field label={tx("Full name", "Nom complet")}><Input value={cv.full_name} onChange={(e) => setCv({ ...cv, full_name: e.target.value })} /></Field>
+              <Field label={tx("Role / headline", "Poste / titre")}><Input value={cv.role_title} onChange={(e) => setCv({ ...cv, role_title: e.target.value })} placeholder={tx("e.g. DEVELOPPEUR JAVA", "ex. DÉVELOPPEUR JAVA")} /></Field>
+              <Field label={tx("Email", "E-mail")}><Input value={cv.email ?? ""} onChange={(e) => setCv({ ...cv, email: e.target.value })} /></Field>
+              <Field label={tx("Phone", "Téléphone")}><Input value={cv.phone ?? ""} onChange={(e) => setCv({ ...cv, phone: e.target.value })} /></Field>
+              <Field label={tx("Location", "Localisation")}><Input value={cv.location ?? ""} onChange={(e) => setCv({ ...cv, location: e.target.value })} /></Field>
               <Field label="LinkedIn"><Input value={cv.linkedin_url ?? ""} onChange={(e) => setCv({ ...cv, linkedin_url: e.target.value })} /></Field>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">Skills</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, skill_groups: [...cv.skill_groups, ""] })}><Plus className="h-3 w-3 mr-1" />Add line</Button>
+              <CardTitle className="text-base">{tx("Skills", "Compétences")}</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, skill_groups: [...cv.skill_groups, ""] })}><Plus className="h-3 w-3 mr-1" />{tx("Add line", "Ajouter une ligne")}</Button>
             </CardHeader>
             <CardContent className="space-y-2">
               {cv.skill_groups.map((s, i) => (
@@ -258,23 +260,23 @@ function GenerateCvPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">Experience</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, experiences: [...cv.experiences, emptyExp()] })}><Plus className="h-3 w-3 mr-1" />Add</Button>
+              <CardTitle className="text-base">{tx("Experience", "Expérience")}</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, experiences: [...cv.experiences, emptyExp()] })}><Plus className="h-3 w-3 mr-1" />{tx("Add", "Ajouter")}</Button>
             </CardHeader>
             <CardContent className="space-y-4">
               {cv.experiences.map((e, i) => (
                 <div key={i} className="space-y-2 rounded-md border p-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <Input value={e.title} placeholder="Role title" onChange={(ev) => updateExp(cv, i, { ...e, title: ev.target.value }, setCv)} />
-                    <Input value={e.company} placeholder="Company" onChange={(ev) => updateExp(cv, i, { ...e, company: ev.target.value }, setCv)} />
-                    <Input value={e.location} placeholder="Location" onChange={(ev) => updateExp(cv, i, { ...e, location: ev.target.value }, setCv)} />
+                    <Input value={e.title} placeholder={tx("Role title", "Intitulé du poste")} onChange={(ev) => updateExp(cv, i, { ...e, title: ev.target.value }, setCv)} />
+                    <Input value={e.company} placeholder={tx("Company", "Entreprise")} onChange={(ev) => updateExp(cv, i, { ...e, company: ev.target.value }, setCv)} />
+                    <Input value={e.location} placeholder={tx("Location", "Localisation")} onChange={(ev) => updateExp(cv, i, { ...e, location: ev.target.value }, setCv)} />
                     <Input value={e.period} placeholder="MM/YYYY-MM/YYYY" onChange={(ev) => updateExp(cv, i, { ...e, period: ev.target.value }, setCv)} />
                   </div>
-                  <Input value={e.project ?? ""} placeholder="Project description (optional)" onChange={(ev) => updateExp(cv, i, { ...e, project: ev.target.value }, setCv)} />
-                  <Textarea rows={4} value={e.bullets.join("\n")} placeholder="One bullet per line"
+                  <Input value={e.project ?? ""} placeholder={tx("Project description (optional)", "Description du projet (facultatif)")} onChange={(ev) => updateExp(cv, i, { ...e, project: ev.target.value }, setCv)} />
+                  <Textarea rows={4} value={e.bullets.join("\n")} placeholder={tx("One bullet per line", "Un point par ligne")}
                     onChange={(ev) => updateExp(cv, i, { ...e, bullets: ev.target.value.split("\n") }, setCv)} />
                   <div className="flex justify-end">
-                    <Button size="sm" variant="ghost" onClick={() => setCv({ ...cv, experiences: cv.experiences.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4 mr-1" />Remove</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setCv({ ...cv, experiences: cv.experiences.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4 mr-1" />{tx("Remove", "Retirer")}</Button>
                   </div>
                 </div>
               ))}
@@ -283,22 +285,22 @@ function GenerateCvPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base">Education</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, educations: [...cv.educations, emptyEdu()] })}><Plus className="h-3 w-3 mr-1" />Add</Button>
+              <CardTitle className="text-base">{tx("Education", "Formation")}</CardTitle>
+              <Button size="sm" variant="outline" onClick={() => setCv({ ...cv, educations: [...cv.educations, emptyEdu()] })}><Plus className="h-3 w-3 mr-1" />{tx("Add", "Ajouter")}</Button>
             </CardHeader>
             <CardContent className="space-y-4">
               {cv.educations.map((e, i) => (
                 <div key={i} className="space-y-2 rounded-md border p-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <Input value={e.title} placeholder="Degree" onChange={(ev) => updateEdu(cv, i, { ...e, title: ev.target.value }, setCv)} />
-                    <Input value={e.school} placeholder="Institution" onChange={(ev) => updateEdu(cv, i, { ...e, school: ev.target.value }, setCv)} />
-                    <Input value={e.location} placeholder="Location" onChange={(ev) => updateEdu(cv, i, { ...e, location: ev.target.value }, setCv)} />
-                    <Input value={e.period} placeholder="Period" onChange={(ev) => updateEdu(cv, i, { ...e, period: ev.target.value }, setCv)} />
+                    <Input value={e.title} placeholder={tx("Degree", "Diplôme")} onChange={(ev) => updateEdu(cv, i, { ...e, title: ev.target.value }, setCv)} />
+                    <Input value={e.school} placeholder={tx("Institution", "Établissement")} onChange={(ev) => updateEdu(cv, i, { ...e, school: ev.target.value }, setCv)} />
+                    <Input value={e.location} placeholder={tx("Location", "Localisation")} onChange={(ev) => updateEdu(cv, i, { ...e, location: ev.target.value }, setCv)} />
+                    <Input value={e.period} placeholder={tx("Period", "Période")} onChange={(ev) => updateEdu(cv, i, { ...e, period: ev.target.value }, setCv)} />
                   </div>
-                  <Textarea rows={2} value={e.notes.join("\n")} placeholder="One note per line"
+                  <Textarea rows={2} value={e.notes.join("\n")} placeholder={tx("One note per line", "Une note par ligne")}
                     onChange={(ev) => updateEdu(cv, i, { ...e, notes: ev.target.value.split("\n") }, setCv)} />
                   <div className="flex justify-end">
-                    <Button size="sm" variant="ghost" onClick={() => setCv({ ...cv, educations: cv.educations.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4 mr-1" />Remove</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setCv({ ...cv, educations: cv.educations.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4 mr-1" />{tx("Remove", "Retirer")}</Button>
                   </div>
                 </div>
               ))}
@@ -306,18 +308,18 @@ function GenerateCvPage() {
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Others (certifications, side projects)</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{tx("Others (certifications, side projects)", "Autres (certifications, projets personnels)")}</CardTitle></CardHeader>
             <CardContent>
-              <Textarea rows={4} value={cv.others.join("\n")} placeholder="One item per line"
+              <Textarea rows={4} value={cv.others.join("\n")} placeholder={tx("One item per line", "Un élément par ligne")}
                 onChange={(e) => setCv({ ...cv, others: e.target.value.split("\n") })} />
             </CardContent>
           </Card>
 
           <Card className="sticky bottom-4 shadow-lg">
             <CardContent className="p-4 flex flex-wrap gap-3 justify-end items-center">
-              <span className="text-sm text-muted-foreground mr-auto">Ready to export</span>
-              <Button variant="outline" onClick={downloadDocx}><Download className="h-4 w-4 mr-2" />Download DOCX</Button>
-              <Button variant="outline" onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />Download PDF</Button>
+              <span className="text-sm text-muted-foreground mr-auto">{tx("Ready to export", "Prêt à exporter")}</span>
+              <Button variant="outline" onClick={downloadDocx}><Download className="h-4 w-4 mr-2" />{tx("Download DOCX", "Télécharger DOCX")}</Button>
+              <Button variant="outline" onClick={downloadPdf}><Download className="h-4 w-4 mr-2" />{tx("Download PDF", "Télécharger PDF")}</Button>
               <Button onClick={saveToProfile} disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                 Save to profile

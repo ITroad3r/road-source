@@ -1,4 +1,5 @@
 import { can } from "@/lib/permissions";
+import { useTx } from "@/hooks/use-tx";
 import { createFileRoute } from "@tanstack/react-router";
 import { canApproveTjmFor } from "@/lib/decisions";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -307,6 +308,7 @@ function Stat({ icon: Icon, label, value }: { icon: React.ComponentType<{ classN
 type Existing = Row["candidate_financials"][number] | undefined;
 
 function EditFinancials({ row, existing }: { row: Row; existing: Existing }) {
+  const { tx } = useTx();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [clientRate, setClientRate] = useState(existing?.client_rate?.toString() ?? "");
@@ -342,7 +344,7 @@ function EditFinancials({ row, existing }: { row: Row; existing: Existing }) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["financials-rows"] });
-      toast.success("Financials saved");
+      toast.success(tx("Financials saved", "Données financières enregistrées"));
       setOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -359,15 +361,15 @@ function EditFinancials({ row, existing }: { row: Row; existing: Existing }) {
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2"><Label>Client rate</Label><Input type="number" min={0} value={clientRate} onChange={(e) => setClientRate(e.target.value)} /></div>
-            <div className="space-y-2"><Label>Candidate rate</Label><Input type="number" min={0} value={candidateRate} onChange={(e) => setCandidateRate(e.target.value)} /></div>
+            <div className="space-y-2"><Label>{tx("Client rate", "Tarif client")}</Label><Input type="number" min={0} value={clientRate} onChange={(e) => setClientRate(e.target.value)} /></div>
+            <div className="space-y-2"><Label>{tx("Candidate rate", "Tarif candidat")}</Label><Input type="number" min={0} value={candidateRate} onChange={(e) => setCandidateRate(e.target.value)} /></div>
           </div>
           <div className="rounded-md bg-muted p-3 text-sm flex justify-between">
-            <span className="text-muted-foreground">Computed margin</span>
+            <span className="text-muted-foreground">{tx("Computed margin", "Marge calculée")}</span>
             <span className="font-medium tabular-nums">{margin != null ? `${currency === "EUR" ? "€" : currency + " "}${margin}` : "—"}</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-2"><Label>Currency</Label>
+            <div className="space-y-2"><Label>{tx("Currency", "Devise")}</Label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -378,13 +380,13 @@ function EditFinancials({ row, existing }: { row: Row; existing: Existing }) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label>Duration (months)</Label><Input type="number" min={0} max={120} value={duration} onChange={(e) => setDuration(e.target.value)} /></div>
-            <div className="space-y-2"><Label>Placement date</Label><Input type="date" value={placement} onChange={(e) => setPlacement(e.target.value)} /></div>
+            <div className="space-y-2"><Label>{tx("Duration (months)", "Durée (mois)")}</Label><Input type="number" min={0} max={120} value={duration} onChange={(e) => setDuration(e.target.value)} /></div>
+            <div className="space-y-2"><Label>{tx("Placement date", "Date de placement")}</Label><Input type="date" value={placement} onChange={(e) => setPlacement(e.target.value)} /></div>
           </div>
           <div className="space-y-2"><Label>Notes</Label><Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} /></div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>{tx("Cancel", "Annuler")}</Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? tx("Saving…", "Enregistrement…") : tx("Save", "Enregistrer")}</Button>
           </div>
         </div>
       </DialogContent>

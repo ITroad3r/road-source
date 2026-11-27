@@ -1,4 +1,5 @@
 import { can } from "@/lib/permissions";
+import { useTx } from "@/hooks/use-tx";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
@@ -49,6 +50,7 @@ type ClientRow = {
 };
 
 function ClientsPage() {
+  const { tx } = useTx();
   const qc = useQueryClient();
   const { user } = Route.useRouteContext();
   const { data: roles } = useMyRoles(user.id);
@@ -100,7 +102,7 @@ function ClientsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Client deleted");
+      toast.success(tx("Client deleted", "Client supprimé"));
       qc.invalidateQueries({ queryKey: ["clients"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -120,11 +122,11 @@ function ClientsPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
-          <p className="text-muted-foreground text-sm">Manage client accounts and their demands.</p>
+          <p className="text-muted-foreground text-sm">{tx("Manage client accounts and their demands.", "Gérez les comptes clients et leurs demandes.")}</p>
         </div>
         {canManage && (
           <Button onClick={openNew}>
-            <Plus className="h-4 w-4 mr-2" /> New client
+            <Plus className="h-4 w-4 mr-2" /> {tx("New client", "Nouveau client")}
           </Button>
         )}
       </div>
@@ -139,24 +141,24 @@ function ClientsPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, industry, contact..."
+              placeholder={tx("Search by name, industry, contact...", "Rechercher par nom, secteur, contact...")}
               className="pl-9"
             />
           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Loading...</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{tx("Loading...", "Chargement...")}</p>
           ) : filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No clients found.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{tx("No clients found.", "Aucun client trouvé.")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Industry</TableHead>
+                  <TableHead>{tx("Name", "Nom")}</TableHead>
+                  <TableHead>{tx("Industry", "Secteur")}</TableHead>
                   <TableHead>Contact</TableHead>
-                  <TableHead>Demands</TableHead>
+                  <TableHead>{tx("Demands", "Demandes")}</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -199,7 +201,7 @@ function ClientsPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              if (confirm(`Delete client "${c.name}"? This cannot be undone.`)) {
+                              if (confirm(tx(`Delete client "${c.name}"? This cannot be undone.`, `Supprimer le client « ${c.name} » ? Cette action est irréversible.`))) {
                                 deleteMutation.mutate(c.id);
                               }
                             }}
@@ -241,6 +243,7 @@ function ClientDialog({
   userId: string;
   onSaved: () => void;
 }) {
+  const { tx } = useTx();
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
   const [contactName, setContactName] = useState("");
@@ -288,16 +291,16 @@ function ClientDialog({
       if (editing) {
         const { error } = await supabase.from("clients").update(payload).eq("id", editing.id);
         if (error) throw error;
-        toast.success("Client updated");
+        toast.success(tx("Client updated", "Client mis à jour"));
       } else {
         const { error } = await supabase.from("clients").insert({ ...payload, created_by: userId });
         if (error) throw error;
-        toast.success("Client created");
+        toast.success(tx("Client created", "Client créé"));
       }
       onSaved();
       onOpenChange(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save");
+      toast.error(err instanceof Error ? err.message : tx("Failed to save", "Échec de l'enregistrement"));
     } finally {
       setSubmitting(false);
     }
@@ -307,29 +310,29 @@ function ClientDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editing ? "Edit client" : "New client"}</DialogTitle>
+          <DialogTitle>{editing ? tx("Edit client", "Modifier le client") : tx("New client", "Nouveau client")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name">{tx("Name *", "Nom *")}</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={200} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="industry">Industry</Label>
+            <Label htmlFor="industry">{tx("Industry", "Secteur")}</Label>
             <Input id="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} maxLength={100} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="cname">Contact name</Label>
+              <Label htmlFor="cname">{tx("Contact name", "Nom du contact")}</Label>
               <Input id="cname" value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={200} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="cphone">Contact phone</Label>
+              <Label htmlFor="cphone">{tx("Contact phone", "Téléphone du contact")}</Label>
               <Input id="cphone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} maxLength={50} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="cemail">Contact email</Label>
+            <Label htmlFor="cemail">{tx("Contact email", "E-mail du contact")}</Label>
             <Input id="cemail" type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} maxLength={200} />
           </div>
           <div className="space-y-1.5">
@@ -338,10 +341,10 @@ function ClientDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tx("Cancel", "Annuler")}
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : editing ? "Save changes" : "Create client"}
+              {submitting ? tx("Saving...", "Enregistrement...") : editing ? tx("Save changes", "Enregistrer") : tx("Create client", "Créer le client")}
             </Button>
           </DialogFooter>
         </form>

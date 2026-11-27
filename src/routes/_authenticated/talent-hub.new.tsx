@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { CandidateCreateForm } from "@/components/CandidateCreateForm";
 import { useMyRoles } from "@/hooks/useMyRoles";
 import { can } from "@/lib/permissions";
@@ -15,11 +16,12 @@ export const Route = createFileRoute("/_authenticated/talent-hub/new")({
   component: NewCandidate,
 });
 function NewCandidate() {
+  const { tx } = useTx();
   const navigate = useNavigate();
   const { user } = Route.useRouteContext();
   const { data: roles, isPending } = useMyRoles(user.id);
-  if (isPending) return <div className="p-4 text-muted-foreground">Loading…</div>;
-  if (!can(roles, "candidates.edit")) return <div className="p-4 text-muted-foreground">Candidate editing access required.</div>;
+  if (isPending) return <div className="p-4 text-muted-foreground">{tx("Loading…", "Chargement…")}</div>;
+  if (!can(roles, "candidates.edit")) return <div className="p-4 text-muted-foreground">{tx("Candidate editing access required.", "Accès à la modification des candidats requis.")}</div>;
   const back = () => { void navigate({ to: "/talent-hub" }); };
   return <div className="p-4 md:p-8"><CandidateCreateForm userId={user.id} onSaved={back} onCancel={back} /></div>;
 }

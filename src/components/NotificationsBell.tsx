@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTx } from "@/hooks/use-tx";
 import { Bell, Check } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +20,7 @@ type Notification = {
 };
 
 export function NotificationsBell({ userId }: { userId: string }) {
+  const { tx } = useTx();
   const navigate = useNavigate();
   const [items, setItems] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
@@ -81,13 +83,13 @@ export function NotificationsBell({ userId }: { userId: string }) {
           <div className="text-sm font-semibold">Notifications</div>
           {unread > 0 && (
             <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={markAllRead}>
-              <Check className="h-3 w-3 mr-1" /> Mark all read
+              <Check className="h-3 w-3 mr-1" /> {tx("Mark all read", "Tout marquer comme lu")}
             </Button>
           )}
         </div>
         <ScrollArea className="max-h-96">
           {items.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">No notifications yet</div>
+            <div className="p-6 text-center text-sm text-muted-foreground">{tx("No notifications yet", "Aucune notification pour le moment")}</div>
           ) : (
             <ul className="divide-y">
               {items.map((n) => (

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -58,6 +59,7 @@ const stageColors: Record<string, string> = {
 };
 
 function CandidateDetail() {
+  const { tx } = useTx();
   const { t } = useTranslation();
   const { cvId } = Route.useParams();
   const { user } = Route.useRouteContext();
@@ -106,15 +108,15 @@ function CandidateDetail() {
 
   async function openGenerated(path: string) {
     const { data, error } = await supabase.storage.from("cvs").createSignedUrl(path, 120);
-    if (error || !data) return toast.error(error?.message ?? "Could not open file");
+    if (error || !data) return toast.error(error?.message ?? tx("Could not open file", "Impossible d'ouvrir le fichier"));
     window.open(data.signedUrl, "_blank");
   }
   async function deleteGenerated(id: string, path: string) {
-    if (!confirm("Delete this generated CV?")) return;
+    if (!confirm(tx("Delete this generated CV?", "Supprimer ce CV généré ?"))) return;
     await supabase.storage.from("cvs").remove([path]);
     const { error } = await supabase.from("generated_cvs").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
+    toast.success(tx("Deleted", "Supprimé"));
     refetchGenerated();
   }
 
@@ -198,7 +200,7 @@ function CandidateDetail() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["talent-hub", cvId] });
       qc.invalidateQueries({ queryKey: ["talent-hub"] });
-      toast.success("Candidate updated");
+      toast.success(tx("Candidate updated", "Candidat mis à jour"));
       setEditing(false);
       setFile(null);
     },
@@ -212,7 +214,7 @@ function CandidateDetail() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["talent-hub"] });
-      toast.success("Candidate deleted");
+      toast.success(tx("Candidate deleted", "Candidat supprimé"));
       navigate({ to: "/talent-hub" });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -222,15 +224,15 @@ function CandidateDetail() {
     if (!cv?.cv_url) return;
     if (/^https?:\/\//i.test(cv.cv_url)) { window.open(cv.cv_url, "_blank"); return; }
     const { data, error } = await supabase.storage.from("cvs").createSignedUrl(cv.cv_url, 60);
-    if (error || !data) return toast.error(error?.message ?? "Could not open CV");
+    if (error || !data) return toast.error(error?.message ?? tx("Could not open CV", "Impossible d'ouvrir le CV"));
     window.open(data.signedUrl, "_blank");
   }
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
     if (!f) return setFile(null);
-    if (f.size > MAX_FILE) return toast.error("File too large (max 10 MB)");
-    if (!ALLOWED.includes(f.type)) return toast.error("Only PDF, DOC or DOCX allowed");
+    if (f.size > MAX_FILE) return toast.error(tx("File too large (max 10 MB)", "Fichier trop volumineux (10 Mo max)"));
+    if (!ALLOWED.includes(f.type)) return toast.error(tx("Only PDF, DOC or DOCX allowed", "Seuls les formats PDF, DOC ou DOCX sont acceptés"));
     setFile(f);
   }
 
@@ -245,40 +247,40 @@ function CandidateDetail() {
     setTags([...tags, t]); setTagInput("");
   }
 
-  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
-  if (!cv) return <div className="p-4 md:p-8">Candidate not found.</div>;
+  if (isLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</div>;
+  if (!cv) return <div className="p-4 md:p-8">{tx("Candidate not found.", "Candidat introuvable.")}</div>;
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm" className="-ml-3">
-          <Link to="/talent-hub"><ArrowLeft className="h-4 w-4 mr-1" /> Back to Talent Hub</Link>
+          <Link to="/talent-hub"><ArrowLeft className="h-4 w-4 mr-1" /> {tx("Back to Talent Hub", "Retour au Talent Hub")}</Link>
         </Button>
         <div className="flex items-center gap-2">
           {!editing ? (
             <>
-              <Button variant="outline" onClick={() => setEditing(true)}><Pencil className="h-4 w-4 mr-1" /> Edit</Button>
+              <Button variant="outline" onClick={() => setEditing(true)}><Pencil className="h-4 w-4 mr-1" /> {tx("Edit", "Modifier")}</Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="icon"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete candidate?</AlertDialogTitle>
-                    <AlertDialogDescription>This permanently removes the CV from the Talent Hub. Pipeline entries referencing this candidate will also be removed.</AlertDialogDescription>
+                    <AlertDialogTitle>{tx("Delete candidate?", "Supprimer le candidat ?")}</AlertDialogTitle>
+                    <AlertDialogDescription>{tx("This permanently removes the CV from the Talent Hub. Pipeline entries referencing this candidate will also be removed.", "Le CV sera définitivement supprimé du Talent Hub. Les entrées de pipeline liées à ce candidat seront également supprimées.")}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteMutation.mutate()}>Delete</AlertDialogAction>
+                    <AlertDialogCancel>{tx("Cancel", "Annuler")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteMutation.mutate()}>{tx("Delete", "Supprimer")}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={() => { setEditing(false); setFile(null); }}><X className="h-4 w-4 mr-1" /> Cancel</Button>
+              <Button variant="outline" onClick={() => { setEditing(false); setFile(null); }}><X className="h-4 w-4 mr-1" /> {tx("Cancel", "Annuler")}</Button>
               <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-                <Save className="h-4 w-4 mr-1" /> {saveMutation.isPending ? "Saving…" : "Save changes"}
+                <Save className="h-4 w-4 mr-1" /> {saveMutation.isPending ? tx("Saving…", "Enregistrement…") : tx("Save changes", "Enregistrer")}
               </Button>
             </>
           )}
@@ -295,7 +297,7 @@ function CandidateDetail() {
               {editing ? (
                 <>
                   <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className="text-xl font-semibold h-10" maxLength={200} />
-                  <Input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} placeholder="Headline" maxLength={200} />
+                  <Input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} placeholder={tx("Headline", "Titre")} maxLength={200} />
                 </>
               ) : (
                 <>
@@ -306,7 +308,7 @@ function CandidateDetail() {
               <div className="flex flex-wrap gap-2 pt-1">
                 {!editing && cv.availability && (
                   <Badge variant={cv.availability === "available" ? "default" : "secondary"} className="text-xs capitalize">
-                    {cv.availability.replace("_", " ")}
+                    {availLabel(cv.availability, tx)}
                   </Badge>
                 )}
                 {!editing && cv.seniority && <Badge variant="outline" className="text-xs capitalize">{cv.seniority}</Badge>}
@@ -319,17 +321,17 @@ function CandidateDetail() {
         <CardContent className="space-y-5">
           {/* Contact */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field label="Email">
+            <Field label={tx("Email", "E-mail")}>
               {editing
                 ? <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={255} />
                 : (cv.email ? <a href={`mailto:${cv.email}`} className="text-sm text-primary hover:underline flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{cv.email}</a> : <span className="text-sm text-muted-foreground">—</span>)}
             </Field>
-            <Field label="Phone">
+            <Field label={tx("Phone", "Téléphone")}>
               {editing
                 ? <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} maxLength={50} />
                 : (cv.phone ? <span className="text-sm flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{cv.phone}</span> : <span className="text-sm text-muted-foreground">—</span>)}
             </Field>
-            <Field label="Location">
+            <Field label={tx("Location", "Localisation")}>
               {editing
                 ? <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} maxLength={200} />
                 : (cv.location ? <span className="text-sm flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{cv.location}</span> : <span className="text-sm text-muted-foreground">—</span>)}
@@ -337,19 +339,19 @@ function CandidateDetail() {
             <Field label="LinkedIn">
               {editing
                 ? <Input type="url" value={form.linkedin_url} onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })} maxLength={500} />
-                : (cv.linkedin_url ? <a href={cv.linkedin_url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1"><ExternalLink className="h-3.5 w-3.5" />Open profile</a> : <span className="text-sm text-muted-foreground">—</span>)}
+                : (cv.linkedin_url ? <a href={cv.linkedin_url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1"><ExternalLink className="h-3.5 w-3.5" />{tx("Open profile", "Ouvrir le profil")}</a> : <span className="text-sm text-muted-foreground">—</span>)}
             </Field>
           </div>
 
-          <Field label="Summary">
+          <Field label={tx("Summary", "Résumé")}>
             {editing
               ? <Textarea rows={5} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} maxLength={5000} />
-              : <p className="text-sm whitespace-pre-wrap">{cv.summary ?? <span className="text-muted-foreground">No summary</span>}</p>}
+              : <p className="text-sm whitespace-pre-wrap">{cv.summary ?? <span className="text-muted-foreground">{tx("No summary", "Aucun résumé")}</span>}</p>}
           </Field>
 
           {/* Profile */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Field label="Seniority">
+            <Field label={tx("Seniority", "Séniorité")}>
               {editing ? (
                 <Select value={form.seniority} onValueChange={(v) => setForm({ ...form, seniority: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -359,45 +361,45 @@ function CandidateDetail() {
                 </Select>
               ) : <span className="text-sm capitalize">{cv.seniority ?? "—"}</span>}
             </Field>
-            <Field label="Years of experience">
+            <Field label={tx("Years of experience", "Années d'expérience")}>
               {editing
                 ? <Input type="number" min={0} max={60} value={form.years_experience} onChange={(e) => setForm({ ...form, years_experience: e.target.value })} />
                 : <span className="text-sm">{cv.years_experience ?? "—"}</span>}
             </Field>
-            <Field label="Availability">
+            <Field label={tx("Availability", "Disponibilité")}>
               {editing ? (
                 <Select value={form.availability} onValueChange={(v) => setForm({ ...form, availability: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="available">Available</SelectItem>
-                    <SelectItem value="available_soon">Available soon</SelectItem>
-                    <SelectItem value="unavailable">Unavailable</SelectItem>
+                    <SelectItem value="available">{tx("Available", "Disponible")}</SelectItem>
+                    <SelectItem value="available_soon">{tx("Available soon", "Bientôt disponible")}</SelectItem>
+                    <SelectItem value="unavailable">{tx("Unavailable", "Indisponible")}</SelectItem>
                   </SelectContent>
                 </Select>
-              ) : <span className="text-sm capitalize">{cv.availability?.replace("_", " ") ?? "—"}</span>}
+              ) : <span className="text-sm capitalize">{cv.availability ? availLabel(cv.availability, tx) : "—"}</span>}
             </Field>
             <div className="sm:col-span-2">
               {editing
                 ? <PreferredContractSelect id="pref-contract" value={form.preferred_contract_type} onChange={(v) => setForm({ ...form, preferred_contract_type: v })} />
                 : <PreferredContractView value={cv.preferred_contract_type} />}
             </div>
-            <Field label="Engagement preference (legacy)">
+            <Field label={tx("Engagement preference (legacy)", "Préférence d'engagement (ancien)")}>
               {editing ? (
                 <Select value={form.engagement_preference} onValueChange={(v) => setForm({ ...form, engagement_preference: v })}>
-                  <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={tx("Any", "Indifférent")} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="freelance">Freelance</SelectItem>
-                    <SelectItem value="permanent">Permanent</SelectItem>
+                    <SelectItem value="permanent">{tx("Permanent", "CDI")}</SelectItem>
                   </SelectContent>
                 </Select>
               ) : <span className="text-sm capitalize">{cv.engagement_preference ?? "—"}</span>}
             </Field>
-            <Field label="Daily rate (€)">
+            <Field label={tx("Daily rate (€)", "TJM (€)")}>
               {editing
                 ? <Input type="number" min={0} value={form.daily_rate} onChange={(e) => setForm({ ...form, daily_rate: e.target.value })} />
                 : <span className="text-sm">{cv.daily_rate != null ? `€${cv.daily_rate}` : "—"}</span>}
             </Field>
-            <Field label="Salary expectation (€)">
+            <Field label={tx("Salary expectation (€)", "Prétention salariale (€)")}>
               {editing
                 ? <Input type="number" min={0} value={form.salary_expectation} onChange={(e) => setForm({ ...form, salary_expectation: e.target.value })} />
                 : <span className="text-sm">{cv.salary_expectation != null ? `€${cv.salary_expectation}` : "—"}</span>}
@@ -407,16 +409,16 @@ function CandidateDetail() {
           {editing && (
             <div className="flex items-center gap-3">
               <Switch checked={form.remote_ok} onCheckedChange={(v) => setForm({ ...form, remote_ok: v })} id="remote" />
-              <Label htmlFor="remote">Open to remote work</Label>
+              <Label htmlFor="remote">{tx("Open to remote work", "Ouvert au télétravail")}</Label>
             </div>
           )}
           {!editing && (
-            <div className="text-sm text-muted-foreground">Remote: {cv.remote_ok ? "Yes" : "No"}</div>
+            <div className="text-sm text-muted-foreground">{tx("Remote", "Télétravail")} : {cv.remote_ok ? tx("Yes", "Oui") : tx("No", "Non")}</div>
           )}
 
-          <Field label="Skills">
+          <Field label={tx("Skills", "Compétences")}>
             {editing ? (
-              <TagInput value={skillInput} setValue={setSkillInput} onAdd={addSkill} items={skills} onRemove={(s) => setSkills(skills.filter((x) => x !== s))} placeholder="Type a skill and press Enter" />
+              <TagInput value={skillInput} setValue={setSkillInput} onAdd={addSkill} items={skills} onRemove={(s) => setSkills(skills.filter((x) => x !== s))} placeholder={tx("Type a skill and press Enter", "Saisissez une compétence puis Entrée")} />
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {(cv.skills ?? []).length === 0 && <span className="text-sm text-muted-foreground">—</span>}
@@ -425,9 +427,9 @@ function CandidateDetail() {
             )}
           </Field>
 
-          <Field label="Tags">
+          <Field label={tx("Tags", "Étiquettes")}>
             {editing ? (
-              <TagInput value={tagInput} setValue={setTagInput} onAdd={addTag} items={tags} onRemove={(t) => setTags(tags.filter((x) => x !== t))} placeholder="e.g. fintech, ex-Google" />
+              <TagInput value={tagInput} setValue={setTagInput} onAdd={addTag} items={tags} onRemove={(t) => setTags(tags.filter((x) => x !== t))} placeholder={tx("e.g. fintech, ex-Google", "ex. fintech, ex-Google")} />
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {(cv.tags ?? []).length === 0 && <span className="text-sm text-muted-foreground">—</span>}
@@ -436,37 +438,37 @@ function CandidateDetail() {
             )}
           </Field>
 
-          <Field label="CV file">
+          <Field label={tx("CV file", "Fichier CV")}>
             <div className="space-y-2">
               {cv.cv_url && !editing && (
                 <button type="button" onClick={openCv} className="flex items-center gap-1 text-sm text-primary hover:underline">
-                  <FileText className="h-3.5 w-3.5" /> Open current CV
+                  <FileText className="h-3.5 w-3.5" /> {tx("Open current CV", "Ouvrir le CV actuel")}
                 </button>
               )}
               {editing && (
                 <>
                   {cv.cv_url && !file && (
                     <button type="button" onClick={openCv} className="flex items-center gap-1 text-sm text-primary hover:underline">
-                      <FileText className="h-3.5 w-3.5" /> Current CV
+                      <FileText className="h-3.5 w-3.5" /> {tx("Current CV", "CV actuel")}
                     </button>
                   )}
                   <label className="flex items-center justify-center gap-2 border-2 border-dashed rounded-md p-4 cursor-pointer hover:bg-accent/40 transition">
                     <Upload className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{file ? `Selected: ${file.name}` : "Click to upload a new CV (PDF / DOC / DOCX, max 10 MB)"}</span>
+                    <span className="text-sm text-muted-foreground">{file ? `${tx("Selected", "Sélectionné")} : ${file.name}` : tx("Click to upload a new CV (PDF / DOC / DOCX, max 10 MB)", "Cliquez pour importer un nouveau CV (PDF / DOC / DOCX, 10 Mo max)")}</span>
                     <input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={onFileChange} />
                   </label>
-                  {file && <Button type="button" size="sm" variant="ghost" onClick={() => setFile(null)}><X className="h-3.5 w-3.5 mr-1" />Remove selection</Button>}
+                  {file && <Button type="button" size="sm" variant="ghost" onClick={() => setFile(null)}><X className="h-3.5 w-3.5 mr-1" />{tx("Remove selection", "Retirer la sélection")}</Button>}
                 </>
               )}
-              {!cv.cv_url && !editing && <span className="text-sm text-muted-foreground">No CV uploaded</span>}
+              {!cv.cv_url && !editing && <span className="text-sm text-muted-foreground">{tx("No CV uploaded", "Aucun CV importé")}</span>}
             </div>
           </Field>
 
           {!editing && (
-            <Field label="Branded export">
+            <Field label={tx("Branded export", "Export ITROAD")}>
               <Button asChild variant="outline" size="sm" className="w-fit">
                 <Link to="/talent-hub/generate/$cvId" params={{ cvId }}>
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Generate ITROAD CV
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" /> {tx("Generate ITROAD CV", "Générer le CV ITROAD")}
                 </Link>
               </Button>
             </Field>
@@ -476,14 +478,14 @@ function CandidateDetail() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-lg flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Generated ITROAD CVs ({generatedCvs?.length ?? 0})</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> {tx("Generated ITROAD CVs", "CV ITROAD générés")} ({generatedCvs?.length ?? 0})</CardTitle>
           <Button asChild size="sm" variant="outline">
-            <Link to="/talent-hub/generate/$cvId" params={{ cvId }}><Sparkles className="h-3.5 w-3.5 mr-1.5" /> New</Link>
+            <Link to="/talent-hub/generate/$cvId" params={{ cvId }}><Sparkles className="h-3.5 w-3.5 mr-1.5" /> {tx("New", "Nouveau")}</Link>
           </Button>
         </CardHeader>
         <CardContent>
           {(!generatedCvs || generatedCvs.length === 0) ? (
-            <div className="text-sm text-muted-foreground">No branded CVs generated yet.</div>
+            <div className="text-sm text-muted-foreground">{tx("No branded CVs generated yet.", "Aucun CV ITROAD généré pour le moment.")}</div>
           ) : (
             <div className="space-y-2">
               {generatedCvs.map((g) => (
@@ -493,14 +495,14 @@ function CandidateDetail() {
                       <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <span className="truncate">{g.display_name}</span>
                       <Badge variant="outline" className="text-[10px] uppercase">{g.format}</Badge>
-                      {g.anonymized && <Badge variant="secondary" className="text-[10px]">anonymized</Badge>}
+                      {g.anonymized && <Badge variant="secondary" className="text-[10px]">{tx("anonymized", "anonymisé")}</Badge>}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
                       {g.role_title ? `${g.role_title} · ` : ""}{format(new Date(g.created_at), "PP · p")}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <Button size="sm" variant="ghost" onClick={() => openGenerated(g.storage_path)}>Open</Button>
+                    <Button size="sm" variant="ghost" onClick={() => openGenerated(g.storage_path)}>{tx("Open", "Ouvrir")}</Button>
                     <Button size="icon" variant="ghost" onClick={() => deleteGenerated(g.id, g.storage_path)}><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </div>
@@ -511,10 +513,10 @@ function CandidateDetail() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Briefcase className="h-4 w-4" /> Pipeline appearances ({appearances?.length ?? 0})</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Briefcase className="h-4 w-4" /> {tx("Pipeline appearances", "Présence dans les pipelines")} ({appearances?.length ?? 0})</CardTitle></CardHeader>
         <CardContent>
           {(!appearances || appearances.length === 0) && (
-            <div className="text-sm text-muted-foreground">Not in any demand pipelines yet.</div>
+            <div className="text-sm text-muted-foreground">{tx("Not in any demand pipelines yet.", "Dans aucun pipeline de demande pour le moment.")}</div>
           )}
           <div className="space-y-2">
             {appearances?.map((a) => (
@@ -525,9 +527,9 @@ function CandidateDetail() {
                 className="flex items-center justify-between gap-3 p-3 rounded-md border hover:bg-accent transition"
               >
                 <div className="min-w-0">
-                  <div className="font-medium text-sm truncate">{a.demands?.title ?? "Untitled demand"}</div>
+                  <div className="font-medium text-sm truncate">{a.demands?.title ?? tx("Untitled demand", "Demande sans titre")}</div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {a.demands?.clients?.name ?? "—"} · added {format(new Date(a.created_at), "MMM d, yyyy")}
+                    {a.demands?.clients?.name ?? "—"} · {tx("added", "ajouté le")} {format(new Date(a.created_at), "dd/MM/yyyy")}
                   </div>
                 </div>
                 <Badge variant="outline" className={stageColors[a.stage] ?? ""}>{t(`dash.stage.${a.stage}`)}</Badge>
@@ -542,6 +544,10 @@ function CandidateDetail() {
   );
 }
 
+function availLabel(v: string, tx: (en: string, fr: string) => string) {
+  return v === "available" ? tx("Available", "Disponible") : v === "available_soon" ? tx("Available soon", "Bientôt disponible") : v === "unavailable" ? tx("Unavailable", "Indisponible") : v;
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (<div className="space-y-1.5"><Label className="text-xs text-muted-foreground">{label}</Label>{children}</div>);
 }
@@ -550,12 +556,13 @@ function TagInput({ value, setValue, onAdd, items, onRemove, placeholder }: {
   value: string; setValue: (v: string) => void; onAdd: () => void;
   items: string[]; onRemove: (v: string) => void; placeholder: string;
 }) {
+  const { tx } = useTx();
   return (
     <div className="space-y-2">
       <div className="flex gap-2">
         <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} maxLength={50}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onAdd(); } }} />
-        <Button type="button" variant="outline" onClick={onAdd}>Add</Button>
+        <Button type="button" variant="outline" onClick={onAdd}>{tx("Add", "Ajouter")}</Button>
       </div>
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ type Notification = {
 };
 
 function NotificationsPage() {
+  const { tx } = useTx();
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const [items, setItems] = useState<Notification[]>([]);
@@ -94,22 +96,22 @@ function NotificationsPage() {
             <Bell className="h-6 w-6" /> Notifications
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {unread > 0 ? `${unread} unread` : "All caught up"}
+            {unread > 0 ? `${unread} unread` : tx("All caught up", "Tout est lu")}
           </p>
         </div>
         {unread > 0 && (
           <Button variant="outline" size="sm" onClick={markAllRead}>
-            <Check className="h-4 w-4 mr-2" /> Mark all read
+            <Check className="h-4 w-4 mr-2" /> {tx("Mark all read", "Tout marquer comme lu")}
           </Button>
         )}
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</p>
       ) : items.length === 0 ? (
         <Card className="p-12 text-center">
           <Bell className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-          <p className="text-sm text-muted-foreground">No notifications yet.</p>
+          <p className="text-sm text-muted-foreground">{tx("No notifications yet.", "Aucune notification pour le moment.")}</p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -130,10 +132,10 @@ function NotificationsPage() {
                 </div>
               </button>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" onClick={() => toggleRead(n)} title={n.read ? "Mark unread" : "Mark read"}>
+                <Button variant="ghost" size="sm" onClick={() => toggleRead(n)} title={n.read ? tx("Mark unread", "Marquer comme non lu") : tx("Mark read", "Marquer comme lu")}>
                   <Check className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => remove(n.id)} title="Delete">
+                <Button variant="ghost" size="sm" onClick={() => remove(n.id)} title={tx("Delete", "Supprimer")}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

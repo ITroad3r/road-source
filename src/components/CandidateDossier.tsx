@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTx } from "@/hooks/use-tx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ClipboardCheck, Phone, Trash2 } from "lucide-react";
@@ -35,16 +36,18 @@ export function CandidateDossier({ dcId, name, stage, roles }: { dcId: string; n
   </Dialog>;
 }
 function DossierLoader({ dcId, name, canEdit, initialSection }: { dcId: string; name: string; canEdit: boolean; initialSection: Section }) {
+  const { tx } = useTx();
   const { data, isPending, error, refetch } = useQuery({ queryKey: ["candidate-dossier", dcId], queryFn: async () => {
     const result = await supabase.from("candidate_dossiers").select("*").eq("demand_candidate_id", dcId).maybeSingle();
     if (result.error) throw result.error;
     return result.data;
   } });
-  if (isPending) return <p className="text-muted-foreground">Loading…</p>;
-  if (error) return <div role="alert">{error.message}<Button variant="outline" onClick={() => { void refetch(); }}>Retry</Button></div>;
+  if (isPending) return <p className="text-muted-foreground">{tx("Loading…", "Chargement…")}</p>;
+  if (error) return <div role="alert">{error.message}<Button variant="outline" onClick={() => { void refetch(); }}>{tx("Retry", "Réessayer")}</Button></div>;
   return <DossierForm dcId={dcId} name={name} canEdit={canEdit} initialSection={initialSection} initial={data ?? { demand_candidate_id: dcId }} />;
 }
 function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: string; name: string; canEdit: boolean; initialSection: Section; initial: Dossier }) {
+  const { tx } = useTx();
   const { i18n } = useTranslation();
   const fr = i18n.language.startsWith("fr");
   const text = (en: string, french: string) => fr ? french : en;
@@ -106,19 +109,19 @@ function DossierForm({ dcId, name, canEdit, initialSection, initial }: { dcId: s
       toast.error((e as Error).message);
     } finally { setBusy(false); }
   }
-  const actions = (section: Section) => canEdit && <div className="flex justify-between gap-2 pt-3"><Button type="button" variant="outline" disabled={busy} onClick={() => { void persist(section, true); }}><Trash2 className="h-4 w-4 mr-1" />{text("Delete section", "Supprimer la section")}</Button><Button type="button" disabled={busy} onClick={() => { void persist(section); }}>{busy ? text("Saving…", "Enregistrement…") : text("Save", "Enregistrer")}</Button></div>;
+  const actions = (section: Section) => canEdit && <div className="flex justify-between gap-2 pt-3"><Button type="button" variant="outline" disabled={busy} onClick={() => { void persist(section, true); }}><Trash2 className="h-4 w-4 mr-1" />{text("Delete section", "Supprimer la section")}</Button><Button type="button" disabled={busy} onClick={() => { void persist(section); }}>{busy ? text(tx("Saving…", "Enregistrement…"), "Enregistrement…") : text(tx("Save", "Enregistrer"), "Enregistrer")}</Button></div>;
   return <Tabs defaultValue={initialSection}>
     <TabsList className="grid w-full grid-cols-2"><TabsTrigger value="contact">{text("Contacted", "Contacté")}</TabsTrigger><TabsTrigger value="screening">{text("Tests", "Tests")}</TabsTrigger></TabsList>
     <TabsContent value="contact" className="space-y-4">
       <fieldset disabled={!canEdit || busy} className="space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">
-          {select("communication_method", text("Communication method", "Mode de communication"), [["phone",text("Phone","Téléphone")],["visio",text("Video call","Visio")],["whatsapp","WhatsApp"]])}
+          {select("communication_method", text("Communication method", "Mode de communication"), [["phone",text(tx("Phone", "Téléphone"),"Téléphone")],["visio",text("Video call","Visio")],["whatsapp","WhatsApp"]])}
           <div className="space-y-1.5"><Label htmlFor={`${dcId}-communicated_at`}>{text("Communication date and time", "Date et heure de communication")}</Label><Input id={`${dcId}-communicated_at`} type="datetime-local" value={draft.communicated_at ? localDateTime(draft.communicated_at) : ""} onChange={e => set("communicated_at", e.target.value ? new Date(e.target.value).toISOString() : null)} /></div>
           {select("employment_status",text("Employment status","Situation professionnelle"),[["employed",text("Employed","Employé")],["unemployed",text("Unemployed","Sans emploi")]])}
           {field("expected_joining_date",text("Expected joining date","Date de disponibilité prévue"),"date")}
           {field("availability_notes",text("Availability / notice period","Disponibilité / préavis"))}
           {field("current_contract_type",text("Current contract type","Type de contrat actuel"))}
-          {select("current_pay_type",text("Current remuneration type","Type de rémunération actuelle"),[["salary",text("Salary","Salaire")],["tjm","TJM"]])}
+          {select("current_pay_type",text("Current remuneration type","Type de rémunération actuelle"),[["salary",text(tx("Salary", "Salaire"),"Salaire")],["tjm","TJM"]])}
           {field("current_pay",text("Current salary / TJM","Salaire actuel / TJM"),"number")}
           {field("currency",text("Currency","Devise"))}
           {field("country",text("Country","Pays"))}{field("city",text("City","Ville"))}

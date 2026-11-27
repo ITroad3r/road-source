@@ -1,3 +1,4 @@
+import { txNow } from "@/hooks/use-tx";
 export const LIFECYCLE_VALUES = ["open", "in_progress", "on_hold", "filled", "cancelled"] as const;
 export type Lifecycle = (typeof LIFECYCLE_VALUES)[number];
 
@@ -5,17 +6,17 @@ export const OUTCOME_VALUES = ["pending", "won", "lost"] as const;
 export type Outcome = (typeof OUTCOME_VALUES)[number];
 
 export const LIFECYCLE_LABEL: Record<Lifecycle, string> = {
-  open: "Open",
-  in_progress: "In progress",
-  on_hold: "On hold",
-  filled: "Filled",
-  cancelled: "Cancelled",
+  get open() { return txNow("Open", "Ouverte"); },
+  get in_progress() { return txNow("In progress", "En cours"); },
+  get on_hold() { return txNow("On hold", "En pause"); },
+  get filled() { return txNow("Filled", "Pourvue"); },
+  get cancelled() { return txNow("Cancelled", "Annulée"); },
 };
 
 export const OUTCOME_LABEL: Record<Outcome, string> = {
-  pending: "Pending",
-  won: "Won",
-  lost: "Lost",
+  get pending() { return txNow("Pending", "En attente"); },
+  get won() { return txNow("Won", "Gagnée"); },
+  get lost() { return txNow("Lost", "Perdue"); },
 };
 
 export const LIFECYCLE_COLORS: Record<Lifecycle, string> = {

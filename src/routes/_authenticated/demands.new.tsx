@@ -1,4 +1,5 @@
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { useTx, txNow } from "@/hooks/use-tx";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
@@ -41,8 +42,8 @@ function NewDemandAccess() {
 }
 
 const demandSchema = z.object({
-  client_id: z.string().uuid({ message: "Select a client" }),
-  title: z.string().trim().min(3, "Title too short").max(200),
+  client_id: z.string().uuid({ message: txNow("Select a client", "Sélectionnez un client") }),
+  title: z.string().trim().min(3, txNow("Title too short", "Titre trop court")).max(200),
   description: z.string().trim().max(5000).optional().or(z.literal("")),
   engagement: z.enum(["freelance", "permanent"]),
   location: z.string().trim().max(200).optional().or(z.literal("")),
@@ -57,6 +58,7 @@ const demandSchema = z.object({
 });
 
 function NewDemand() {
+  const { tx } = useTx();
   const navigate = useNavigate();
   const { user } = Route.useRouteContext();
 
@@ -142,26 +144,26 @@ function NewDemand() {
     }).select("id").single();
     setSubmitting(false);
     if (error) return toast.error(error.message);
-    toast.success("Demand created");
+    toast.success(tx("Demand created", "Demande créée"));
     navigate({ to: "/demands/$demandId", params: { demandId: data.id } });
   }
 
   return (
     <div className="p-4 md:p-8 max-w-3xl">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">New Demand</h1>
-        <p className="text-muted-foreground mt-1">Create a client request and assign it to a sourcing teammate.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{tx("New Demand", "Nouvelle demande")}</h1>
+        <p className="text-muted-foreground mt-1">{tx("Create a client request and assign it to a sourcing teammate.", "Créez une demande client et assignez-la à un membre du sourcing.")}</p>
       </header>
 
       <form onSubmit={submit}>
         <Card>
-          <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{tx("Details", "Détails")}</CardTitle></CardHeader>
           <CardContent className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2 items-end">
               <div className="space-y-2">
                 <Label>Client *</Label>
                 <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={tx("Select a client", "Sélectionnez un client")} /></SelectTrigger>
                   <SelectContent>
                     {clients?.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}{c.industry ? ` · ${c.industry}` : ""}</SelectItem>
@@ -171,10 +173,10 @@ function NewDemand() {
               </div>
               <Dialog open={newClientOpen} onOpenChange={setNewClientOpen}>
                 <DialogTrigger asChild>
-                  <Button type="button" variant="outline"><Plus className="h-4 w-4 mr-1" /> New client</Button>
+                  <Button type="button" variant="outline"><Plus className="h-4 w-4 mr-1" /> {tx("New client", "Nouveau client")}</Button>
                 </DialogTrigger>
                 <DialogContent>
-                  <DialogHeader><DialogTitle>New client</DialogTitle></DialogHeader>
+                  <DialogHeader><DialogTitle>{tx("New client", "Nouveau client")}</DialogTitle></DialogHeader>
                   <NewClientForm
                     createdBy={user.id}
                     onCreated={async (id) => {
@@ -188,52 +190,52 @@ function NewDemand() {
             </div>
 
             <div className="space-y-2">
-              <Label>Title *</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder="e.g. Senior React Engineer — 6 months" />
+              <Label>{tx("Title *", "Titre *")}</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder={tx("e.g. Senior React Engineer — 6 months", "ex. Ingénieur React senior — 6 mois")} />
             </div>
 
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={5000} rows={5} placeholder="Mission context, team, must-haves…" />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={5000} rows={5} placeholder={tx("Mission context, team, must-haves…", "Contexte de mission, équipe, impératifs…")} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Engagement *</Label>
+                <Label>{tx("Engagement *", "Type d'engagement *")}</Label>
                 <Select value={engagement} onValueChange={(v) => setEngagement(v as "freelance" | "permanent")}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="freelance">Freelance</SelectItem>
-                    <SelectItem value="permanent">Permanent</SelectItem>
+                    <SelectItem value="permanent">{tx("Permanent", "CDI")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Priority</Label>
+                <Label>{tx("Priority", "Priorité")}</Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 — Critical</SelectItem>
-                    <SelectItem value="2">2 — High</SelectItem>
-                    <SelectItem value="3">3 — Normal</SelectItem>
-                    <SelectItem value="4">4 — Low</SelectItem>
-                    <SelectItem value="5">5 — Nice to have</SelectItem>
+                    <SelectItem value="1">{tx("1 — Critical", "1 — Critique")}</SelectItem>
+                    <SelectItem value="2">{tx("2 — High", "2 — Haute")}</SelectItem>
+                    <SelectItem value="3">{tx("3 — Normal", "3 — Normale")}</SelectItem>
+                    <SelectItem value="4">{tx("4 — Low", "4 — Basse")}</SelectItem>
+                    <SelectItem value="5">{tx("5 — Nice to have", "5 — Optionnelle")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Required skills</Label>
+              <Label>{tx("Required skills", "Compétences requises")}</Label>
               <div className="flex gap-2">
                 <Input
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }}
-                  placeholder="Type a skill and press Enter"
+                  placeholder={tx("Type a skill and press Enter", "Saisissez une compétence puis Entrée")}
                   maxLength={50}
                 />
-                <Button type="button" variant="outline" onClick={addSkill}>Add</Button>
+                <Button type="button" variant="outline" onClick={addSkill}>{tx("Add", "Ajouter")}</Button>
               </div>
               {skills.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -251,8 +253,8 @@ function NewDemand() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Location</Label>
-                <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} placeholder="Paris / Remote / Hybrid" />
+                <Label>{tx("Location", "Localisation")}</Label>
+                <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={200} placeholder={tx("Paris / Remote / Hybrid", "Paris / Télétravail / Hybride")} />
               </div>
               <div className="space-y-2">
                 <Label>Budget min (€)</Label>
@@ -266,17 +268,17 @@ function NewDemand() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Start date</Label>
+                <Label>{tx("Start date", "Date de démarrage")}</Label>
                 <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Positions to fill</Label>
+                <Label>{tx("Positions to fill", "Postes à pourvoir")}</Label>
                 <Input type="number" min={1} max={50} value={positionsCount} onChange={(e) => setPositionsCount(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Assign to</Label>
+                <Label>{tx("Assign to", "Assigner à")}</Label>
                 <Select value={assignedTo} onValueChange={setAssignedTo}>
-                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={tx("Unassigned", "Non assignée")} /></SelectTrigger>
                   <SelectContent>
                     {users?.map((u) => (
                       <SelectItem key={u.id} value={u.id}>{u.full_name ?? u.id.slice(0,8)}</SelectItem>
@@ -289,22 +291,22 @@ function NewDemand() {
             <div className="rounded-md border p-4 space-y-3 bg-muted/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium">Request For Offer (RFO)</Label>
-                  <p className="text-xs text-muted-foreground">Competitive bid — multiple CVs sent, client picks one.</p>
+                  <Label className="text-sm font-medium">{tx("Request For Offer (RFO)", "Appel d'offres (RFO)")}</Label>
+                  <p className="text-xs text-muted-foreground">{tx("Competitive bid — multiple CVs sent, client picks one.", "Mise en concurrence — plusieurs CV envoyés, le client en choisit un.")}</p>
                 </div>
                 <Switch checked={isRfo} onCheckedChange={setIsRfo} />
               </div>
               {isRfo && (
                 <div className="space-y-2">
-                  <Label>RFO deadline</Label>
+                  <Label>{tx("RFO deadline", "Date limite RFO")}</Label>
                   <Input type="datetime-local" value={rfoDeadline} onChange={(e) => setRfoDeadline(e.target.value)} />
                 </div>
               )}
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => navigate({ to: "/dashboard" })}>Cancel</Button>
-              <Button type="submit" disabled={submitting}>{submitting ? "Creating…" : "Create demand"}</Button>
+              <Button type="button" variant="outline" onClick={() => navigate({ to: "/dashboard" })}>{tx("Cancel", "Annuler")}</Button>
+              <Button type="submit" disabled={submitting}>{submitting ? tx("Creating…", "Création…") : tx("Create demand", "Créer la demande")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -322,6 +324,7 @@ const clientSchema = z.object({
 });
 
 function NewClientForm({ createdBy, onCreated }: { createdBy: string; onCreated: (id: string) => void }) {
+  const { tx } = useTx();
   const { data: roles } = useMyRoles(createdBy);
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
@@ -346,20 +349,20 @@ function NewClientForm({ createdBy, onCreated }: { createdBy: string; onCreated:
     }).select("id").single();
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Client created");
+    toast.success(tx("Client created", "Client créé"));
     onCreated(data.id);
   }
 
   return (
     <form onSubmit={save} className="space-y-3">
-      <div className="space-y-2"><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} maxLength={200} /></div>
-      <div className="space-y-2"><Label>Industry</Label><Input value={industry} onChange={(e) => setIndustry(e.target.value)} maxLength={100} /></div>
+      <div className="space-y-2"><Label>{tx("Name *", "Nom *")}</Label><Input value={name} onChange={(e) => setName(e.target.value)} maxLength={200} /></div>
+      <div className="space-y-2"><Label>{tx("Industry", "Secteur")}</Label><Input value={industry} onChange={(e) => setIndustry(e.target.value)} maxLength={100} /></div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2"><Label>Contact name</Label><Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={200} /></div>
-        <div className="space-y-2"><Label>Contact phone</Label><Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} maxLength={50} /></div>
+        <div className="space-y-2"><Label>{tx("Contact name", "Nom du contact")}</Label><Input value={contactName} onChange={(e) => setContactName(e.target.value)} maxLength={200} /></div>
+        <div className="space-y-2"><Label>{tx("Contact phone", "Téléphone du contact")}</Label><Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} maxLength={50} /></div>
       </div>
-      <div className="space-y-2"><Label>Contact email</Label><Input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} maxLength={255} /></div>
-      <Button type="submit" disabled={saving} className="w-full">{saving ? "Saving…" : "Create client"}</Button>
+      <div className="space-y-2"><Label>{tx("Contact email", "E-mail du contact")}</Label><Input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} maxLength={255} /></div>
+      <Button type="submit" disabled={saving} className="w-full">{saving ? tx("Saving…", "Enregistrement…") : tx("Create client", "Créer le client")}</Button>
     </form>
   );
 }

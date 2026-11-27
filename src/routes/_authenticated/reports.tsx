@@ -1,4 +1,5 @@
 import { can } from "@/lib/permissions";
+import { useTx } from "@/hooks/use-tx";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +47,7 @@ type Candidate = {
 type Profile = { id: string; full_name: string | null; email: string };
 
 function ReportsPage() {
+  const { tx } = useTx();
   const { user } = Route.useRouteContext();
   const { data: roles, isLoading: rolesLoading } = useMyRoles(user.id);
   const [rangeDays, setRangeDays] = useState<number>(90);
@@ -90,12 +92,12 @@ function ReportsPage() {
     },
   });
 
-  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (rolesLoading) return <div className="p-4 md:p-8 text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</div>;
   if (!canView) {
     return (
       <div className="p-4 md:p-8">
         <Card><CardContent className="p-4 md:p-8 text-center text-muted-foreground">
-          Reports are available to managers, directors, CEO, and admins.
+          {tx("Reports are available to managers, directors, CEO, and admins.", "Les rapports sont réservés aux responsables, à la direction et au CEO.")}
         </CardContent></Card>
       </div>
     );
@@ -117,7 +119,7 @@ function ReportsPage() {
   });
   const sourcerRows = Array.from(sourcerStats.entries())
     .map(([uid, s]) => ({
-      name: profileMap.get(uid) ?? "Unknown",
+      name: profileMap.get(uid) ?? tx("Unknown", "Inconnu"),
       ...s,
       conversion: s.submitted > 0 ? (s.placed / s.submitted) * 100 : 0,
     }))
@@ -179,10 +181,10 @@ function ReportsPage() {
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <BarChart3 className="h-7 w-7" /> Reports & Analytics
+            <BarChart3 className="h-7 w-7" /> {tx("Reports & Analytics", "Rapports et analyses")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Sourcer performance, client win rates, and time-to-fill metrics.
+            {tx("Sourcer performance, client win rates, and time-to-fill metrics.", "Performance des sourceurs, taux de succès clients et délais de recrutement.")}
           </p>
         </div>
         <div className="flex gap-2">
@@ -208,15 +210,15 @@ function ReportsPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPI icon={Target} label="Demands created" value={demands?.length ?? 0} />
-        <KPI icon={Users} label="Candidates submitted" value={totalSubmitted} />
+        <KPI icon={Target} label={tx("Demands created", "Demandes créées")} value={demands?.length ?? 0} />
+        <KPI icon={Users} label={tx("Candidates submitted", "Candidats soumis")} value={totalSubmitted} />
         <KPI icon={Trophy} label="Placements" value={totalPlaced} sub={`${overallConversion.toFixed(1)}% conv.`} />
-        <KPI icon={Clock} label="Avg time-to-fill" value={avgTimeToFill ?? "—"} sub={medianTimeToFill !== null ? `median ${medianTimeToFill}d` : undefined} suffix={avgTimeToFill !== null ? "d" : ""} />
+        <KPI icon={Clock} label={tx("Avg time-to-fill", "Délai moyen de recrutement")} value={avgTimeToFill ?? "—"} sub={medianTimeToFill !== null ? `median ${medianTimeToFill}d` : undefined} suffix={avgTimeToFill !== null ? "d" : ""} />
       </div>
 
       {/* Funnel */}
       <Card>
-        <CardHeader><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Candidate funnel</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4" /> {tx("Candidate funnel", "Entonnoir candidats")}</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-3">
             {["identified", "submitted", "interview", "offer", "placed", "rejected"].map((stage) => {
@@ -240,20 +242,20 @@ function ReportsPage() {
 
       {/* Sourcer performance */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Sourcer performance</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">{tx("Sourcer performance", "Performance des sourceurs")}</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           {sourcerRows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No candidate submissions in this period.</p>
+            <p className="text-sm text-muted-foreground">{tx("No candidate submissions in this period.", "Aucune soumission de candidat sur cette période.")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead className="text-xs uppercase text-muted-foreground border-b">
                 <tr>
-                  <th className="text-left py-2 pr-3">Sourcer</th>
-                  <th className="text-right py-2 px-2">Submitted</th>
-                  <th className="text-right py-2 px-2">Interview</th>
-                  <th className="text-right py-2 px-2">Offer</th>
-                  <th className="text-right py-2 px-2">Placed</th>
-                  <th className="text-right py-2 px-2">Rejected</th>
+                  <th className="text-left py-2 pr-3">{tx("Sourcer", "Sourceur")}</th>
+                  <th className="text-right py-2 px-2">{tx("Submitted", "Soumis")}</th>
+                  <th className="text-right py-2 px-2">{tx("Interview", "Entretien")}</th>
+                  <th className="text-right py-2 px-2">{tx("Offer", "Offre")}</th>
+                  <th className="text-right py-2 px-2">{tx("Placed", "Placés")}</th>
+                  <th className="text-right py-2 px-2">{tx("Rejected", "Rejetés")}</th>
                   <th className="text-right py-2 pl-2">Conversion</th>
                 </tr>
               </thead>
@@ -279,20 +281,20 @@ function ReportsPage() {
 
       {/* Client win rates */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Client win rates</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base">{tx("Client win rates", "Taux de succès par client")}</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           {clientRows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No demands in this period.</p>
+            <p className="text-sm text-muted-foreground">{tx("No demands in this period.", "Aucune demande sur cette période.")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead className="text-xs uppercase text-muted-foreground border-b">
                 <tr>
                   <th className="text-left py-2 pr-3">Client</th>
-                  <th className="text-right py-2 px-2">Demands</th>
-                  <th className="text-right py-2 px-2">Open</th>
-                  <th className="text-right py-2 px-2">Placed</th>
-                  <th className="text-right py-2 px-2">Lost/Closed</th>
-                  <th className="text-right py-2 pl-2">Win rate</th>
+                  <th className="text-right py-2 px-2">{tx("Demands", "Demandes")}</th>
+                  <th className="text-right py-2 px-2">{tx("Open", "Ouvrir")}</th>
+                  <th className="text-right py-2 px-2">{tx("Placed", "Placés")}</th>
+                  <th className="text-right py-2 px-2">{tx("Lost/Closed", "Perdues/Clôturées")}</th>
+                  <th className="text-right py-2 pl-2">{tx("Win rate", "Taux de succès")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -322,16 +324,16 @@ function ReportsPage() {
 
       {/* Time-to-fill detail */}
       <Card>
-        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Clock className="h-4 w-4" /> Time-to-fill</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Clock className="h-4 w-4" /> {tx("Time-to-fill", "Délai de recrutement")}</CardTitle></CardHeader>
         <CardContent>
           {fillTimes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No placements yet in this period.</p>
+            <p className="text-sm text-muted-foreground">{tx("No placements yet in this period.", "Aucun placement sur cette période.")}</p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <Metric label="Placements" value={fillTimes.length} />
-              <Metric label="Avg days" value={avgTimeToFill ?? 0} />
-              <Metric label="Median days" value={medianTimeToFill ?? 0} />
-              <Metric label="Fastest" value={Math.min(...fillTimes)} />
+              <Metric label={tx("Avg days", "Jours en moyenne")} value={avgTimeToFill ?? 0} />
+              <Metric label={tx("Median days", "Jours (médiane)")} value={medianTimeToFill ?? 0} />
+              <Metric label={tx("Fastest", "Plus rapide")} value={Math.min(...fillTimes)} />
             </div>
           )}
         </CardContent>

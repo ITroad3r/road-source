@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useTx } from "@/hooks/use-tx";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { tx } = useTx();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -59,7 +61,7 @@ function AuthPage() {
     setLoading(false);
     if (error) toast.error(error.message);
     else {
-      toast.success("If that account exists, a reset link is on its way.");
+      toast.success(tx("If that account exists, a reset link is on its way.", "Si ce compte existe, un lien de réinitialisation vous a été envoyé."));
       setResetMode(false);
     }
   }
@@ -74,7 +76,7 @@ function AuthPage() {
           </div>
           <CardTitle className="text-2xl font-extrabold tracking-tight">{t("auth.title")}</CardTitle>
           <CardDescription>
-            {resetMode ? "Enter your email and we'll send a reset link." : t("auth.subtitle")}
+            {resetMode ? tx("Enter your email and we'll send a reset link.", "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.") : t("auth.subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,10 +98,10 @@ function AuthPage() {
                 onClick={() => setResetMode(true)}
                 className="block w-full text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
               >
-                Forgot your password?
+                {tx("Forgot your password?", "Mot de passe oublié ?")}
               </button>
               <p className="text-xs text-muted-foreground text-center pt-2 border-t">
-                RoadSource is invitation-only. Contact your administrator for access.
+                {tx("RoadSource is invitation-only. Contact your administrator for access.", "RoadSource est accessible sur invitation uniquement. Contactez votre administrateur.")}
               </p>
             </form>
           ) : (
@@ -109,14 +111,14 @@ function AuthPage() {
                 <Input id="r-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sending…" : "Send reset link"}
+                {loading ? tx("Sending…", "Envoi…") : tx("Send reset link", "Envoyer le lien")}
               </Button>
               <button
                 type="button"
                 onClick={() => setResetMode(false)}
                 className="block w-full text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
               >
-                Back to sign in
+                {tx("Back to sign in", "Retour à la connexion")}
               </button>
             </form>
           )}

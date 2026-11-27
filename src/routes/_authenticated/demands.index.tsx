@@ -1,4 +1,5 @@
 import { can } from "@/lib/permissions";
+import { useTx } from "@/hooks/use-tx";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/demands/")({
 });
 
 function DemandsList() {
+  const { tx } = useTx();
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
   const { data: roles } = useMyRoles(user.id);
@@ -79,9 +81,9 @@ function DemandsList() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demands", "list"] });
-      toast.success("Assignment updated");
+      toast.success(tx("Assignment updated", "Assignation mise à jour"));
     },
-    onError: (e: Error) => toast.error(e.message ?? "Failed to update"),
+    onError: (e: Error) => toast.error(e.message ?? tx("Failed to update", "Échec de la mise à jour")),
   });
 
   const lifecycleMutation = useMutation({
@@ -91,9 +93,9 @@ function DemandsList() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["demands", "list"] });
-      toast.success("Lifecycle updated");
+      toast.success(tx("Lifecycle updated", "Cycle de vie mis à jour"));
     },
-    onError: (e: Error) => toast.error(e.message ?? "Failed to update"),
+    onError: (e: Error) => toast.error(e.message ?? tx("Failed to update", "Échec de la mise à jour")),
   });
 
   const filtered = useMemo(() => {
@@ -130,7 +132,7 @@ function DemandsList() {
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Demands</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{tx("Demands", "Demandes")}</h1>
           <p className="text-muted-foreground text-sm">
             {filtered.length} of {demands?.length ?? 0} demands
           </p>
@@ -138,7 +140,7 @@ function DemandsList() {
         {canCreate && (
           <Button asChild>
             <Link to="/demands/new">
-              <Plus className="h-4 w-4 mr-2" /> New demand
+              <Plus className="h-4 w-4 mr-2" /> {tx("New demand", "Nouvelle demande")}
             </Link>
           </Button>
         )}
@@ -149,7 +151,7 @@ function DemandsList() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search title, client, skills, location…"
+              placeholder={tx("Search title, client, skills, location…", "Rechercher titre, client, compétences, localisation…")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -158,42 +160,42 @@ function DemandsList() {
           <Select value={lifecycleFilter} onValueChange={(v) => setLifecycleFilter(v as Lifecycle | "all")}>
             <SelectTrigger className="w-full md:w-44"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All lifecycles</SelectItem>
+              <SelectItem value="all">{tx("All lifecycles", "Tous les cycles de vie")}</SelectItem>
               {LIFECYCLE_VALUES.map((s) => <SelectItem key={s} value={s}>{LIFECYCLE_LABEL[s]}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={outcomeFilter} onValueChange={(v) => setOutcomeFilter(v as Outcome | "all")}>
             <SelectTrigger className="w-full md:w-40"><Trophy className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All outcomes</SelectItem>
+              <SelectItem value="all">{tx("All outcomes", "Tous les résultats")}</SelectItem>
               {OUTCOME_VALUES.map((s) => <SelectItem key={s} value={s}>{OUTCOME_LABEL[s]}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
             <SelectTrigger className="w-full md:w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              <SelectItem value="rfo">RFO only</SelectItem>
+              <SelectItem value="all">{tx("All types", "Tous les types")}</SelectItem>
+              <SelectItem value="rfo">{tx("RFO only", "RFO uniquement")}</SelectItem>
               <SelectItem value="standard">Standard</SelectItem>
             </SelectContent>
           </Select>
           <Select value={assigneeFilter} onValueChange={(v) => setAssigneeFilter(v as typeof assigneeFilter)}>
             <SelectTrigger className="w-full md:w-44"><User className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All assignees</SelectItem>
-              <SelectItem value="me">Assigned to me</SelectItem>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
+              <SelectItem value="all">{tx("All assignees", "Toutes les personnes")}</SelectItem>
+              <SelectItem value="me">{tx("Assigned to me", "Assignées à moi")}</SelectItem>
+              <SelectItem value="unassigned">{tx("Unassigned", "Non assignée")}</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
       </Card>
 
       {isLoading ? (
-        <div className="text-muted-foreground text-sm">Loading…</div>
+        <div className="text-muted-foreground text-sm">{tx("Loading…", "Chargement…")}</div>
       ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
-            No demands match your filters.
+            {tx("No demands match your filters.", "Aucune demande ne correspond à vos filtres.")}
           </CardContent>
         </Card>
       ) : (
@@ -224,7 +226,7 @@ function DemandsList() {
                       )}
                       <Badge variant="secondary" className="capitalize">{d.engagement}</Badge>
                       {d.priority <= 2 && <Badge variant="destructive">P{d.priority}</Badge>}
-                      {d.positions_count > 1 && <Badge variant="outline">{d.positions_count} positions</Badge>}
+                      {d.positions_count > 1 && <Badge variant="outline">{d.positions_count} {tx("positions", "postes")}</Badge>}
                     </div>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-2">
                       {d.clients?.name && (
@@ -272,10 +274,10 @@ function DemandsList() {
                           }
                         >
                           <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Assign to…" />
+                            <SelectValue placeholder={tx("Assign to…", "Assigner à…")} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="unassigned">Unassigned</SelectItem>
+                            <SelectItem value="unassigned">{tx("Unassigned", "Non assignée")}</SelectItem>
                             {sourcers?.map((p) => (
                               <SelectItem key={p.id} value={p.id}>{p.full_name ?? p.id.slice(0,8)}</SelectItem>
                             ))}
@@ -300,8 +302,8 @@ function DemandsList() {
                     ) : (
                       <div className="text-xs text-muted-foreground">
                         {d.assigned_to
-                          ? `Assigned to ${sourcerName(d.assigned_to) ?? "—"}`
-                          : "Unassigned"}
+                          ? `${tx("Assigned to", "Assignée à")} ${sourcerName(d.assigned_to) ?? "—"}`
+                          : tx("Unassigned", "Non assignée")}
                       </div>
                     )}
                   </div>

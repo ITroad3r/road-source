@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTx } from "@/hooks/use-tx";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ type Entry = {
 type Scope = { demandId?: string; cvId?: string };
 
 export function ActivityLog({ scope, currentUserId }: { scope: Scope; currentUserId: string }) {
+  const { tx } = useTx();
   const qc = useQueryClient();
   const [body, setBody] = useState("");
 
@@ -61,7 +63,7 @@ export function ActivityLog({ scope, currentUserId }: { scope: Scope; currentUse
     onSuccess: () => {
       setBody("");
       qc.invalidateQueries({ queryKey });
-      toast.success("Note added");
+      toast.success(tx("Note added", "Note ajoutée"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -79,13 +81,13 @@ export function ActivityLog({ scope, currentUserId }: { scope: Scope; currentUse
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <Activity className="h-4 w-4" /> Activity & notes
+          <Activity className="h-4 w-4" /> {tx("Activity & notes", "Activité et notes")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Textarea
-            placeholder="Add a note… (visible to all teammates)"
+            placeholder={tx("Add a note… (visible to all teammates)", "Ajouter une note… (visible par toute l'équipe)")}
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={2}
@@ -96,15 +98,15 @@ export function ActivityLog({ scope, currentUserId }: { scope: Scope; currentUse
               onClick={() => addNote.mutate()}
               disabled={!body.trim() || addNote.isPending}
             >
-              {addNote.isPending ? "Adding…" : "Add note"}
+              {addNote.isPending ? tx("Adding…", "Ajout…") : tx("Add note", "Ajouter une note")}
             </Button>
           </div>
         </div>
 
         <div className="relative pl-5 border-l space-y-4">
-          {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+          {isLoading && <p className="text-sm text-muted-foreground">{tx("Loading…", "Chargement…")}</p>}
           {!isLoading && (entries?.length ?? 0) === 0 && (
-            <p className="text-sm text-muted-foreground">No activity yet.</p>
+            <p className="text-sm text-muted-foreground">{tx("No activity yet.", "Aucune activité pour le moment.")}</p>
           )}
           {entries?.map((e) => (
             <TimelineItem
@@ -129,7 +131,8 @@ function TimelineItem({
   canDelete: boolean;
   onDelete: () => void;
 }) {
-  const author = entry.profiles?.full_name || entry.profiles?.email || "System";
+  const { tx } = useTx();
+  const author = entry.profiles?.full_name || entry.profiles?.email || tx("System", "Système");
   const Icon = entry.kind === "note" ? MessageSquare : entry.kind === "pipeline_added" ? UserPlus : ArrowRight;
 
   return (

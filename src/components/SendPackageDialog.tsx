@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTx, txNow } from "@/hooks/use-tx";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export function SendPackageDialog({
   demand: { id: string; title: string; clients: { name: string; contact_email?: string | null; contact_name?: string | null } | null };
   candidates: Candidate[];
 }) {
+  const { tx } = useTx();
   const eligible = useMemo(
     () => candidates.filter((c) => c.cv && c.qualification_status === "qualified" && c.final_decision === "approved" && ["submitted", "screened", "client_interview", "offer"].includes(c.stage)),
     [candidates]
@@ -49,7 +51,7 @@ export function SendPackageDialog({
     Object.fromEntries(eligible.filter((c) => c.stage === "submitted").map((c) => [c.id, true]))
   );
   const [to, setTo] = useState(demand.clients?.contact_email ?? "");
-  const [subject, setSubject] = useState(`Candidate package — ${demand.title}`);
+  const [subject, setSubject] = useState(txNow(`Candidate package — ${demand.title}`, `Dossier candidats — ${demand.title}`));
   const [intro, setIntro] = useState(
     `Hello ${demand.clients?.contact_name ?? ""},\n\nPlease find below the candidate package for "${demand.title}". CV links expire in ${SIGN_TTL_HOURS} hours.\n`.trimStart()
   );
@@ -60,7 +62,7 @@ export function SendPackageDialog({
   const selectedRows = eligible.filter((c) => selected[c.id]);
 
   async function build() {
-    if (selectedRows.length === 0) return toast.error("Pick at least one candidate");
+    if (selectedRows.length === 0) return toast.error(tx("Pick at least one candidate", "Sélectionnez au moins un candidat"));
     setBuilding(true);
     try {
       const rows = await Promise.all(
@@ -98,16 +100,16 @@ export function SendPackageDialog({
 <p>${escape(intro).replace(/\n/g, "<br/>")}</p>
 <table style="border-collapse:collapse;width:100%;font-size:13px;">
   <thead><tr style="background:#f3f4f6;">
-    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Candidate</th>
-    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Seniority</th>
-    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Location</th>
-    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Rate</th>
-    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Skills</th>
-    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">Links</th>
+    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">${tx("Candidate", "Candidat")}</th>
+    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">${tx("Seniority", "Séniorité")}</th>
+    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">${tx("Location", "Localisation")}</th>
+    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">${tx("Rate", "Tarif")}</th>
+    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">${tx("Skills", "Compétences")}</th>
+    <th style="padding:8px;border:1px solid #e5e7eb;text-align:left;">${tx("Links", "Liens")}</th>
   </tr></thead>
   <tbody>${tableRows}</tbody>
 </table>
-<p style="color:#6b7280;font-size:12px;margin-top:16px;">CV links expire in ${SIGN_TTL_HOURS} hours.</p>
+<p style="color:#6b7280;font-size:12px;margin-top:16px;">${tx(`CV links expire in ${SIGN_TTL_HOURS} hours.`, `Les liens vers les CV expirent dans ${SIGN_TTL_HOURS} heures.`)}</p>
 </div>`;
 
       const textRows = rows.map(({ c, cvLink }) => {
@@ -115,7 +117,7 @@ export function SendPackageDialog({
         const parts = [
           `• ${cv.full_name}${cv.headline ? ` — ${cv.headline}` : ""}`,
           `  ${cv.seniority ?? "—"}${cv.years_experience != null ? ` · ${cv.years_experience}y` : ""} · ${cv.location ?? "—"}${cv.daily_rate != null ? ` · €${cv.daily_rate}/d` : ""}`,
-          (cv.skills ?? []).length ? `  Skills: ${(cv.skills ?? []).slice(0, 8).join(", ")}` : null,
+          (cv.skills ?? []).length ? `  ${tx("Skills", "Compétences")} : ${(cv.skills ?? []).slice(0, 8).join(", ")}` : null,
           cvLink ? `  CV: ${cvLink}` : null,
           cv.linkedin_url ? `  LinkedIn: ${cv.linkedin_url}` : null,
         ].filter(Boolean);
@@ -126,7 +128,7 @@ export function SendPackageDialog({
       setBodyHtml(html);
       setBodyText(text);
     } catch (err) {
-      toast.error((err as Error).message ?? "Failed to build package");
+      toast.error((err as Error).message ?? tx("Failed to build package", "Impossible de préparer le dossier"));
     } finally {
       setBuilding(false);
     }
@@ -137,10 +139,10 @@ export function SendPackageDialog({
     try {
       const blob = new Blob([bodyHtml], { type: "text/html" });
       await navigator.clipboard.write([new ClipboardItem({ "text/html": blob, "text/plain": new Blob([bodyText ?? ""], { type: "text/plain" }) })]);
-      toast.success("Copied — paste into your email client");
+      toast.success(tx("Copied — paste into your email client", "Copié — collez-le dans votre messagerie"));
     } catch {
       await navigator.clipboard.writeText(bodyText ?? "");
-      toast.success("Copied as plain text");
+      toast.success(tx("Copied as plain text", "Copié en texte brut"));
     }
   }
 
@@ -153,20 +155,20 @@ export function SendPackageDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Send candidate package</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{tx("Send candidate package", "Envoyer le dossier candidats")}</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>To</Label>
+              <Label>{tx("To", "À")}</Label>
               <Input type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@example.com" />
             </div>
             <div className="space-y-1.5">
-              <Label>Subject</Label>
+              <Label>{tx("Subject", "Objet")}</Label>
               <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label>Intro message</Label>
+            <Label>{tx("Intro message", "Message d'introduction")}</Label>
             <Textarea rows={3} value={intro} onChange={(e) => setIntro(e.target.value)} />
           </div>
 
@@ -175,7 +177,7 @@ export function SendPackageDialog({
             <div className="border rounded-md divide-y max-h-56 overflow-y-auto">
               {eligible.length === 0 && (
                 <div className="p-3 text-sm text-muted-foreground">
-                  No eligible candidates. Move them to Submitted / Screened / Interview / Offer first.
+                  {tx("No eligible candidates. Move them to Submitted / Screened / Interview / Offer first.", "Aucun candidat éligible. Déplacez-les d'abord en Soumis / Évaluation / Entretien / Offre.")}
                 </div>
               )}
               {eligible.map((c) => (
@@ -199,14 +201,14 @@ export function SendPackageDialog({
 
           {bodyHtml && (
             <div className="space-y-2">
-              <Label>Preview</Label>
+              <Label>{tx("Preview", "Aperçu")}</Label>
               <div
                 className="border rounded-md p-3 bg-background max-h-72 overflow-auto text-sm"
                 dangerouslySetInnerHTML={{ __html: bodyHtml }}
               />
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={copyHtml}><Copy className="h-4 w-4 mr-1" /> Copy</Button>
-                <Button onClick={openMail} disabled={!to}><Mail className="h-4 w-4 mr-1" /> Open in mail client</Button>
+                <Button variant="outline" onClick={copyHtml}><Copy className="h-4 w-4 mr-1" /> {tx("Copy", "Copier")}</Button>
+                <Button onClick={openMail} disabled={!to}><Mail className="h-4 w-4 mr-1" /> {tx("Open in mail client", "Ouvrir dans la messagerie")}</Button>
               </div>
             </div>
           )}

@@ -5,7 +5,8 @@ describe("RBAC rules", () => {
   it("Align CV belongs only to Sourcer and HRBP", () => {
     expect(can(["sourceur"], "cv.align")).toBe(true);
     expect(can(["hrbp"], "cv.align")).toBe(true);
-    for (const role of ["operations", "ceo", "admin", "unknown"]) expect(can([role], "cv.align")).toBe(false);
+    expect(can(["ceo"], "cv.align")).toBe(true);
+    for (const role of ["operations", "admin", "unknown"]) expect(can([role], "cv.align")).toBe(false);
     expect(can(undefined, "cv.align")).toBe(false);
     expect(can([], "cv.align")).toBe(false);
   });

@@ -109,8 +109,6 @@ export function CeoDashboard({ fullName, roles }: { fullName: string | null; rol
         </Panel>
       </div>
 
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm">{t("dash.ceo.unavailableTitle")}</CardTitle></CardHeader>
-        <CardContent className="text-xs text-muted-foreground">{t("dash.ceo.unavailableBody")}</CardContent></Card>
     </div>
   );
 }

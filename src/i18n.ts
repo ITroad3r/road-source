@@ -37,3 +37,4 @@ void instance.init({
 });
 
 export default i18n;
+import "@/lib/zod-i18n";

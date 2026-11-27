@@ -1,5 +1,7 @@
 {
-  "workflow": { "stageBlocked": "Cette étape nécessite l'étape précédente et les approbations HRBP / Opérations." },
+  "workflow": {
+    "stageBlocked": "Cette étape nécessite l'étape précédente et les approbations HRBP / Opérations."
+  },
   "common": {
     "loading": "Chargement…",
     "save": "Enregistrer",
@@ -40,7 +42,8 @@
     "profile": "Profil",
     "usersRoles": "Utilisateurs & rôles",
     "poweredBy": "PROPULSÉ PAR IT ROAD",
-    "compensation": "Rémunération"
+    "compensation": "Rémunération",
+    "activeResources": "Ressources actives"
   },
   "landing": {
     "navFeatures": "Fonctionnalités",

@@ -28,6 +28,10 @@ export const CAPABILITIES = {
   "compensation.submit": ["sourceur", "hrbp", "operations"],
   "compensation.review": ["hrbp", "operations"],
   "compensation.finalize": ["operations"],
+  // Active Resources page: everyone manages the list; pay only Operations/CEO; analytics only CEO.
+  "resources.manage": ["sourceur", "hrbp", "operations", "ceo"],
+  "resources.financials": ["operations", "ceo"],
+  "resources.analytics": ["ceo"],
   "reports.view": ["hrbp", "operations", "ceo"],
   "users.manage": ["admin"],
   // Dashboard workspaces: one per role, never inherited (admin is not a business superuser).

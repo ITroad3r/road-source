@@ -2,6 +2,14 @@ import { describe, it, expect } from "vitest";
 import { can, pickPrimaryRole } from "./permissions";
 
 describe("RBAC rules", () => {
+  it("Active Resources: all business roles manage the list, pay for Operations/CEO, analytics for CEO only", () => {
+    for (const r of ["sourceur", "hrbp", "operations", "ceo"]) expect(can([r], "resources.manage")).toBe(true);
+    expect(can(["admin"], "resources.manage")).toBe(false);
+    for (const r of ["sourceur", "hrbp", "admin"]) expect(can([r], "resources.financials")).toBe(false);
+    for (const r of ["operations", "ceo"]) expect(can([r], "resources.financials")).toBe(true);
+    expect(can(["ceo"], "resources.analytics")).toBe(true);
+    for (const r of ["sourceur", "hrbp", "operations", "admin"]) expect(can([r], "resources.analytics")).toBe(false);
+  });
   it("Align CV belongs only to Sourcer and HRBP", () => {
     expect(can(["sourceur"], "cv.align")).toBe(true);
     expect(can(["hrbp"], "cv.align")).toBe(true);

@@ -14,6 +14,107 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_resource_financials: {
+        Row: {
+          cost_amount: number | null
+          currency: string
+          pay_type: string
+          resource_id: string
+          sell_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          cost_amount?: number | null
+          currency?: string
+          pay_type?: string
+          resource_id: string
+          sell_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cost_amount?: number | null
+          currency?: string
+          pay_type?: string
+          resource_id?: string
+          sell_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_resource_financials_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: true
+            referencedRelation: "active_resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      active_resources: {
+        Row: {
+          client_id: string
+          contract_type: Database["public"]["Enums"]["contract_type"] | null
+          created_at: string
+          created_by: string | null
+          demand_candidate_id: string | null
+          email: string | null
+          end_date: string | null
+          full_name: string
+          id: string
+          job_title: string | null
+          notes: string | null
+          phone: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          contract_type?: Database["public"]["Enums"]["contract_type"] | null
+          created_at?: string
+          created_by?: string | null
+          demand_candidate_id?: string | null
+          email?: string | null
+          end_date?: string | null
+          full_name: string
+          id?: string
+          job_title?: string | null
+          notes?: string | null
+          phone?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          contract_type?: Database["public"]["Enums"]["contract_type"] | null
+          created_at?: string
+          created_by?: string | null
+          demand_candidate_id?: string | null
+          email?: string | null
+          end_date?: string | null
+          full_name?: string
+          id?: string
+          job_title?: string | null
+          notes?: string | null
+          phone?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_resources_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "active_resources_demand_candidate_id_fkey"
+            columns: ["demand_candidate_id"]
+            isOneToOne: true
+            referencedRelation: "demand_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_log: {
         Row: {
           author_id: string | null

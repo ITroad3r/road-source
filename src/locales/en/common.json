@@ -1,5 +1,7 @@
 {
-  "workflow": { "stageBlocked": "This stage requires the previous step and HRBP / Operations approvals." },
+  "workflow": {
+    "stageBlocked": "This stage requires the previous step and HRBP / Operations approvals."
+  },
   "common": {
     "loading": "Loading…",
     "save": "Save",
@@ -40,7 +42,8 @@
     "profile": "Profile",
     "usersRoles": "Users & roles",
     "poweredBy": "POWERED BY IT ROAD",
-    "compensation": "Compensation"
+    "compensation": "Compensation",
+    "activeResources": "Active Resources"
   },
   "landing": {
     "navFeatures": "Features",

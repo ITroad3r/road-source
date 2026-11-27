@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {LANGS.map((l) => (
-          <DropdownMenuItem key={l.code} onClick={() => i18n.changeLanguage(l.code)}>
+          <DropdownMenuItem key={l.code} onClick={() => { void i18n.changeLanguage(l.code); document.documentElement.lang = l.code; }}>
             <span className="flex-1">{t(l.labelKey)}</span>
             {current === l.code && <Check className="h-4 w-4 ml-2 text-primary" />}
           </DropdownMenuItem>

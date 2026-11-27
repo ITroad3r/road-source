@@ -49,7 +49,7 @@ function EditDemandAccess() {
   return <EditDemand />;
 }
 
-const demandSchema = z.object({
+const buildDemandSchema = () => z.object({
   client_id: z.string().uuid({ message: txNow("Select a client", "Sélectionnez un client") }),
   title: z.string().trim().min(3, txNow("Title too short", "Titre trop court")).max(200),
   description: z.string().trim().max(5000).optional().or(z.literal("")),
@@ -159,7 +159,7 @@ function EditDemand() {
   }
 
   const updateMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof demandSchema>) => {
+    mutationFn: async (values: z.infer<ReturnType<typeof buildDemandSchema>>) => {
       if (!can(roles, "demands.manage")) throw new Error(tx("Demand management access required", "Accès à la gestion des demandes requis"));
       const { error } = await supabase
         .from("demands")
@@ -196,7 +196,7 @@ function EditDemand() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = demandSchema.safeParse({
+    const parsed = buildDemandSchema().safeParse({
       client_id: clientId, title, description, engagement, location,
       budget_min: budgetMin, budget_max: budgetMax, start_date: startDate, priority,
       assigned_to: assignedTo, lifecycle, commercial_outcome: outcome, lost_reason: lostReason,

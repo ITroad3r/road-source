@@ -41,7 +41,7 @@ function NewDemandAccess() {
   return <NewDemand />;
 }
 
-const demandSchema = z.object({
+const buildDemandSchema = () => z.object({
   client_id: z.string().uuid({ message: txNow("Select a client", "Sélectionnez un client") }),
   title: z.string().trim().min(3, txNow("Title too short", "Titre trop court")).max(200),
   description: z.string().trim().max(5000).optional().or(z.literal("")),
@@ -113,7 +113,7 @@ function NewDemand() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canManageDemand) return;
-    const parsed = demandSchema.safeParse({
+    const parsed = buildDemandSchema().safeParse({
       client_id: clientId, title, description, engagement, location,
       budget_min: budgetMin, budget_max: budgetMax, start_date: startDate, priority, assigned_to: assignedTo,
       is_rfo: isRfo, rfo_deadline: rfoDeadline, positions_count: positionsCount,

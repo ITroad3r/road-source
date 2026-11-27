@@ -4,6 +4,10 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./locales/en/common.json";
 import fr from "./locales/fr/common.json";
 
+export const LANG_COOKIE = "roadsource-lang";
+export type AppLang = "en" | "fr";
+export const normalizeLang = (v: string | null | undefined): AppLang => (v ?? "").toLowerCase().startsWith("fr") ? "fr" : "en";
+
 const isBrowser = typeof window !== "undefined";
 
 const instance = i18n.use(initReactI18next);
@@ -22,9 +26,13 @@ void instance.init({
   initAsync: false,
   react: { useSuspense: false },
   detection: {
-    order: ["localStorage", "navigator", "htmlTag"],
+    // Cookie first so the server renders the same language the browser will use (no English flash).
+    order: ["cookie", "localStorage", "navigator", "htmlTag"],
+    lookupCookie: LANG_COOKIE,
     lookupLocalStorage: "roadsource-lang",
-    caches: ["localStorage"],
+    caches: ["localStorage", "cookie"],
+    cookieMinutes: 60 * 24 * 365,
+    cookieOptions: { path: "/", sameSite: "lax" },
   },
 });
 

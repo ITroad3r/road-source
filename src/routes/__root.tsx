@@ -9,13 +9,20 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
+import { createIsomorphicFn } from "@tanstack/react-start";
+import { getCookie } from "@tanstack/react-start/server";
 import { I18nextProvider } from "react-i18next";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import i18n from "@/i18n";
+import i18n, { LANG_COOKIE, normalizeLang, type AppLang } from "@/i18n";
+
+/** Language for this render: the cookie on the server, the live i18n language in the browser. */
+const readLang = createIsomorphicFn()
+  .server((): AppLang => normalizeLang(getCookie(LANG_COOKIE)))
+  .client((): AppLang => normalizeLang(i18n.resolvedLanguage ?? i18n.language));
 
 function NotFoundComponent() {
   const { tx } = useTx();
@@ -114,6 +121,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
   }),
+  beforeLoad: () => ({ lang: readLang() }),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -121,8 +129,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const { lang } = Route.useRouteContext();
   return (
-    <html lang="en">
+    <html lang={lang}>
       <head>
         <HeadContent />
       </head>
@@ -135,8 +144,16 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, lang } = Route.useRouteContext();
   const router = useRouter();
+  // Server: a per-request copy in the cookie's language, so concurrent requests never share one.
+  // Browser: the shared instance (the detector already read the same cookie).
+  const i18nForRender = useMemo(() => {
+    if (typeof window !== "undefined") return i18n;
+    // Best effort for module-level txNow() label getters, which read the shared instance.
+    if (normalizeLang(i18n.language) !== lang) void i18n.changeLanguage(lang);
+    return i18n.cloneInstance({ lng: lang, initAsync: false });
+  }, [lang]);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -152,7 +169,7 @@ function RootComponent() {
   }, [queryClient, router]);
 
   return (
-    <I18nextProvider i18n={i18n}>
+    <I18nextProvider i18n={i18nForRender}>
       <QueryClientProvider client={queryClient}>
         {/* Required: nested routes render here. */}
         <Outlet />

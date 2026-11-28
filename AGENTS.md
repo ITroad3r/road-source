@@ -17,3 +17,4 @@
 - Align CV has its own PDF renderer and document tokens; it must not alter the existing Hub CV template, and report gaps/submission constraints stay outside exported candidate facts.
 - Screen copy is bilingual: shared strings use locales/*/common.json via t(); page-local copy uses useTx().tx(en, fr) and module-level label maps use txNow via getters, so EN and FR stay feature-identical.
 - UI language is persisted in the `roadsource-lang` cookie (plus localStorage) and read by the root beforeLoad, so the server knows the language and SSR uses a per-request i18n clone; validation schemas with bilingual messages are built at call time, not module load.
+- Active Resources live in active_resources (all business roles manage) with pay split into active_resource_financials (Operations/CEO only via RLS); analytics are CEO-only and computed monthly-recurring in src/lib/active-resources.ts (daily rate × 20), independent of the Financials page.
